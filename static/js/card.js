@@ -1,7 +1,8 @@
 // Render the HTML congratulations card to a PNG in the browser and let the
 // visitor download or share it. modern-screenshot handles Arabic/RTL fonts far
 // better than html2canvas; we await document.fonts.ready before capturing.
-import { domToPng } from "./vendor/modern-screenshot.mjs";
+// Vendored as .js (not .mjs) so Nginx serves it with a JavaScript MIME type.
+import { domToPng } from "./vendor/modern-screenshot.js";
 
 const card = document.getElementById("card");
 const stage = document.getElementById("card-stage");

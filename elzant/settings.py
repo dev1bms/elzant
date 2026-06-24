@@ -87,7 +87,20 @@ WSGI_APPLICATION = "elzant.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        # Path is configurable so production can store the DB on a persistent,
+        # backed-up volume outside the code directory (SQLITE_PATH).
+        "NAME": env("SQLITE_PATH", default=str(BASE_DIR / "db.sqlite3")),
+        "OPTIONS": {
+            # WAL + a busy timeout keep SQLite reliable under a few Gunicorn
+            # workers with light, concurrent writes (greetings).
+            "timeout": 20,
+            "transaction_mode": "IMMEDIATE",
+            "init_command": (
+                "PRAGMA journal_mode=WAL;"
+                "PRAGMA synchronous=NORMAL;"
+                "PRAGMA foreign_keys=ON;"
+            ),
+        },
     }
 }
 
