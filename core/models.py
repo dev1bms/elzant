@@ -19,6 +19,13 @@ class WeddingConfig(models.Model):
 
     groom_name = models.CharField("اسم العريس", max_length=60, default="محمود")
     bride_name = models.CharField("اسم العروس", max_length=60, default="رينان")
+    groom_father = models.CharField(
+        "والد العريس", max_length=160,
+        default="رجل الأعمال السيّد سمير محمود الزنط (أبو إبراهيم)",
+    )
+    bride_father = models.CharField(
+        "والد العروس", max_length=160, default="الشريف فلان الفولاني",
+    )
     wedding_datetime = models.DateTimeField(
         "موعد الزفاف (يُخزَّن بتوقيت القاهرة)", default=default_wedding_datetime
     )
