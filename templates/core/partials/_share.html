@@ -1,14 +1,15 @@
 {% load static i18n %}
 <section class="py-16">
   <div class="mx-auto max-w-xl px-6 text-center">
-    <h2 class="reveal section-title mx-auto text-3xl text-burgundy-700">{% trans "شارك الدعوة" %}</h2>
-    <p class="reveal mb-9 mt-4 text-burgundy-500">ادعُ الأهل والأصدقاء لمشاركتنا الفرحة 🤍</p>
+    <p class="reveal eyebrow mb-3 block text-gold-600">انشر الفرحة</p>
+    <h2 class="reveal font-display text-3xl text-burgundy-700 sm:text-4xl">{% trans "شارك الدعوة" %}</h2>
+    <p class="reveal mb-9 mt-4 text-burgundy-500">ادعُ الأهل والأصدقاء لمشاركتنا الفرحة.</p>
 
     <div class="reveal panel mx-auto flex max-w-md flex-col items-center px-8 py-9">
-      <div class="rounded-2xl bg-white p-4 shadow-inner ring-1 ring-cream-200">
+      <div class="rounded-2xl bg-white p-4 shadow-inner ring-1 ring-gold-400/30">
         <img src="{% static 'img/qr.svg' %}" alt="رمز QR لموقع الزفاف" class="h-40 w-40" width="160" height="160">
       </div>
-      <p class="mt-3 text-sm tracking-[0.3em] text-gold-600">elzant.com</p>
+      <p class="mt-4 text-sm tracking-[0.35em] text-gilt">elzant.com</p>
 
       <a href="https://wa.me/?text={% filter urlencode %}شاركونا فرحة زفاف {{ config.groom_name }} و{{ config.bride_name }} 🤍 {{ site_url }}{% endfilter %}"
          target="_blank" rel="noopener"
