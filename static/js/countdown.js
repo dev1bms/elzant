@@ -19,16 +19,11 @@
   var doneEl = el.querySelector("[data-countdown-done]") ||
     document.querySelector("[data-countdown-done]");
 
-  function toArabic(n) {
-    return String(n).replace(/[0-9]/g, function (d) {
-      return "٠١٢٣٤٥٦٧٨٩"[d];
-    });
-  }
   function pad(n) {
     return n < 10 ? "0" + n : "" + n;
   }
   function set(node, value) {
-    if (node) node.textContent = toArabic(value);
+    if (node) node.textContent = String(value); // English (Western) digits
   }
 
   var timer;

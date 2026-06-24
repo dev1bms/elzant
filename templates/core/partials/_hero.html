@@ -1,46 +1,37 @@
 {% load static i18n %}
-<section class="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-ink-900 px-6 py-20 text-center text-ivory-50">
-  {# subtle warm vignette — no loud gradients #}
-  <div class="pointer-events-none absolute inset-0 opacity-70"
-       style="background:radial-gradient(120% 80% at 50% 0%, rgba(111,36,53,0.22), transparent 60%);" aria-hidden="true"></div>
+<section class="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-ink-900 px-6 py-20 text-center text-ivory-50"
+         style="background-image: linear-gradient(rgba(20,14,12,0.50), rgba(20,14,12,0.74)), url('{% static 'img/hero-bg.jpg' %}'); background-size: cover; background-position: center;">
 
   <div class="relative">
     <p class="up d1 kicker">Wedding Invitation</p>
 
-    <p class="up d2 mt-10 text-sm tracking-[0.3em] text-ivory-100/55">نتشرّف بدعوتكم لحضور زفاف</p>
-    <h1 class="up d2 mt-4 text-5xl font-light leading-[1.08] sm:text-7xl">
+    <p class="up d2 mt-10 text-sm tracking-[0.3em] text-ivory-100/70">نتشرّف بدعوتكم لحضور زفاف</p>
+    <h1 class="up d2 mt-4 text-5xl font-light leading-[1.08] drop-shadow-[0_2px_12px_rgba(0,0,0,0.45)] sm:text-7xl">
       {{ config.groom_name }}<span class="eyebrow mx-3 align-middle text-3xl text-rose-300 sm:text-4xl">&amp;</span>{{ config.bride_name }}
     </h1>
-    <p class="up d3 num mt-6 text-base tracking-[0.35em] text-ivory-100/70">{% language 'ar' %}{{ config.wedding_datetime|date:'d . m . Y' }}{% endlanguage %}</p>
+    <p class="up d3 num mt-6 text-base tracking-[0.35em] text-ivory-100/80">{% language 'ar' %}{{ config.wedding_datetime|date:'d . m . Y' }}{% endlanguage %}</p>
 
-    {# editorial portrait placeholder #}
-    <div class="up d3 mx-auto mt-10 w-40 sm:w-44">
-      <div class="relative aspect-[4/5] overflow-hidden border border-ivory-100/15">
-        <img src="{% static 'img/couple-placeholder.svg' %}" alt="صورة العروسين" class="h-full w-full object-cover">
-      </div>
-    </div>
-
-    {# integrated countdown — minimal, not a dashboard #}
+    {# integrated countdown — minimal, English digits #}
     <div id="countdown" data-target="{{ config.wedding_datetime|date:'c' }}"
-         class="up d4 mt-11 flex items-center justify-center gap-4 sm:gap-7">
+         class="up d4 mt-12 flex items-center justify-center gap-4 sm:gap-7">
       <div class="flex min-w-[3rem] flex-col items-center">
-        <span data-unit="days" class="text-4xl font-light leading-none text-ivory-50 sm:text-5xl">٠</span>
-        <span class="mt-2.5 text-[0.62rem] tracking-[0.22em] text-ivory-100/45">يوم</span>
+        <span data-unit="days" class="num text-4xl font-light leading-none text-ivory-50 sm:text-5xl">0</span>
+        <span class="mt-2.5 text-[0.62rem] tracking-[0.22em] text-ivory-100/60">يوم</span>
       </div>
-      <span class="h-9 w-px bg-ivory-100/15"></span>
+      <span class="h-9 w-px bg-ivory-100/20"></span>
       <div class="flex min-w-[3rem] flex-col items-center">
-        <span data-unit="hours" class="text-4xl font-light leading-none text-ivory-50 sm:text-5xl">٠٠</span>
-        <span class="mt-2.5 text-[0.62rem] tracking-[0.22em] text-ivory-100/45">ساعة</span>
+        <span data-unit="hours" class="num text-4xl font-light leading-none text-ivory-50 sm:text-5xl">00</span>
+        <span class="mt-2.5 text-[0.62rem] tracking-[0.22em] text-ivory-100/60">ساعة</span>
       </div>
-      <span class="h-9 w-px bg-ivory-100/15"></span>
+      <span class="h-9 w-px bg-ivory-100/20"></span>
       <div class="flex min-w-[3rem] flex-col items-center">
-        <span data-unit="minutes" class="text-4xl font-light leading-none text-ivory-50 sm:text-5xl">٠٠</span>
-        <span class="mt-2.5 text-[0.62rem] tracking-[0.22em] text-ivory-100/45">دقيقة</span>
+        <span data-unit="minutes" class="num text-4xl font-light leading-none text-ivory-50 sm:text-5xl">00</span>
+        <span class="mt-2.5 text-[0.62rem] tracking-[0.22em] text-ivory-100/60">دقيقة</span>
       </div>
-      <span class="h-9 w-px bg-ivory-100/15"></span>
+      <span class="h-9 w-px bg-ivory-100/20"></span>
       <div class="flex min-w-[3rem] flex-col items-center">
-        <span data-unit="seconds" class="text-4xl font-light leading-none text-ivory-50 sm:text-5xl">٠٠</span>
-        <span class="mt-2.5 text-[0.62rem] tracking-[0.22em] text-ivory-100/45">ثانية</span>
+        <span data-unit="seconds" class="num text-4xl font-light leading-none text-ivory-50 sm:text-5xl">00</span>
+        <span class="mt-2.5 text-[0.62rem] tracking-[0.22em] text-ivory-100/60">ثانية</span>
       </div>
     </div>
     <p data-countdown-done class="up d4 mt-8 hidden text-lg tracking-wide text-rose-300">تمّ الزفاف بحمد الله</p>
@@ -50,7 +41,7 @@
     </div>
   </div>
 
-  <a href="#details" class="up d6 absolute bottom-7 left-1/2 -translate-x-1/2 text-ivory-100/35 transition hover:text-ivory-100/70" aria-label="مرّر للأسفل">
+  <a href="#details" class="up d6 absolute bottom-7 left-1/2 -translate-x-1/2 text-ivory-100/55 transition hover:text-ivory-100/85" aria-label="مرّر للأسفل">
     <svg viewBox="0 0 24 24" class="h-6 w-6 fill-none stroke-current" stroke-width="1.5"><path d="M6 9l6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
   </a>
 </section>

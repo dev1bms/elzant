@@ -1,10 +1,11 @@
-{% load i18n %}
+{% load static i18n %}
 {% comment %}
   Modern opening screen (replaces the classic envelope). Hidden by default
   (works without JS); the inline script reveals it on first visit. Closing is
   handled by envelope.js. IDs/classes kept for those scripts.
 {% endcomment %}
-<div class="envelope-overlay" id="envelope" role="dialog" aria-modal="true" aria-label="دعوة الزفاف">
+<div class="envelope-overlay" id="envelope" role="dialog" aria-modal="true" aria-label="دعوة الزفاف"
+     style="background-image: linear-gradient(rgba(20,14,12,0.56), rgba(20,14,12,0.80)), url('{% static 'img/hero-bg.jpg' %}'); background-size: cover; background-position: center;">
   <div class="intro-inner">
     <p class="kicker">Wedding Invitation</p>
     <p class="mt-9 text-sm tracking-[0.3em] text-ivory-100/60">بشرف ودعوة</p>
