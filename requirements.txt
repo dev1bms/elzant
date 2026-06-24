@@ -1,0 +1,13 @@
+# Core framework (existing environment: Python 3.14 + Django 6.0)
+Django==6.0.6
+
+# Read configuration from .env (env.bool / env.list API used in settings.py)
+django-environ==0.12.0
+
+# Serve static files in production (WhiteNoise)
+whitenoise==6.9.0
+
+# Optional: rate-limit the greeting POST. Installed only if compatible with
+# Django 6 / Python 3.14; otherwise honeypot + manual moderation + length
+# limits remain the primary spam defense. See settings.py RATELIMIT_ENABLE.
+django-ratelimit==4.1.0

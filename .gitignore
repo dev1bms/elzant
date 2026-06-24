@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+
+# Django
+*.sqlite3
+db.sqlite3
+/staticfiles/
+/media/
+*.log
+local_settings.py
+
+# Environment
+.env
+
+# Node / Tailwind
+node_modules/
+/static/css/output.css
+
+# IDE
+.idea/
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db

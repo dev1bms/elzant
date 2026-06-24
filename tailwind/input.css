@@ -1,0 +1,84 @@
+@import "tailwindcss";
+
+/* Scan Django templates and JS for class names */
+@source "../templates/**/*.html";
+@source "../static/js/**/*.js";
+
+/* ----------------------------------------------------------------------
+   Theme — luxury Arabic wedding palette (CSS-first config, Tailwind v4)
+   - Display font for headings (Aref Ruqaa), body font for text (Cairo).
+   - Cream/ivory base, burgundy/rose primary, soft gold accents.
+   Fonts are loaded via <link> in base.html (font-display: swap).
+---------------------------------------------------------------------- */
+@theme {
+  --font-display: "Aref Ruqaa", "Amiri", serif;
+  --font-body: "Cairo", "Tajawal", sans-serif;
+
+  /* Cream / ivory — page base */
+  --color-cream-50: #fdfbf7;
+  --color-cream-100: #faf6ef;
+  --color-cream-200: #f3ead9;
+  --color-cream-300: #e9dbc2;
+
+  /* Burgundy — primary (buttons, headings accents) */
+  --color-burgundy-50: #fbf1f3;
+  --color-burgundy-100: #f6e1e6;
+  --color-burgundy-200: #ecc2cc;
+  --color-burgundy-300: #dd96a8;
+  --color-burgundy-400: #c8607c;
+  --color-burgundy-500: #a83a57;
+  --color-burgundy-600: #8c2a45;
+  --color-burgundy-700: #6e1f36;
+  --color-burgundy-800: #5a1a2d;
+  --color-burgundy-900: #4a1626;
+
+  /* Rose — soft secondary */
+  --color-rose-soft-300: #e8c3cb;
+  --color-rose-soft-400: #d49aa6;
+  --color-rose-soft-500: #b76e79;
+
+  /* Gold — decorative accent */
+  --color-gold-300: #e6d4a6;
+  --color-gold-400: #d4b978;
+  --color-gold-500: #c9a227;
+  --color-gold-600: #a8861f;
+}
+
+/* ----------------------------------------------------------------------
+   Base layer
+---------------------------------------------------------------------- */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    font-family: var(--font-body);
+    background-color: var(--color-cream-100);
+    color: var(--color-burgundy-900);
+  }
+  h1, h2, h3, .font-display {
+    font-family: var(--font-display);
+  }
+}
+
+/* ----------------------------------------------------------------------
+   Components & utilities
+---------------------------------------------------------------------- */
+@layer components {
+  /* Gentle fade-up reveal on scroll (toggled by JS adding .is-visible) */
+  .reveal {
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .reveal.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Respect users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .reveal { opacity: 1; transform: none; transition: none; }
+}
