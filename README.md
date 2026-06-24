@@ -46,8 +46,13 @@ python -c "from django.core.management.utils import get_random_secret_key; print
 - **تفاصيل المناسبة:** لوحة الإدارة ← «إعدادات الزفاف» (اسم القاعة، العنوان، رابط الخريطة، الموعد، التاريخ الهجري).
 - **مراجعة التهاني:** لوحة الإدارة ← «التهاني» ← تحديد ← «اعتماد المحدد» / «رفض المحدد». لا تظهر أي تهنئة على الجدار قبل الاعتماد.
 
-## ملاحظات الإنتاج (خارج نطاق MVP)
-- اضبط `DEBUG=False` و`ALLOWED_HOSTS` و`SITE_URL=https://elzant.com`.
-- شغّل `python manage.py collectstatic` (WhiteNoise يقدّم الستاتيك).
-- فعّل HSTS (`SECURE_HSTS_SECONDS`) بعد تأكيد HTTPS.
+## النشر على VPS
+دليل النشر الكامل (Ubuntu + Gunicorn + Nginx + Certbot + SQLite) في
+**[deploy/DEPLOY.md](deploy/DEPLOY.md)**، وملفات الخدمة في مجلد [deploy/](deploy).
+للتحديث بعد النشر: `sudo bash /srv/elzant/deploy/update.sh`.
+
+تذكيرات سريعة:
+- `DEBUG=False` · `ALLOWED_HOSTS=elzant.com,www.elzant.com` · `SITE_URL=https://elzant.com` · `RATELIMIT_ENABLE=True`.
+- `npm run assets:build` ثم `npm run css:build` ثم `collectstatic` قبل التشغيل.
 - ثبّت `og:image` قبل المشاركة الواسعة (واتساب يخزّنها بقوة).
+- فعّل HSTS (`SECURE_HSTS_SECONDS`) بعد تأكيد HTTPS.

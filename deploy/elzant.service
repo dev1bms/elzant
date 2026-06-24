@@ -1,0 +1,21 @@
+# systemd unit for elzant.com — install at /etc/systemd/system/elzant.service
+[Unit]
+Description=elzant.com wedding site (Gunicorn)
+After=network.target
+
+[Service]
+User=elzant
+Group=elzant
+WorkingDirectory=/srv/elzant
+# Django reads /srv/elzant/.env itself (django-environ), so no EnvironmentFile.
+ExecStart=/srv/elzant/.venv/bin/gunicorn -c /srv/elzant/deploy/gunicorn.conf.py elzant.wsgi:application
+Restart=on-failure
+RestartSec=3
+
+# Hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+
+[Install]
+WantedBy=multi-user.target
