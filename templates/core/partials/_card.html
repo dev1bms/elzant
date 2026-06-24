@@ -1,0 +1,20 @@
+{% load i18n %}
+<div class="card-stage" id="card-stage">
+  <div class="wed-card" id="card">
+    <div class="wed-card__frame"></div>
+
+    <div class="wed-card__top">
+      <p class="wed-card__bism">بسم الله الرحمن الرحيم</p>
+      <h2 class="wed-card__names">{{ config.groom_name }} <span>&amp;</span> {{ config.bride_name }}</h2>
+      <p class="wed-card__date">{% language 'ar' %}{{ config.wedding_datetime|date:"j F Y" }}{% endlanguage %}</p>
+    </div>
+
+    <div class="wed-card__body">
+      <div class="wed-card__divider"><span></span>♥<span></span></div>
+      <p class="wed-card__message">{{ card.message }}</p>
+      <p class="wed-card__from">— {{ card.name }}</p>
+    </div>
+
+    <div class="wed-card__foot">elzant.com</div>
+  </div>
+</div>
