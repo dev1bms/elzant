@@ -5,6 +5,7 @@ Configuration is read from a .env file via django-environ so that secrets and
 environment-specific values never live in source control. See .env.example.
 """
 
+import os
 from pathlib import Path
 
 import environ
@@ -20,7 +21,10 @@ env = environ.Env(
 )
 environ.Env.read_env(BASE_DIR / ".env")
 
-SECRET_KEY = env("SECRET_KEY")
+# Read SECRET_KEY straight from the environment: django-environ treats values
+# starting with "$" as references to other variables, which would break a random
+# key that happens to start with "$". read_env() has populated os.environ above.
+SECRET_KEY = os.environ["SECRET_KEY"]
 DEBUG = env.bool("DEBUG", default=False)
 ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=[])
 CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS", default=[])
