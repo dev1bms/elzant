@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#fdfbf7"/>
+      <stop offset="100%" stop-color="#f3ead9"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <rect x="28" y="28" width="1144" height="574" rx="18" fill="none" stroke="#c9a227" stroke-width="3"/>
+
+  <text x="600" y="150" text-anchor="middle" font-family="'Geeza Pro', 'Cairo', sans-serif" font-size="34" fill="#a8861f" letter-spacing="6">بسم الله الرحمن الرحيم</text>
+
+  <text x="600" y="300" text-anchor="middle" font-family="'Geeza Pro', 'Cairo', serif" font-size="108" font-weight="700" fill="#6e1f36">محمود &amp; رينان</text>
+
+  <!-- heart accent (between names and tagline) -->
+  <path d="M16 29s-13-8.4-13-17C3 7 7 4 11 4c2.5 0 4 1.5 5 3 1-1.5 2.5-3 5-3 4 0 8 3 8 8 0 8.6-13 17-13 17z" fill="#b76e79" transform="translate(565,346) scale(2.2)"/>
+
+  <text x="600" y="470" text-anchor="middle" font-family="'Geeza Pro', 'Cairo', sans-serif" font-size="46" fill="#8c2a45">شاركنا الفرحة</text>
+  <text x="600" y="535" text-anchor="middle" font-family="'Geeza Pro', 'Cairo', sans-serif" font-size="40" fill="#6e1f36" font-weight="600">٢٢ يوليو ٢٠٢٦</text>
+  <text x="600" y="582" text-anchor="middle" font-family="Georgia, serif" font-size="26" fill="#a8861f" letter-spacing="3">elzant.com</text>
+</svg>

@@ -5,10 +5,14 @@
   "description": "Build tooling for elzant.com wedding site (Tailwind CSS v4)",
   "scripts": {
     "css:build": "tailwindcss -i ./tailwind/input.css -o ./static/css/output.css --minify",
-    "css:watch": "tailwindcss -i ./tailwind/input.css -o ./static/css/output.css --watch"
+    "css:watch": "tailwindcss -i ./tailwind/input.css -o ./static/css/output.css --watch",
+    "assets:build": "node scripts/gen-assets.mjs"
   },
   "devDependencies": {
     "@tailwindcss/cli": "^4.0.0",
+    "modern-screenshot": "^4.7.0",
+    "qrcode": "^1.5.4",
+    "sharp": "^0.35.2",
     "tailwindcss": "^4.0.0"
   }
 }
