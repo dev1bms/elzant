@@ -3,6 +3,12 @@
   <div class="wed-card" id="card">
     <div class="wed-card__frame"></div>
 
+    {# gold corner flourishes (one SVG mirrored to each corner via CSS) #}
+    <svg class="wed-card__corner tl" viewBox="0 0 84 84" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 32C6 15 15 6 32 6" stroke-linecap="round"/><path d="M6 48C6 24 24 6 48 6" stroke-linecap="round" opacity=".45"/><circle cx="9" cy="9" r="2.6" fill="currentColor" stroke="none"/></svg>
+    <svg class="wed-card__corner tr" viewBox="0 0 84 84" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 32C6 15 15 6 32 6" stroke-linecap="round"/><path d="M6 48C6 24 24 6 48 6" stroke-linecap="round" opacity=".45"/><circle cx="9" cy="9" r="2.6" fill="currentColor" stroke="none"/></svg>
+    <svg class="wed-card__corner bl" viewBox="0 0 84 84" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 32C6 15 15 6 32 6" stroke-linecap="round"/><path d="M6 48C6 24 24 6 48 6" stroke-linecap="round" opacity=".45"/><circle cx="9" cy="9" r="2.6" fill="currentColor" stroke="none"/></svg>
+    <svg class="wed-card__corner br" viewBox="0 0 84 84" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 32C6 15 15 6 32 6" stroke-linecap="round"/><path d="M6 48C6 24 24 6 48 6" stroke-linecap="round" opacity=".45"/><circle cx="9" cy="9" r="2.6" fill="currentColor" stroke="none"/></svg>
+
     <div class="wed-card__top">
       <p class="wed-card__bism">بسم الله الرحمن الرحيم</p>
       <h2 class="wed-card__names">{{ config.groom_name }} <span>&amp;</span> {{ config.bride_name }}</h2>
@@ -15,6 +21,9 @@
       <p class="wed-card__from">— {{ card.name }}</p>
     </div>
 
-    <div class="wed-card__foot">elzant.com</div>
+    <div class="wed-card__foot">
+      <div class="wed-card__divider" style="margin-bottom:0;font-size:20px"><span></span>✦<span></span></div>
+      <span>elzant.com</span>
+    </div>
   </div>
 </div>

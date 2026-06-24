@@ -3,9 +3,9 @@ from django import forms
 from .models import Greeting
 
 _FIELD_CLASS = (
-    "w-full rounded-xl border border-cream-300 bg-white px-4 py-3 text-burgundy-900 "
-    "placeholder:text-burgundy-300 focus:border-burgundy-500 focus:outline-none "
-    "focus:ring-2 focus:ring-burgundy-200"
+    "w-full rounded-xl border border-cream-300 bg-white/85 px-4 py-3 text-burgundy-900 "
+    "shadow-sm placeholder:text-burgundy-300 transition focus:border-gold-400 "
+    "focus:outline-none focus:ring-2 focus:ring-gold-300/50"
 )
 
 

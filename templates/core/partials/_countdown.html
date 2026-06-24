@@ -1,28 +1,31 @@
 {% load i18n %}
-<section class="bg-burgundy-700 py-14 text-cream-50">
-  <div class="mx-auto max-w-3xl px-6 text-center">
-    <h2 class="reveal mb-8 font-display text-3xl text-gold-300">{% trans "باقٍ على الفرح" %}</h2>
+<section id="moments" class="relative overflow-hidden bg-gradient-to-b from-burgundy-700 to-burgundy-800 py-16 text-cream-50">
+  <div class="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-gold-400/60 to-transparent"></div>
+  <div class="pointer-events-none absolute left-1/2 top-0 h-48 w-[80%] -translate-x-1/2 rounded-full bg-gold-400/10 blur-3xl"></div>
+
+  <div class="relative mx-auto max-w-3xl px-6 text-center">
+    <h2 class="reveal section-title mx-auto mb-9 text-3xl text-gold-300">{% trans "باقٍ على الفرح" %}</h2>
 
     <div id="countdown" data-target="{{ config.wedding_datetime|date:'c' }}"
-         class="reveal flex justify-center gap-3 sm:gap-6">
-      <div class="flex min-w-[72px] flex-col items-center rounded-2xl bg-burgundy-800/60 px-4 py-3 sm:min-w-[88px]">
-        <span data-unit="days" class="font-display text-4xl sm:text-5xl">٠</span>
-        <span class="mt-1 text-xs text-gold-300">يوم</span>
+         class="reveal mx-auto grid max-w-md grid-cols-4 gap-2.5 sm:gap-4">
+      <div class="flex flex-col items-center rounded-2xl bg-burgundy-800/50 px-2 py-4 ring-1 ring-gold-400/25 sm:py-5">
+        <span data-unit="days" class="font-display text-4xl text-gold-200 sm:text-5xl">٠</span>
+        <span class="mt-1.5 text-xs tracking-wide text-gold-300/90">يوم</span>
       </div>
-      <div class="flex min-w-[72px] flex-col items-center rounded-2xl bg-burgundy-800/60 px-4 py-3 sm:min-w-[88px]">
-        <span data-unit="hours" class="font-display text-4xl sm:text-5xl">٠٠</span>
-        <span class="mt-1 text-xs text-gold-300">ساعة</span>
+      <div class="flex flex-col items-center rounded-2xl bg-burgundy-800/50 px-2 py-4 ring-1 ring-gold-400/25 sm:py-5">
+        <span data-unit="hours" class="font-display text-4xl text-gold-200 sm:text-5xl">٠٠</span>
+        <span class="mt-1.5 text-xs tracking-wide text-gold-300/90">ساعة</span>
       </div>
-      <div class="flex min-w-[72px] flex-col items-center rounded-2xl bg-burgundy-800/60 px-4 py-3 sm:min-w-[88px]">
-        <span data-unit="minutes" class="font-display text-4xl sm:text-5xl">٠٠</span>
-        <span class="mt-1 text-xs text-gold-300">دقيقة</span>
+      <div class="flex flex-col items-center rounded-2xl bg-burgundy-800/50 px-2 py-4 ring-1 ring-gold-400/25 sm:py-5">
+        <span data-unit="minutes" class="font-display text-4xl text-gold-200 sm:text-5xl">٠٠</span>
+        <span class="mt-1.5 text-xs tracking-wide text-gold-300/90">دقيقة</span>
       </div>
-      <div class="flex min-w-[72px] flex-col items-center rounded-2xl bg-burgundy-800/60 px-4 py-3 sm:min-w-[88px]">
-        <span data-unit="seconds" class="font-display text-4xl sm:text-5xl">٠٠</span>
-        <span class="mt-1 text-xs text-gold-300">ثانية</span>
+      <div class="flex flex-col items-center rounded-2xl bg-burgundy-800/50 px-2 py-4 ring-1 ring-gold-400/25 sm:py-5">
+        <span data-unit="seconds" class="font-display text-4xl text-gold-200 sm:text-5xl">٠٠</span>
+        <span class="mt-1.5 text-xs tracking-wide text-gold-300/90">ثانية</span>
       </div>
     </div>
 
-    <p data-countdown-done class="reveal mt-6 hidden text-xl text-gold-300">تمّ الزفاف بحمد الله 🤍</p>
+    <p data-countdown-done class="reveal mt-7 hidden font-display text-2xl text-gold-300">تمّ الزفاف بحمد الله 🤍</p>
   </div>
 </section>
