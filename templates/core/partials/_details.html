@@ -1,31 +1,33 @@
 {% load i18n %}
-<section class="bg-cream-50 py-14">
+<section class="py-16">
   <div class="mx-auto max-w-2xl px-6 text-center">
-    <h2 class="reveal mb-8 font-display text-3xl text-burgundy-700">{% trans "تفاصيل الحفل" %}</h2>
+    <h2 class="reveal section-title mx-auto mb-9 text-3xl text-burgundy-700">{% trans "تفاصيل الحفل" %}</h2>
 
-    <div class="reveal space-y-3 text-burgundy-800">
-      {% if config.venue_name %}
-        <p class="text-xl font-semibold text-burgundy-700">{{ config.venue_name }}</p>
+    <div class="reveal panel mx-auto max-w-xl px-8 py-10">
+      <div class="space-y-3 text-burgundy-800">
+        {% if config.venue_name %}
+          <p class="font-display text-2xl text-burgundy-700">{{ config.venue_name }}</p>
+        {% endif %}
+        {% if config.venue_address %}
+          <p class="text-burgundy-600">{{ config.venue_address }}</p>
+        {% endif %}
+        <p class="pt-1 text-lg">{% language 'ar' %}{{ config.wedding_datetime|date:"l، j F Y" }}{% endlanguage %}</p>
+        <p class="text-burgundy-600">الساعة {{ config.wedding_datetime|time:"G:i" }}</p>
+        {% if config.hijri_text %}
+          <p class="text-burgundy-500">{{ config.hijri_text }}</p>
+        {% endif %}
+      </div>
+
+      {% if config.map_url %}
+        <a href="{{ config.map_url }}" target="_blank" rel="noopener" class="btn-outline mt-7">
+          <svg viewBox="0 0 24 24" class="h-5 w-5 fill-current"><path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg>
+          {% trans "الموقع على الخريطة" %}
+        </a>
       {% endif %}
-      {% if config.venue_address %}
-        <p>{{ config.venue_address }}</p>
-      {% endif %}
-      <p>{% language 'ar' %}{{ config.wedding_datetime|date:"l، j F Y" }}{% endlanguage %}</p>
-      <p>الساعة {{ config.wedding_datetime|time:"G:i" }}</p>
-      {% if config.hijri_text %}
-        <p class="text-burgundy-500">{{ config.hijri_text }}</p>
+
+      {% if not config.venue_name and not config.venue_address and not config.map_url %}
+        <p class="mt-6 text-sm text-burgundy-400">— ستُضاف تفاصيل القاعة قريباً —</p>
       {% endif %}
     </div>
-
-    {% if config.map_url %}
-      <a href="{{ config.map_url }}" target="_blank" rel="noopener"
-         class="reveal mt-8 inline-flex items-center gap-2 rounded-full border-2 border-burgundy-700 px-6 py-2.5 text-burgundy-700 transition hover:bg-burgundy-700 hover:text-cream-50">
-        📍 {% trans "الموقع على الخريطة" %}
-      </a>
-    {% endif %}
-
-    {% if not config.venue_name and not config.venue_address and not config.map_url %}
-      <p class="reveal mt-6 text-sm text-burgundy-400">— ستُضاف تفاصيل القاعة قريباً —</p>
-    {% endif %}
   </div>
 </section>

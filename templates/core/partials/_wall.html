@@ -1,19 +1,28 @@
 {% load i18n %}
-<section class="bg-cream-50 py-14">
+<section class="py-16">
   <div class="mx-auto max-w-3xl px-6">
-    <h2 class="reveal mb-8 text-center font-display text-3xl text-burgundy-700">{% trans "جدار التهاني" %}</h2>
+    <h2 class="reveal section-title mx-auto mb-10 text-3xl text-burgundy-700">{% trans "جدار التهاني" %}</h2>
 
     {% if greetings %}
       <div class="grid gap-5 sm:grid-cols-2">
         {% for g in greetings %}
-          <figure class="reveal rounded-2xl bg-white p-6 shadow-sm ring-1 ring-cream-200">
-            <blockquote class="leading-relaxed text-burgundy-800">{{ g.message|linebreaksbr }}</blockquote>
-            <figcaption class="mt-4 text-sm font-semibold text-gold-600">— {{ g.name }}</figcaption>
+          <figure class="reveal panel group relative overflow-hidden px-7 py-6 transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_50px_-24px_rgba(74,18,38,0.4)]">
+            <span class="pointer-events-none absolute -top-3 right-5 select-none font-display text-6xl leading-none text-gold-300/60" aria-hidden="true">”</span>
+            <blockquote class="relative leading-relaxed text-burgundy-800">{{ g.message|linebreaksbr }}</blockquote>
+            <figcaption class="mt-4 flex items-center gap-2 text-sm font-semibold text-gold-600">
+              <span class="h-px w-5 bg-gold-400"></span>{{ g.name }}
+            </figcaption>
           </figure>
         {% endfor %}
       </div>
     {% else %}
-      <p class="reveal text-center text-burgundy-400">كن أوّل من يهنّئ العروسين 🤍</p>
+      <div class="reveal panel mx-auto max-w-md px-8 py-12 text-center">
+        <div class="ornament mb-4"><span></span>
+          <svg viewBox="0 0 24 24" class="h-5 w-5 fill-current text-gold-500"><path d="M12 21s-7.5-4.9-10-9.2C.6 9 1.6 5.6 4.6 4.7 6.7 4 8.8 4.9 12 8c3.2-3.1 5.3-4 7.4-3.3 3 .9 4 4.3 2.6 7.1C19.5 16.1 12 21 12 21z"/></svg>
+          <span></span>
+        </div>
+        <p class="text-burgundy-500">كن أوّل من يهنّئ العروسين 🤍</p>
+      </div>
     {% endif %}
   </div>
 </section>

@@ -4,31 +4,32 @@
 {% block title %}شكراً لك — زفاف {{ config.groom_name }} و{{ config.bride_name }}{% endblock %}
 
 {% block content %}
-<section class="bg-cream-50 py-12">
+<section class="py-14">
   <div class="mx-auto max-w-xl px-6 text-center">
-    <h1 class="font-display text-3xl text-burgundy-700">شكراً لك يا {{ card.name }} 🤍</h1>
-    <p class="mt-3 text-burgundy-800">تم استلام تهنئتك، وستظهر على جدار التهاني بعد المراجعة.</p>
-    <p class="mt-1 text-sm text-burgundy-500">هذه بطاقتك — احفظها وشاركها مع العروسين والأصدقاء:</p>
+    <div class="anim-up d1 ornament mb-5" aria-hidden="true"><span></span>
+      <svg viewBox="0 0 24 24" class="h-5 w-5 fill-current"><path d="M12 21s-7.5-4.9-10-9.2C.6 9 1.6 5.6 4.6 4.7 6.7 4 8.8 4.9 12 8c3.2-3.1 5.3-4 7.4-3.3 3 .9 4 4.3 2.6 7.1C19.5 16.1 12 21 12 21z"/></svg>
+      <span></span>
+    </div>
+    <h1 class="anim-up d1 font-display text-4xl text-burgundy-700">شكراً لك يا {{ card.name }} 🤍</h1>
+    <p class="anim-up d2 mt-3 text-burgundy-800">تم استلام تهنئتك، وستظهر على جدار التهاني بعد المراجعة.</p>
+    <p class="anim-up d2 mt-1 text-sm text-burgundy-500">هذه بطاقتك — احفظها وشاركها مع العروسين والأصدقاء:</p>
 
-    <div class="mt-8">
+    <div class="anim-up d3 mt-8">
       {% include "core/partials/_card.html" %}
     </div>
 
-    <div class="mt-7 flex flex-col gap-3 sm:flex-row sm:justify-center">
-      <button id="card-download" type="button"
-              class="rounded-full bg-burgundy-700 px-8 py-3 text-cream-50 shadow-md transition hover:bg-burgundy-800">
+    <div class="anim-up d3 mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
+      <button id="card-download" type="button" class="btn-primary">
+        <svg viewBox="0 0 24 24" class="h-5 w-5 fill-current"><path d="M5 20h14v-2H5v2zM12 4v9.17l3.59-3.58L17 11l-5 5-5-5 1.41-1.41L11 13.17V4h1z"/></svg>
         {% trans "تحميل البطاقة صورة" %}
       </button>
-      <button id="card-share" type="button"
-              class="rounded-full border-2 border-burgundy-700 px-8 py-3 text-burgundy-700 transition hover:bg-burgundy-700 hover:text-cream-50">
-        {% trans "مشاركة عبر واتساب" %}
-      </button>
+      <button id="card-share" type="button" class="btn-outline">{% trans "مشاركة عبر واتساب" %}</button>
     </div>
-    <p class="mt-3 text-xs text-burgundy-400">
+    <p class="anim-up d4 mt-3 text-xs text-burgundy-400">
       إن لم يدعم جهازك مشاركة الصور، نزّل البطاقة وأرفقها يدوياً في واتساب.
     </p>
 
-    <a href="{% url 'home' %}" class="mt-8 inline-block text-burgundy-600 underline transition hover:text-burgundy-800">
+    <a href="{% url 'home' %}" class="anim-up d4 mt-8 inline-block text-burgundy-600 underline underline-offset-4 transition hover:text-burgundy-800">
       العودة للصفحة الرئيسية
     </a>
   </div>

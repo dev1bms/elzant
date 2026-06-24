@@ -6,16 +6,19 @@
   <div class="envelope-card">
     <div class="envelope-art" aria-hidden="true">
       <svg viewBox="0 0 120 92" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect x="4" y="20" width="112" height="68" rx="8" fill="#fffdf8" stroke="currentColor" stroke-width="2"/>
-        <path d="M6 24l54 38 54-38" stroke="#c9a227" stroke-width="2" fill="none"/>
-        <path d="M6 86l40-30M114 86L74 56" stroke="#c9a227" stroke-width="2"/>
-        <circle cx="60" cy="34" r="16" fill="#b76e79"/>
-        <path d="M60 41s-7-4.4-7-9c0-2.6 2.1-4.2 4.2-3.2.9.4 1.8 1.4 2.8 2.8 1-1.4 1.9-2.4 2.8-2.8 2.1-1 4.2.6 4.2 3.2 0 4.6-7 9-7 9z" fill="#fffdf8"/>
+        <rect x="5" y="21" width="110" height="66" rx="9" fill="#fffdf8" stroke="currentColor" stroke-width="2"/>
+        <path d="M7 25l53 37 53-37" stroke="#c8a24e" stroke-width="2" fill="none"/>
+        <path d="M7 85l41-30M113 85L72 55" stroke="#c8a24e" stroke-width="2"/>
+        <circle cx="60" cy="33" r="17" fill="#6a1c30"/>
+        <circle cx="60" cy="33" r="17" fill="none" stroke="#dcc07f" stroke-width="1.5"/>
+        <path d="M60 41s-7.5-4.7-7.5-9.4c0-2.7 2.2-4.4 4.5-3.3.9.5 1.9 1.5 3 3 1.1-1.5 2.1-2.5 3-3 2.3-1.1 4.5.6 4.5 3.3 0 4.7-7.5 9.4-7.5 9.4z" fill="#dcc07f"/>
       </svg>
     </div>
     <p class="envelope-kicker">دعوة زفاف</p>
     <h2 class="envelope-names">{{ config.groom_name }} <span>&amp;</span> {{ config.bride_name }}</h2>
-    <button type="button" id="envelope-open" class="envelope-btn">افتح الدعوة 🤍</button>
+    <div>
+      <button type="button" id="envelope-open" class="btn-primary text-lg">افتح الدعوة 🤍</button>
+    </div>
     <button type="button" id="envelope-skip" class="envelope-skip">تخطّي</button>
   </div>
 </div>

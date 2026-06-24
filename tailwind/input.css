@@ -5,43 +5,47 @@
 @source "../static/js/**/*.js";
 
 /* ----------------------------------------------------------------------
-   Theme — luxury Arabic wedding palette (CSS-first config, Tailwind v4)
-   - Display font for headings (Aref Ruqaa), body font for text (Cairo).
-   - Cream/ivory base, burgundy/rose primary, soft gold accents.
-   Fonts are loaded via <link> in base.html (font-display: swap).
+   Theme — premium Arabic wedding palette (ivory · champagne · gold ·
+   burgundy · warm rose). CSS-first config (Tailwind v4).
+   Fonts are self-hosted (see static/css/fonts.css), font-display: swap.
 ---------------------------------------------------------------------- */
 @theme {
   --font-display: "Aref Ruqaa", "Amiri", serif;
   --font-body: "Cairo", "Tajawal", sans-serif;
 
-  /* Cream / ivory — page base */
-  --color-cream-50: #fdfbf7;
-  --color-cream-100: #faf6ef;
-  --color-cream-200: #f3ead9;
-  --color-cream-300: #e9dbc2;
+  /* Ivory / champagne — page base */
+  --color-cream-50: #fdfaf3;
+  --color-cream-100: #f9f3e7;
+  --color-cream-200: #f2e7d0;
+  --color-cream-300: #e8d6b3;
 
-  /* Burgundy — primary (buttons, headings accents) */
-  --color-burgundy-50: #fbf1f3;
-  --color-burgundy-100: #f6e1e6;
-  --color-burgundy-200: #ecc2cc;
-  --color-burgundy-300: #dd96a8;
-  --color-burgundy-400: #c8607c;
-  --color-burgundy-500: #a83a57;
-  --color-burgundy-600: #8c2a45;
-  --color-burgundy-700: #6e1f36;
-  --color-burgundy-800: #5a1a2d;
-  --color-burgundy-900: #4a1626;
+  /* Champagne accents */
+  --color-champagne-200: #f0e3c6;
+  --color-champagne-300: #e3cfa3;
+  --color-champagne-400: #d8bd84;
 
-  /* Rose — soft secondary */
-  --color-rose-soft-300: #e8c3cb;
-  --color-rose-soft-400: #d49aa6;
-  --color-rose-soft-500: #b76e79;
+  /* Burgundy — primary */
+  --color-burgundy-50: #fbf0f2;
+  --color-burgundy-100: #f5dee3;
+  --color-burgundy-200: #e9bcc6;
+  --color-burgundy-300: #d690a0;
+  --color-burgundy-400: #c0617a;
+  --color-burgundy-500: #a23a55;
+  --color-burgundy-600: #821f37;
+  --color-burgundy-700: #6a1c30;
+  --color-burgundy-800: #531526;
+  --color-burgundy-900: #3c0f1b;
 
-  /* Gold — decorative accent */
-  --color-gold-300: #e6d4a6;
-  --color-gold-400: #d4b978;
-  --color-gold-500: #c9a227;
-  --color-gold-600: #a8861f;
+  /* Warm rose — soft secondary */
+  --color-rose-soft-300: #e9c6cc;
+  --color-rose-soft-400: #d59ba4;
+  --color-rose-soft-500: #c17b85;
+
+  /* Soft gold — decorative accent */
+  --color-gold-300: #ecdaa6;
+  --color-gold-400: #dcc07f;
+  --color-gold-500: #c8a24e;
+  --color-gold-600: #a8843a;
 }
 
 /* ----------------------------------------------------------------------
@@ -53,11 +57,22 @@
   }
   body {
     font-family: var(--font-body);
-    background-color: var(--color-cream-100);
     color: var(--color-burgundy-900);
+    background-color: var(--color-cream-100);
+    /* Soft champagne depth + faint gold glows — never flat. */
+    background-image:
+      radial-gradient(120% 60% at 50% -10%, #fdfbf5 0%, rgba(253, 251, 245, 0) 60%),
+      radial-gradient(80% 50% at 100% 0%, rgba(200, 162, 78, 0.07) 0%, rgba(200, 162, 78, 0) 55%),
+      radial-gradient(70% 50% at 0% 100%, rgba(193, 123, 133, 0.06) 0%, rgba(193, 123, 133, 0) 55%),
+      linear-gradient(180deg, #fdfaf3 0%, #f7efe0 100%);
+    background-attachment: fixed;
   }
   h1, h2, h3, .font-display {
     font-family: var(--font-display);
+  }
+  ::selection {
+    background: var(--color-burgundy-700);
+    color: var(--color-cream-50);
   }
 }
 
@@ -65,29 +80,141 @@
    Components & utilities
 ---------------------------------------------------------------------- */
 @layer components {
-  /* Gentle fade-up reveal on scroll (toggled by JS adding .is-visible) */
+  /* Reveal-on-scroll (below-the-fold sections) */
   .reveal {
     opacity: 0;
-    transform: translateY(16px);
-    transition: opacity 0.7s ease, transform 0.7s ease;
+    transform: translateY(18px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
   }
   .reveal.is-visible {
     opacity: 1;
     transform: translateY(0);
   }
-}
 
-/* ----------------------------------------------------------------------
-   Shareable congratulations card — fixed 1080×1350, scaled to fit screen.
-   Exported to PNG by static/js/card.js (modern-screenshot).
----------------------------------------------------------------------- */
-@layer components {
+  /* On-load entrance for above-the-fold (hero) — no JS, no blank flash */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .anim-up { opacity: 0; animation: fadeUp 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+  .anim-up.d1 { animation-delay: 0.08s; }
+  .anim-up.d2 { animation-delay: 0.18s; }
+  .anim-up.d3 { animation-delay: 0.30s; }
+  .anim-up.d4 { animation-delay: 0.44s; }
+  .anim-up.d5 { animation-delay: 0.58s; }
+  .anim-up.d6 { animation-delay: 0.72s; }
+
+  /* Premium primary button — burgundy with a thin gold ring + soft shine */
+  .btn-primary {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    overflow: hidden;
+    border-radius: 9999px;
+    padding: 0.85rem 2.4rem;
+    font-weight: 600;
+    color: var(--color-cream-50);
+    background: linear-gradient(135deg, #7a2238 0%, #5a1626 100%);
+    box-shadow: 0 8px 22px -8px rgba(74, 18, 38, 0.6),
+      inset 0 0 0 1px rgba(220, 192, 127, 0.55);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+  }
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 30px -10px rgba(74, 18, 38, 0.65),
+      inset 0 0 0 1px rgba(220, 192, 127, 0.8);
+  }
+  /* moving sheen */
+  .btn-primary::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    inset-inline-start: -60%;
+    width: 40%;
+    height: 100%;
+    background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.28), transparent);
+    transform: skewX(-18deg);
+    transition: inset-inline-start 0.6s ease;
+  }
+  .btn-primary:hover::after { inset-inline-start: 130%; }
+
+  /* Outline / secondary button */
+  .btn-outline {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 9999px;
+    padding: 0.7rem 1.9rem;
+    font-weight: 600;
+    color: var(--color-burgundy-700);
+    border: 1.5px solid var(--color-burgundy-700);
+    transition: background 0.25s ease, color 0.25s ease, transform 0.25s ease;
+  }
+  .btn-outline:hover {
+    background: var(--color-burgundy-700);
+    color: var(--color-cream-50);
+    transform: translateY(-2px);
+  }
+
+  /* Surface panel — soft elevation + gold hairline */
+  .panel {
+    background: linear-gradient(180deg, #fffdf9 0%, #fcf6ea 100%);
+    border-radius: 1.25rem;
+    box-shadow: 0 18px 45px -22px rgba(74, 18, 38, 0.28);
+    border: 1px solid rgba(200, 162, 78, 0.28);
+  }
+
+  /* Section heading with twin gold flourishes */
+  .section-title {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.9rem;
+    font-family: var(--font-display);
+  }
+  .section-title::before,
+  .section-title::after {
+    content: "";
+    width: 38px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--color-gold-500));
+  }
+  .section-title::after {
+    background: linear-gradient(90deg, var(--color-gold-500), transparent);
+  }
+
+  /* Gold ornamental divider (small heart/diamond between hairlines) */
+  .ornament {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.9rem;
+    color: var(--color-gold-500);
+  }
+  .ornament span {
+    display: block;
+    height: 1px;
+    width: 56px;
+    background: linear-gradient(90deg, transparent, var(--color-gold-400));
+  }
+  .ornament span:last-child {
+    background: linear-gradient(90deg, var(--color-gold-400), transparent);
+  }
+
+  /* ------------------------------------------------------------------
+     Shareable congratulations card — fixed 1080×1350, scaled to fit.
+     Exported to PNG by static/js/card.js (modern-screenshot).
+     (Box geometry/scaling MUST stay stable — card.js depends on it.)
+  ------------------------------------------------------------------ */
   .card-stage {
     width: 100%;
     max-width: 1080px;
     margin-inline: auto;
     overflow: hidden;
     direction: ltr; /* pin the card box's top-left so scaling stays on-screen */
+    filter: drop-shadow(0 24px 50px rgba(74, 18, 38, 0.25));
   }
   .wed-card {
     width: 1080px;
@@ -101,74 +228,88 @@
     flex-direction: column;
     justify-content: space-between;
     align-items: center;
-    padding: 120px 90px 90px;
+    padding: 130px 96px 104px;
     text-align: center;
-    color: #4a1626;
-    background: linear-gradient(160deg, #fdfbf7 0%, #faf6ef 55%, #f3ead9 100%);
+    color: #3c0f1b;
+    background:
+      radial-gradient(140% 75% at 50% -8%, #fffdf8 0%, rgba(255, 253, 248, 0) 55%),
+      radial-gradient(60% 40% at 50% 108%, rgba(200, 162, 78, 0.12) 0%, rgba(200, 162, 78, 0) 60%),
+      linear-gradient(160deg, #fdfaf2 0%, #f7edd9 55%, #f1e3c6 100%);
   }
   .wed-card__frame {
     position: absolute;
-    inset: 42px;
-    border: 3px solid #c9a227;
-    border-radius: 28px;
+    inset: 44px;
+    border: 2px solid var(--color-gold-500);
+    border-radius: 26px;
     pointer-events: none;
   }
   .wed-card__frame::after {
     content: "";
     position: absolute;
-    inset: 10px;
-    border: 1px solid rgba(201, 162, 39, 0.45);
-    border-radius: 20px;
+    inset: 12px;
+    border: 1px solid rgba(200, 162, 78, 0.5);
+    border-radius: 18px;
   }
+  /* gold corner flourishes */
+  .wed-card__corner {
+    position: absolute;
+    width: 84px;
+    height: 84px;
+    color: var(--color-gold-600);
+    pointer-events: none;
+  }
+  .wed-card__corner.tl { top: 30px; inset-inline-start: 30px; }
+  .wed-card__corner.tr { top: 30px; inset-inline-end: 30px; transform: scaleX(-1); }
+  .wed-card__corner.bl { bottom: 30px; inset-inline-start: 30px; transform: scaleY(-1); }
+  .wed-card__corner.br { bottom: 30px; inset-inline-end: 30px; transform: scale(-1, -1); }
+
   .wed-card__bism {
     font-family: var(--font-body);
     font-size: 30px;
-    letter-spacing: 4px;
-    color: #a8861f;
+    letter-spacing: 5px;
+    color: var(--color-gold-600);
     margin: 0;
   }
   .wed-card__names {
     font-family: var(--font-display);
-    font-size: 104px;
+    font-size: 108px;
     line-height: 1.15;
     font-weight: 700;
-    color: #6e1f36;
-    margin: 18px 0 0;
+    color: var(--color-burgundy-700);
+    margin: 22px 0 0;
     white-space: nowrap;
   }
-  .wed-card__names span {
-    color: #c9a227;
-  }
+  .wed-card__names span { color: var(--color-gold-500); }
   .wed-card__date {
     font-family: var(--font-body);
     font-size: 34px;
-    color: #8c2a45;
-    margin: 16px 0 0;
+    color: var(--color-burgundy-600);
+    margin: 18px 0 0;
+    letter-spacing: 1px;
   }
-  .wed-card__body {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
+  .wed-card__body { display: flex; flex-direction: column; align-items: center; }
   .wed-card__divider {
     display: flex;
     align-items: center;
-    gap: 18px;
-    color: #c9a227;
-    font-size: 34px;
-    margin-bottom: 38px;
+    gap: 20px;
+    color: var(--color-gold-500);
+    font-size: 30px;
+    margin-bottom: 42px;
   }
   .wed-card__divider span {
     display: block;
-    width: 90px;
-    height: 2px;
-    background: #d4b978;
+    width: 110px;
+    height: 1.5px;
+    background: linear-gradient(90deg, transparent, var(--color-gold-400));
+  }
+  .wed-card__divider span:last-child {
+    background: linear-gradient(90deg, var(--color-gold-400), transparent);
   }
   .wed-card__message {
     font-family: var(--font-body);
-    font-size: 46px;
-    line-height: 1.7;
-    color: #5a1a2d;
+    font-size: 47px;
+    line-height: 1.75;
+    color: var(--color-burgundy-800);
     margin: 0;
     max-width: 880px;
     white-space: pre-wrap;
@@ -176,29 +317,28 @@
   }
   .wed-card__from {
     font-family: var(--font-display);
-    font-size: 44px;
+    font-size: 46px;
     font-weight: 700;
-    color: #a8861f;
-    margin: 44px 0 0;
+    color: var(--color-gold-600);
+    margin: 48px 0 0;
     white-space: nowrap;
   }
   .wed-card__foot {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
     font-family: var(--font-body);
     font-size: 28px;
-    letter-spacing: 3px;
-    color: #a8861f;
+    letter-spacing: 4px;
+    color: var(--color-gold-600);
   }
-}
 
-/* ----------------------------------------------------------------------
-   Digital envelope — a light intro overlay. Hidden by default so the site
-   works with JS disabled; an inline script reveals it (adds .show-envelope
-   to <html>) only when it hasn't been dismissed yet.
----------------------------------------------------------------------- */
-@layer components {
-  html.show-envelope {
-    overflow: hidden;
-  }
+  /* ------------------------------------------------------------------
+     Digital envelope — light intro overlay (hidden by default; revealed
+     on first visit by an inline script in _envelope.html).
+  ------------------------------------------------------------------ */
+  html.show-envelope { overflow: hidden; }
   .envelope-overlay {
     position: fixed;
     inset: 0;
@@ -207,61 +347,54 @@
     align-items: center;
     justify-content: center;
     padding: 24px;
-    background: linear-gradient(160deg, #faf6ef 0%, #f3ead9 100%);
-    transition: opacity 0.5s ease;
+    background:
+      radial-gradient(120% 70% at 50% 0%, #fdf8ec 0%, rgba(253, 248, 236, 0) 60%),
+      linear-gradient(160deg, #f7eede 0%, #efe0c4 100%);
   }
-  .show-envelope .envelope-overlay {
-    display: flex;
-  }
-  .envelope-overlay.is-closing {
-    opacity: 0;
-  }
+  .show-envelope .envelope-overlay { display: flex; }
+  .envelope-overlay.is-closing { opacity: 0; transition: opacity 0.6s ease; }
   .envelope-card {
-    max-width: 420px;
+    max-width: 440px;
     text-align: center;
+    animation: fadeUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
   }
   .envelope-art {
-    width: 150px;
-    margin: 0 auto 24px;
-    color: #8c2a45;
+    width: 168px;
+    margin: 0 auto 28px;
+    color: var(--color-burgundy-700);
+    animation: envFloat 4s ease-in-out infinite;
+  }
+  @keyframes envFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-7px); }
   }
   .envelope-kicker {
-    letter-spacing: 0.3em;
+    letter-spacing: 0.35em;
     font-size: 0.85rem;
-    color: #a8861f;
+    color: var(--color-gold-600);
   }
   .envelope-names {
     font-family: var(--font-display);
-    font-size: 2.6rem;
-    color: #6e1f36;
-    margin: 0.5rem 0 1.75rem;
+    font-size: 2.9rem;
+    color: var(--color-burgundy-700);
+    margin: 0.6rem 0 1.9rem;
   }
-  .envelope-names span {
-    color: #c9a227;
-  }
-  .envelope-btn {
-    background: #6e1f36;
-    color: #fdfbf7;
-    border-radius: 9999px;
-    padding: 0.8rem 2.2rem;
-    font-size: 1.05rem;
-    box-shadow: 0 4px 14px rgba(110, 31, 54, 0.3);
-    transition: background 0.2s ease;
-  }
-  .envelope-btn:hover {
-    background: #5a1a2d;
-  }
+  .envelope-names span { color: var(--color-gold-500); }
   .envelope-skip {
-    display: block;
-    margin: 1rem auto 0;
+    display: inline-block;
+    margin-top: 1.1rem;
     font-size: 0.85rem;
-    color: #a8861f;
+    color: var(--color-gold-600);
     text-decoration: underline;
+    text-underline-offset: 3px;
   }
 }
 
 /* Respect users who prefer reduced motion */
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  .reveal { opacity: 1; transform: none; transition: none; }
+  .reveal,
+  .anim-up,
+  .envelope-card,
+  .envelope-art { opacity: 1; transform: none; transition: none; animation: none; }
 }
