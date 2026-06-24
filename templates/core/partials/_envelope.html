@@ -1,25 +1,25 @@
+{% load i18n %}
 {% comment %}
-  Light digital envelope. Hidden by default (works without JS); the inline
-  script below reveals it only on first visit. Closing is handled by envelope.js.
+  Modern opening screen (replaces the classic envelope). Hidden by default
+  (works without JS); the inline script reveals it on first visit. Closing is
+  handled by envelope.js. IDs/classes kept for those scripts.
 {% endcomment %}
 <div class="envelope-overlay" id="envelope" role="dialog" aria-modal="true" aria-label="دعوة الزفاف">
-  <div class="envelope-card">
-    <div class="envelope-art" aria-hidden="true">
-      <svg viewBox="0 0 120 92" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect x="5" y="21" width="110" height="66" rx="9" fill="#fffdf8" stroke="currentColor" stroke-width="2"/>
-        <path d="M7 25l53 37 53-37" stroke="#c8a24e" stroke-width="2" fill="none"/>
-        <path d="M7 85l41-30M113 85L72 55" stroke="#c8a24e" stroke-width="2"/>
-        <circle cx="60" cy="33" r="17" fill="#6a1c30"/>
-        <circle cx="60" cy="33" r="17" fill="none" stroke="#dcc07f" stroke-width="1.5"/>
-        <g transform="translate(60 33) scale(0.55)" fill="#dcc07f"><path d="M0 -11 L2.93 -4.20 L7.78 -7.78 L4.20 -2.93 L11 0 L4.20 2.93 L7.78 7.78 L2.93 4.20 L0 11 L-2.93 4.20 L-7.78 7.78 L-4.20 2.93 L-11 0 L-4.20 -2.93 L-7.78 -7.78 L-2.93 -4.20 Z"/></g>
-      </svg>
+  <div class="intro-inner">
+    <p class="kicker">Wedding Invitation</p>
+    <p class="mt-9 text-sm tracking-[0.3em] text-ivory-100/60">بشرف ودعوة</p>
+    <h1 class="mt-4 text-5xl font-light leading-[1.15] text-ivory-50 sm:text-6xl">
+      {{ config.groom_name }}
+      <span class="eyebrow my-1 block text-2xl text-rose-300">&amp;</span>
+      {{ config.bride_name }}
+    </h1>
+    <div class="mx-auto my-8 h-px w-16 bg-gold-400/60"></div>
+    <p class="num text-sm tracking-[0.35em] text-ivory-100/70">{% language 'ar' %}{{ config.wedding_datetime|date:'d . m . Y' }}{% endlanguage %}</p>
+
+    <div class="mt-11">
+      <button type="button" id="envelope-open" class="btn btn-line-light">الدخول للدعوة</button>
     </div>
-    <p class="envelope-kicker">دعوة زفاف</p>
-    <h2 class="envelope-names">{{ config.groom_name }} <span>&amp;</span> {{ config.bride_name }}</h2>
-    <div>
-      <button type="button" id="envelope-open" class="btn-primary text-lg">افتح الدعوة</button>
-    </div>
-    <button type="button" id="envelope-skip" class="envelope-skip">تخطّي</button>
+    <button type="button" id="envelope-skip" class="mt-6 text-xs tracking-[0.25em] text-ivory-100/40 underline-offset-4 transition hover:text-ivory-100/70 hover:underline">تخطّي</button>
   </div>
 </div>
 <script>

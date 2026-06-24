@@ -1,33 +1,15 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" width="600" height="600" role="img" aria-label="رمز العروسين (عنصر نائب)">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 600" width="480" height="600" role="img" aria-label="صورة العروسين (عنصر نائب)">
   <defs>
-    <radialGradient id="bg" cx="50%" cy="40%" r="75%">
-      <stop offset="0%" stop-color="#fffdf8"/>
-      <stop offset="58%" stop-color="#f8efdc"/>
-      <stop offset="100%" stop-color="#efdfc0"/>
-    </radialGradient>
-    <linearGradient id="gilt" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#f0dba6"/>
-      <stop offset="50%" stop-color="#c8a24e"/>
-      <stop offset="100%" stop-color="#a8843a"/>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#faf6ef"/>
+      <stop offset="100%" stop-color="#ece1d2"/>
     </linearGradient>
   </defs>
 
-  <rect width="600" height="600" fill="url(#bg)"/>
-  <circle cx="300" cy="300" r="250" fill="none" stroke="#c8a24e" stroke-width="1.4" opacity="0.5"/>
+  <rect width="480" height="600" fill="url(#bg)"/>
+  <rect x="18" y="18" width="444" height="564" fill="none" stroke="#c4a978" stroke-opacity="0.5" stroke-width="1"/>
 
-  <!-- eight-point star (najmah) crest -->
-  <g transform="translate(300 224) scale(2.9)" fill="url(#gilt)">
-    <path d="M0 -11 L2.93 -4.20 L7.78 -7.78 L4.20 -2.93 L11 0 L4.20 2.93 L7.78 7.78 L2.93 4.20 L0 11 L-2.93 4.20 L-7.78 7.78 L-4.20 2.93 L-11 0 L-4.20 -2.93 L-7.78 -7.78 L-2.93 -4.20 Z"/>
-    <circle cx="0" cy="0" r="2.4" fill="#fffdf8"/>
-  </g>
-
-  <!-- two thin interlaced rings (monogram) -->
-  <circle cx="265" cy="332" r="60" fill="none" stroke="url(#gilt)" stroke-width="5.5"/>
-  <circle cx="335" cy="332" r="60" fill="none" stroke="url(#gilt)" stroke-width="5.5" opacity="0.85"/>
-
-  <!-- tapered gold hairline + placeholder hint -->
-  <line x1="232" y1="436" x2="288" y2="436" stroke="#c8a24e" stroke-width="1.4" opacity="0.65"/>
-  <line x1="312" y1="436" x2="368" y2="436" stroke="#c8a24e" stroke-width="1.4" opacity="0.65"/>
-  <circle cx="300" cy="436" r="2.4" fill="#c8a24e"/>
-  <text x="300" y="476" text-anchor="middle" font-family="Cairo, 'Tajawal', sans-serif" font-size="20" letter-spacing="5" fill="#a8843a">صورة العروسين</text>
+  <text x="240" y="300" text-anchor="middle" font-family="Georgia, serif" font-size="84" fill="#a96d75">M &amp; R</text>
+  <line x1="210" y1="345" x2="270" y2="345" stroke="#c4a978" stroke-width="1.5"/>
+  <text x="240" y="392" text-anchor="middle" font-family="'Geeza Pro','Cairo',sans-serif" font-size="20" letter-spacing="2" fill="#6b5d55">صورة العروسين</text>
 </svg>
