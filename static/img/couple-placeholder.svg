@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" width="600" height="600" role="img" aria-label="صورة العروسين (عنصر نائب)">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="42%" r="70%">
+      <stop offset="0%" stop-color="#fdfbf7"/>
+      <stop offset="100%" stop-color="#f3ead9"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="600" height="600" fill="url(#bg)"/>
+
+  <!-- heart -->
+  <path d="M300 168c-22-26-52-30-72-16-22 16-24 47-6 70 14 18 78 62 78 62s64-44 78-62c18-23 16-54-6-70-20-14-50-10-72 16z"
+        fill="#b76e79" opacity="0.85"/>
+
+  <!-- two interlocking wedding rings -->
+  <circle cx="262" cy="320" r="66" fill="none" stroke="#c9a227" stroke-width="12"/>
+  <circle cx="338" cy="320" r="66" fill="none" stroke="#d4b978" stroke-width="12"/>
+
+  <!-- label -->
+  <text x="300" y="452" text-anchor="middle" font-family="Cairo, Tajawal, system-ui, sans-serif"
+        font-size="30" fill="#8c2a45" font-weight="600">محمود &amp; رينان</text>
+  <text x="300" y="492" text-anchor="middle" font-family="Cairo, Tajawal, system-ui, sans-serif"
+        font-size="20" fill="#a8861f">صورة العروسين</text>
+</svg>

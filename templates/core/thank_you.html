@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}شكراً لك — زفاف {{ config.groom_name }} و{{ config.bride_name }}{% endblock %}
+
+{% block content %}
+<section class="flex min-h-[60vh] items-center bg-cream-50 py-16">
+  <div class="mx-auto max-w-xl px-6 text-center">
+    <h1 class="font-display text-4xl text-burgundy-700">شكراً لكِ/لك يا {{ card.name }} 🤍</h1>
+    <p class="mt-4 text-burgundy-800">تم استلام تهنئتك، وستظهر على جدار التهاني بعد المراجعة.</p>
+
+    {# Stage 4 adds the downloadable / shareable congratulations card here. #}
+
+    <a href="{% url 'home' %}"
+       class="mt-9 inline-block rounded-full bg-burgundy-700 px-8 py-3 text-cream-50 shadow-md transition hover:bg-burgundy-800">
+      العودة للصفحة الرئيسية
+    </a>
+  </div>
+</section>
+{% endblock %}

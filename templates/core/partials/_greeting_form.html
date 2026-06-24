@@ -1,0 +1,36 @@
+{% load i18n %}
+<section id="greeting" class="bg-cream-100 py-14">
+  <div class="mx-auto max-w-xl px-6">
+    <h2 class="reveal text-center font-display text-3xl text-burgundy-700">{% trans "اترك تهنئتك للعروسين" %}</h2>
+    <p class="reveal mt-3 mb-8 text-center text-burgundy-500">شاركهما فرحتهما بكلمات من قلبك 🤍</p>
+
+    <form method="post" action="{% url 'home' %}#greeting" class="reveal space-y-5" novalidate>
+      {% csrf_token %}
+
+      {# honeypot — hidden from humans, ignored by screen readers #}
+      <div class="hidden" aria-hidden="true">{{ form.website }}</div>
+
+      <div>
+        <label for="{{ form.name.id_for_label }}" class="mb-1 block text-sm text-burgundy-700">الاسم</label>
+        {{ form.name }}
+        {% if form.name.errors %}
+          <p class="mt-1 text-sm text-burgundy-600">{{ form.name.errors.0 }}</p>
+        {% endif %}
+      </div>
+
+      <div>
+        <label for="{{ form.message.id_for_label }}" class="mb-1 block text-sm text-burgundy-700">الرسالة</label>
+        {{ form.message }}
+        {% if form.message.errors %}
+          <p class="mt-1 text-sm text-burgundy-600">{{ form.message.errors.0 }}</p>
+        {% endif %}
+      </div>
+
+      <button type="submit"
+              class="w-full rounded-full bg-burgundy-700 px-8 py-3 text-cream-50 shadow-md transition hover:bg-burgundy-800">
+        {% trans "إرسال التهنئة" %}
+      </button>
+      <p class="text-center text-xs text-burgundy-400">تظهر التهنئة على الجدار بعد مراجعتها.</p>
+    </form>
+  </div>
+</section>

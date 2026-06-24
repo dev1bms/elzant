@@ -69,7 +69,7 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "django.template.context_processors.i18n",
-                # "core.context_processors.wedding" is added in stage 3.
+                "core.context_processors.wedding",
             ],
         },
     },
@@ -101,9 +101,13 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization — Arabic (RTL) now, English structurally ready.
 # ---------------------------------------------------------------------------
 LANGUAGE_CODE = "ar"
+# Keep only Arabic active so the whole site stays RTL/Arabic regardless of the
+# visitor's browser language. The i18n machinery (USE_I18N, LocaleMiddleware,
+# LOCALE_PATHS) is in place — enabling English later is: uncomment the line,
+# add translations under locale/, and wrap remaining strings in {% trans %}.
 LANGUAGES = [
     ("ar", "العربية"),
-    ("en", "English"),  # placeholder — not actively translated yet
+    # ("en", "English"),  # enable once English translations exist
 ]
 LOCALE_PATHS = [BASE_DIR / "locale"]
 
