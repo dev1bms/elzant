@@ -38,7 +38,8 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    # Local apps — "core" is registered in stage 2 (models & admin).
+    # Local apps
+    "core",
 ]
 
 MIDDLEWARE = [
