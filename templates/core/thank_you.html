@@ -4,35 +4,26 @@
 {% block title %}شكراً لك — زفاف {{ config.groom_name }} و{{ config.bride_name }}{% endblock %}
 
 {% block content %}
-<section class="py-14">
-  <div class="mx-auto max-w-xl px-6 text-center">
-    <p class="anim-up d1 eyebrow mb-4 block text-gold-600">تهنئتك في الطريق</p>
-    <div class="anim-up d1 flourish flourish--sm mb-5 text-gold-500" aria-hidden="true"><span></span>
-      <svg viewBox="0 0 24 24" class="fill-current"><path d="M12 1l1.74 6.8 6.04-3.58-3.58 6.04L23 12l-6.8 1.74 3.58 6.04-6.04-3.58L12 23l-1.74-6.8-6.04 3.58 3.58-6.04L1 12l6.8-1.74L4.22 4.22l6.04 3.58z"/></svg>
-      <span></span>
-    </div>
-    <h1 class="anim-up d1 font-display text-4xl text-burgundy-700 sm:text-5xl">شكراً لك يا {{ card.name }}</h1>
-    <p class="anim-up d2 mt-4 text-burgundy-800">تم استلام تهنئتك، وستظهر على جدار التهاني بعد المراجعة.</p>
-    <p class="anim-up d2 mt-1 text-sm text-burgundy-500">هذه بطاقتك — احفظها وشاركها مع العروسين والأصدقاء:</p>
+<section class="bg-ivory-50 px-6 py-20">
+  <div class="mx-auto max-w-xl text-center">
+    <p class="up d1 kicker">Thank you</p>
+    <h1 class="up d1 mt-4 text-3xl font-light text-charcoal sm:text-4xl">وصلت تهنئتك يا {{ card.name }}</h1>
+    <p class="up d2 mt-3 text-charcoal-soft">ستظهر على جدار التهاني بعد المراجعة. وهذه بطاقتك — احفظها وشاركها:</p>
 
-    <div class="anim-up d3 mt-8">
+    <div class="up d3 mt-10">
       {% include "core/partials/_card.html" %}
     </div>
 
-    <div class="anim-up d3 mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
-      <button id="card-download" type="button" class="btn-primary">
-        <svg viewBox="0 0 24 24" class="h-5 w-5 fill-current"><path d="M5 20h14v-2H5v2zM12 4v9.17l3.59-3.58L17 11l-5 5-5-5 1.41-1.41L11 13.17V4h1z"/></svg>
-        {% trans "تحميل البطاقة صورة" %}
+    <div class="up d3 mt-9 flex flex-col gap-3 sm:flex-row sm:justify-center">
+      <button id="card-download" type="button" class="btn btn-solid">
+        <svg viewBox="0 0 24 24" class="h-4 w-4 fill-current"><path d="M5 20h14v-2H5v2zM12 4v9.17l3.59-3.58L17 11l-5 5-5-5 1.41-1.41L11 13.17V4h1z"/></svg>
+        {% trans "تحميل البطاقة" %}
       </button>
-      <button id="card-share" type="button" class="btn-outline">{% trans "مشاركة عبر واتساب" %}</button>
+      <button id="card-share" type="button" class="btn btn-line">{% trans "مشاركة عبر واتساب" %}</button>
     </div>
-    <p class="anim-up d4 mt-3 text-xs text-burgundy-400">
-      إن لم يدعم جهازك مشاركة الصور، نزّل البطاقة وأرفقها يدوياً في واتساب.
-    </p>
+    <p class="up d4 mt-4 text-xs text-charcoal-soft/70">إن لم يدعم جهازك مشاركة الصور، نزّل البطاقة وأرفقها يدوياً في واتساب.</p>
 
-    <a href="{% url 'home' %}" class="anim-up d4 mt-8 inline-block text-burgundy-600 underline underline-offset-4 transition hover:text-burgundy-800">
-      العودة للصفحة الرئيسية
-    </a>
+    <a href="{% url 'home' %}" class="up d4 mt-9 inline-block text-sm text-burgundy-500 underline underline-offset-4 transition hover:text-burgundy-400">العودة للصفحة الرئيسية</a>
   </div>
 </section>
 {% endblock %}

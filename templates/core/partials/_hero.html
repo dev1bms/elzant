@@ -1,50 +1,56 @@
 {% load static i18n %}
-<section class="relative overflow-hidden">
-  {# soft decorative glows #}
-  <div class="pointer-events-none absolute inset-0 -z-10" aria-hidden="true">
-    <div class="absolute left-1/2 top-[-12%] h-[55vh] w-[55vh] -translate-x-1/2 rounded-full bg-gold-400/10 blur-3xl"></div>
-    <div class="absolute bottom-0 right-[-10%] h-[40vh] w-[40vh] rounded-full bg-rose-soft-300/15 blur-3xl"></div>
-  </div>
+<section class="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-ink-900 px-6 py-20 text-center text-ivory-50">
+  {# subtle warm vignette — no loud gradients #}
+  <div class="pointer-events-none absolute inset-0 opacity-70"
+       style="background:radial-gradient(120% 80% at 50% 0%, rgba(111,36,53,0.22), transparent 60%);" aria-hidden="true"></div>
 
-  <div class="mx-auto max-w-3xl px-6 pb-20 pt-16 text-center sm:pt-24">
-    <p class="anim-up d1 eyebrow text-gilt mb-8">بسم الله الرحمن الرحيم</p>
+  <div class="relative">
+    <p class="up d1 kicker">Wedding Invitation</p>
 
-    {# couple portrait / monogram — double gold cameo crowned with a star #}
-    <div class="anim-up d2 relative mx-auto mb-9 h-48 w-48 sm:h-60 sm:w-60">
-      <div class="absolute -inset-4 rounded-full bg-gradient-to-b from-gold-300/35 to-rose-soft-300/15 blur-2xl"></div>
-      <svg viewBox="0 0 24 24" class="absolute left-1/2 top-[-1.15rem] z-20 h-7 w-7 -translate-x-1/2 fill-gold-500 drop-shadow-[0_2px_4px_rgba(168,132,58,0.4)]" aria-hidden="true"><path d="M12 1l1.74 6.8 6.04-3.58-3.58 6.04L23 12l-6.8 1.74 3.58 6.04-6.04-3.58L12 23l-1.74-6.8-6.04 3.58 3.58-6.04L1 12l6.8-1.74L4.22 4.22l6.04 3.58z"/></svg>
-      <div class="relative h-full w-full overflow-hidden rounded-full bg-cream-50 shadow-[0_22px_50px_-22px_rgba(74,18,38,0.55)] ring-1 ring-gold-500/70">
-        <div class="pointer-events-none absolute inset-[9px] z-10 rounded-full ring-1 ring-gold-300/70"></div>
+    <p class="up d2 mt-10 text-sm tracking-[0.3em] text-ivory-100/55">نتشرّف بدعوتكم لحضور زفاف</p>
+    <h1 class="up d2 mt-4 text-5xl font-light leading-[1.08] sm:text-7xl">
+      {{ config.groom_name }}<span class="eyebrow mx-3 align-middle text-3xl text-rose-300 sm:text-4xl">&amp;</span>{{ config.bride_name }}
+    </h1>
+    <p class="up d3 num mt-6 text-base tracking-[0.35em] text-ivory-100/70">{% language 'ar' %}{{ config.wedding_datetime|date:'d . m . Y' }}{% endlanguage %}</p>
+
+    {# editorial portrait placeholder #}
+    <div class="up d3 mx-auto mt-10 w-40 sm:w-44">
+      <div class="relative aspect-[4/5] overflow-hidden border border-ivory-100/15">
         <img src="{% static 'img/couple-placeholder.svg' %}" alt="صورة العروسين" class="h-full w-full object-cover">
       </div>
     </div>
 
-    <p class="anim-up d2 eyebrow text-burgundy-400">دعوة زفاف</p>
-    <h1 class="anim-up d3 mt-4 font-display text-6xl leading-[1.1] text-burgundy-700 sm:text-8xl">
-      {{ config.groom_name }} <span class="text-gilt px-1">&amp;</span> {{ config.bride_name }}
-    </h1>
-
-    {# signature eight-point star flourish #}
-    <div class="anim-up d4 flourish my-7" aria-hidden="true">
-      <span></span>
-      <svg viewBox="0 0 24 24" class="fill-current"><path d="M12 1l1.74 6.8 6.04-3.58-3.58 6.04L23 12l-6.8 1.74 3.58 6.04-6.04-3.58L12 23l-1.74-6.8-6.04 3.58 3.58-6.04L1 12l6.8-1.74L4.22 4.22l6.04 3.58z"/></svg>
-      <span></span>
+    {# integrated countdown — minimal, not a dashboard #}
+    <div id="countdown" data-target="{{ config.wedding_datetime|date:'c' }}"
+         class="up d4 mt-11 flex items-center justify-center gap-4 sm:gap-7">
+      <div class="flex min-w-[3rem] flex-col items-center">
+        <span data-unit="days" class="text-4xl font-light leading-none text-ivory-50 sm:text-5xl">٠</span>
+        <span class="mt-2.5 text-[0.62rem] tracking-[0.22em] text-ivory-100/45">يوم</span>
+      </div>
+      <span class="h-9 w-px bg-ivory-100/15"></span>
+      <div class="flex min-w-[3rem] flex-col items-center">
+        <span data-unit="hours" class="text-4xl font-light leading-none text-ivory-50 sm:text-5xl">٠٠</span>
+        <span class="mt-2.5 text-[0.62rem] tracking-[0.22em] text-ivory-100/45">ساعة</span>
+      </div>
+      <span class="h-9 w-px bg-ivory-100/15"></span>
+      <div class="flex min-w-[3rem] flex-col items-center">
+        <span data-unit="minutes" class="text-4xl font-light leading-none text-ivory-50 sm:text-5xl">٠٠</span>
+        <span class="mt-2.5 text-[0.62rem] tracking-[0.22em] text-ivory-100/45">دقيقة</span>
+      </div>
+      <span class="h-9 w-px bg-ivory-100/15"></span>
+      <div class="flex min-w-[3rem] flex-col items-center">
+        <span data-unit="seconds" class="text-4xl font-light leading-none text-ivory-50 sm:text-5xl">٠٠</span>
+        <span class="mt-2.5 text-[0.62rem] tracking-[0.22em] text-ivory-100/45">ثانية</span>
+      </div>
     </div>
+    <p data-countdown-done class="up d4 mt-8 hidden text-lg tracking-wide text-rose-300">تمّ الزفاف بحمد الله</p>
 
-    <p class="anim-up d4 text-lg text-burgundy-800">يتشرّفان بدعوتكم لمشاركتهما فرحة العمر</p>
-    <p class="anim-up d5 mt-3 text-2xl font-semibold tracking-wide text-burgundy-700">
-      {% language 'ar' %}{{ config.wedding_datetime|date:"l، j F Y" }}{% endlanguage %}
-    </p>
-    {% if config.hijri_text %}
-      <p class="anim-up d5 mt-1 text-burgundy-500">{{ config.hijri_text }}</p>
-    {% endif %}
-
-    <div class="anim-up d6 mt-9">
-      <a href="#greeting" class="btn-primary text-lg">{% trans "اكتب تهنئتك" %}</a>
+    <div class="up d5 mt-12">
+      <a href="#greeting" class="btn btn-solid">اكتب تهنئتك</a>
     </div>
-
-    <a href="#moments" class="anim-up d6 mx-auto mt-14 flex h-10 w-10 items-center justify-center rounded-full text-gold-500 ring-1 ring-gold-400/50 transition hover:bg-gold-400/10" aria-label="مرّر للأسفل">
-      <svg viewBox="0 0 24 24" class="h-5 w-5 animate-bounce fill-none stroke-current" stroke-width="2"><path d="M6 9l6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-    </a>
   </div>
+
+  <a href="#details" class="up d6 absolute bottom-7 left-1/2 -translate-x-1/2 text-ivory-100/35 transition hover:text-ivory-100/70" aria-label="مرّر للأسفل">
+    <svg viewBox="0 0 24 24" class="h-6 w-6 fill-none stroke-current" stroke-width="1.5"><path d="M6 9l6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </a>
 </section>
