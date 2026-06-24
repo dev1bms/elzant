@@ -1,8 +1,9 @@
 {% load i18n %}
 <section id="greeting" class="py-16">
   <div class="mx-auto max-w-xl px-6">
-    <h2 class="reveal section-title mx-auto text-3xl text-burgundy-700">{% trans "اكتب تهنئتك للعروسين" %}</h2>
-    <p class="reveal mb-9 mt-4 text-center text-burgundy-500">شاركهما فرحتهما بكلمات من قلبك — وتُضاف بطاقتك لجدار التهاني بعد المراجعة 🤍</p>
+    <p class="reveal eyebrow mb-3 block text-center text-gold-600">من القلب</p>
+    <h2 class="reveal text-center font-display text-3xl text-burgundy-700 sm:text-4xl">{% trans "اكتب تهنئتك للعروسين" %}</h2>
+    <p class="reveal mb-9 mt-4 text-center text-burgundy-500">شاركهما فرحتهما بكلمات من قلبك — وتُضاف بطاقتك لجدار التهاني بعد المراجعة.</p>
 
     <form method="post" action="{% url 'home' %}#greeting" class="reveal panel space-y-5 px-7 py-8" novalidate>
       {% csrf_token %}

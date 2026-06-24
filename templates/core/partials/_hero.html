@@ -7,25 +7,27 @@
   </div>
 
   <div class="mx-auto max-w-3xl px-6 pb-20 pt-16 text-center sm:pt-24">
-    <p class="anim-up d1 mb-7 text-sm tracking-[0.4em] text-gold-600">بسم الله الرحمن الرحيم</p>
+    <p class="anim-up d1 eyebrow text-gilt mb-8">بسم الله الرحمن الرحيم</p>
 
-    {# monogram / couple photo placeholder #}
-    <div class="anim-up d2 relative mx-auto mb-8 h-48 w-48 sm:h-60 sm:w-60">
-      <div class="absolute -inset-3 rounded-full bg-gradient-to-b from-gold-300/35 to-rose-soft-300/20 blur-2xl"></div>
-      <div class="relative h-full w-full overflow-hidden rounded-full shadow-[0_22px_50px_-22px_rgba(74,18,38,0.55)] ring-1 ring-gold-400/70">
-        <div class="pointer-events-none absolute inset-[10px] z-10 rounded-full ring-1 ring-gold-300/60"></div>
+    {# couple portrait / monogram — double gold cameo crowned with a star #}
+    <div class="anim-up d2 relative mx-auto mb-9 h-48 w-48 sm:h-60 sm:w-60">
+      <div class="absolute -inset-4 rounded-full bg-gradient-to-b from-gold-300/35 to-rose-soft-300/15 blur-2xl"></div>
+      <svg viewBox="0 0 24 24" class="absolute left-1/2 top-[-1.15rem] z-20 h-7 w-7 -translate-x-1/2 fill-gold-500 drop-shadow-[0_2px_4px_rgba(168,132,58,0.4)]" aria-hidden="true"><path d="M12 1l1.74 6.8 6.04-3.58-3.58 6.04L23 12l-6.8 1.74 3.58 6.04-6.04-3.58L12 23l-1.74-6.8-6.04 3.58 3.58-6.04L1 12l6.8-1.74L4.22 4.22l6.04 3.58z"/></svg>
+      <div class="relative h-full w-full overflow-hidden rounded-full bg-cream-50 shadow-[0_22px_50px_-22px_rgba(74,18,38,0.55)] ring-1 ring-gold-500/70">
+        <div class="pointer-events-none absolute inset-[9px] z-10 rounded-full ring-1 ring-gold-300/70"></div>
         <img src="{% static 'img/couple-placeholder.svg' %}" alt="صورة العروسين" class="h-full w-full object-cover">
       </div>
     </div>
 
-    <p class="anim-up d2 text-sm tracking-[0.3em] text-burgundy-500">دعوة زفاف</p>
-    <h1 class="anim-up d3 mt-3 font-display text-6xl leading-[1.12] text-burgundy-700 sm:text-8xl">
-      {{ config.groom_name }} <span class="text-gold-500">&amp;</span> {{ config.bride_name }}
+    <p class="anim-up d2 eyebrow text-burgundy-400">دعوة زفاف</p>
+    <h1 class="anim-up d3 mt-4 font-display text-6xl leading-[1.1] text-burgundy-700 sm:text-8xl">
+      {{ config.groom_name }} <span class="text-gilt px-1">&amp;</span> {{ config.bride_name }}
     </h1>
 
-    <div class="anim-up d4 ornament my-7" aria-hidden="true">
+    {# signature eight-point star flourish #}
+    <div class="anim-up d4 flourish my-7" aria-hidden="true">
       <span></span>
-      <svg viewBox="0 0 24 24" class="h-5 w-5 fill-current"><path d="M12 21s-7.5-4.9-10-9.2C.6 9 1.6 5.6 4.6 4.7 6.7 4 8.8 4.9 12 8c3.2-3.1 5.3-4 7.4-3.3 3 .9 4 4.3 2.6 7.1C19.5 16.1 12 21 12 21z"/></svg>
+      <svg viewBox="0 0 24 24" class="fill-current"><path d="M12 1l1.74 6.8 6.04-3.58-3.58 6.04L23 12l-6.8 1.74 3.58 6.04-6.04-3.58L12 23l-1.74-6.8-6.04 3.58 3.58-6.04L1 12l6.8-1.74L4.22 4.22l6.04 3.58z"/></svg>
       <span></span>
     </div>
 
@@ -38,7 +40,7 @@
     {% endif %}
 
     <div class="anim-up d6 mt-9">
-      <a href="#greeting" class="btn-primary text-lg">{% trans "اكتب تهنئتك" %} 🤍</a>
+      <a href="#greeting" class="btn-primary text-lg">{% trans "اكتب تهنئتك" %}</a>
     </div>
 
     <a href="#moments" class="anim-up d6 mx-auto mt-14 flex h-10 w-10 items-center justify-center rounded-full text-gold-500 ring-1 ring-gold-400/50 transition hover:bg-gold-400/10" aria-label="مرّر للأسفل">

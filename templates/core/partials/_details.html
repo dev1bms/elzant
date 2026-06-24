@@ -1,7 +1,8 @@
 {% load i18n %}
 <section class="py-16">
   <div class="mx-auto max-w-2xl px-6 text-center">
-    <h2 class="reveal section-title mx-auto mb-9 text-3xl text-burgundy-700">{% trans "تفاصيل الحفل" %}</h2>
+    <p class="reveal eyebrow mb-3 text-gold-600">الزمان والمكان</p>
+    <h2 class="reveal mb-9 font-display text-3xl text-burgundy-700 sm:text-4xl">{% trans "تفاصيل الحفل" %}</h2>
 
     <div class="reveal panel mx-auto max-w-xl px-8 py-10">
       <div class="space-y-3 text-burgundy-800">
@@ -11,7 +12,11 @@
         {% if config.venue_address %}
           <p class="text-burgundy-600">{{ config.venue_address }}</p>
         {% endif %}
-        <p class="pt-1 text-lg">{% language 'ar' %}{{ config.wedding_datetime|date:"l، j F Y" }}{% endlanguage %}</p>
+        <div class="flourish flourish--sm py-1 text-gold-500/70" aria-hidden="true"><span></span>
+          <svg viewBox="0 0 24 24" class="fill-current"><path d="M12 1l1.74 6.8 6.04-3.58-3.58 6.04L23 12l-6.8 1.74 3.58 6.04-6.04-3.58L12 23l-1.74-6.8-6.04 3.58 3.58-6.04L1 12l6.8-1.74L4.22 4.22l6.04 3.58z"/></svg>
+          <span></span>
+        </div>
+        <p class="text-lg">{% language 'ar' %}{{ config.wedding_datetime|date:"l، j F Y" }}{% endlanguage %}</p>
         <p class="text-burgundy-600">الساعة {{ config.wedding_datetime|time:"G:i" }}</p>
         {% if config.hijri_text %}
           <p class="text-burgundy-500">{{ config.hijri_text }}</p>
