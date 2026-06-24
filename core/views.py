@@ -1,10 +1,15 @@
 from django.shortcuts import redirect, render
+from django_ratelimit.decorators import ratelimit
 
 from .forms import GreetingForm
 from .models import Greeting
 from .utils import get_client_ip
 
 
+# Rate-limit greeting submissions per IP. Active only when RATELIMIT_ENABLE is
+# True (off in local dev); honeypot + moderation + length limits are the always-
+# on defenses. GET requests are never limited (method="POST").
+@ratelimit(key="ip", rate="5/h", method="POST", block=True)
 def home(request):
     if request.method == "POST":
         form = GreetingForm(request.POST)
