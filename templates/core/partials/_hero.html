@@ -1,0 +1,34 @@
+{% load static i18n %}
+<section class="relative overflow-hidden bg-cream-50">
+  <div class="mx-auto max-w-3xl px-6 py-16 text-center sm:py-24">
+    <p class="reveal mb-6 text-sm tracking-[0.3em] text-gold-600">بسم الله الرحمن الرحيم</p>
+
+    <div class="reveal mx-auto mb-8 h-44 w-44 overflow-hidden rounded-full shadow-lg ring-4 ring-gold-400/60 sm:h-56 sm:w-56">
+      <img src="{% static 'img/couple-placeholder.svg' %}" alt="صورة العروسين" class="h-full w-full object-cover">
+    </div>
+
+    <h1 class="reveal font-display text-5xl leading-tight text-burgundy-700 sm:text-7xl">
+      {{ config.groom_name }}
+      <span class="mx-2 text-gold-500">&amp;</span>
+      {{ config.bride_name }}
+    </h1>
+
+    <div class="reveal my-6 flex items-center justify-center gap-3 text-gold-500" aria-hidden="true">
+      <span class="h-px w-12 bg-gold-400"></span>
+      <svg viewBox="0 0 24 24" class="h-6 w-6 fill-current"><path d="M12 21s-7.5-4.9-10-9.2C.6 9 1.6 5.6 4.6 4.7 6.7 4 8.8 4.9 12 8c3.2-3.1 5.3-4 7.4-3.3 3 .9 4 4.3 2.6 7.1C19.5 16.1 12 21 12 21z"/></svg>
+      <span class="h-px w-12 bg-gold-400"></span>
+    </div>
+
+    <p class="reveal text-lg text-burgundy-800">يتشرّفان بدعوتكم لمشاركتهما فرحة العمر</p>
+    <p class="reveal mt-3 text-2xl font-semibold text-burgundy-700">
+      {% language 'ar' %}{{ config.wedding_datetime|date:"l، j F Y" }}{% endlanguage %}
+    </p>
+    {% if config.hijri_text %}
+      <p class="reveal mt-1 text-burgundy-500">{{ config.hijri_text }}</p>
+    {% endif %}
+
+    <a href="#greeting" class="reveal mt-9 inline-block rounded-full bg-burgundy-700 px-8 py-3 text-cream-50 shadow-md transition hover:bg-burgundy-800">
+      {% trans "اترك تهنئتك" %} 🤍
+    </a>
+  </div>
+</section>

@@ -1,0 +1,28 @@
+{% load i18n %}
+<section class="bg-burgundy-700 py-14 text-cream-50">
+  <div class="mx-auto max-w-3xl px-6 text-center">
+    <h2 class="reveal mb-8 font-display text-3xl text-gold-300">{% trans "باقٍ على الفرح" %}</h2>
+
+    <div id="countdown" data-target="{{ config.wedding_datetime|date:'c' }}"
+         class="reveal flex justify-center gap-3 sm:gap-6">
+      <div class="flex min-w-[72px] flex-col items-center rounded-2xl bg-burgundy-800/60 px-4 py-3 sm:min-w-[88px]">
+        <span data-unit="days" class="font-display text-4xl sm:text-5xl">٠</span>
+        <span class="mt-1 text-xs text-gold-300">يوم</span>
+      </div>
+      <div class="flex min-w-[72px] flex-col items-center rounded-2xl bg-burgundy-800/60 px-4 py-3 sm:min-w-[88px]">
+        <span data-unit="hours" class="font-display text-4xl sm:text-5xl">٠٠</span>
+        <span class="mt-1 text-xs text-gold-300">ساعة</span>
+      </div>
+      <div class="flex min-w-[72px] flex-col items-center rounded-2xl bg-burgundy-800/60 px-4 py-3 sm:min-w-[88px]">
+        <span data-unit="minutes" class="font-display text-4xl sm:text-5xl">٠٠</span>
+        <span class="mt-1 text-xs text-gold-300">دقيقة</span>
+      </div>
+      <div class="flex min-w-[72px] flex-col items-center rounded-2xl bg-burgundy-800/60 px-4 py-3 sm:min-w-[88px]">
+        <span data-unit="seconds" class="font-display text-4xl sm:text-5xl">٠٠</span>
+        <span class="mt-1 text-xs text-gold-300">ثانية</span>
+      </div>
+    </div>
+
+    <p data-countdown-done class="reveal mt-6 hidden text-xl text-gold-300">تمّ الزفاف بحمد الله 🤍</p>
+  </div>
+</section>

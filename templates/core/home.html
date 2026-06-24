@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+  {% include "core/partials/_hero.html" %}
+  {% include "core/partials/_countdown.html" %}
+  {% include "core/partials/_details.html" %}
+  {% include "core/partials/_greeting_form.html" %}
+  {% include "core/partials/_wall.html" %}
+{% endblock %}
+
+{% block extra_js %}
+  <script src="{% static 'js/countdown.js' %}" defer></script>
+  <script src="{% static 'js/main.js' %}" defer></script>
+{% endblock %}
