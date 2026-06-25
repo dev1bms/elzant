@@ -15,7 +15,7 @@ from PIL import Image, ImageOps
 ALLOWED_EXTENSIONS = {"jpg", "jpeg", "png", "webp"}
 ALLOWED_CONTENT_TYPES = {"image/jpeg", "image/png", "image/webp"}
 _ALLOWED_PIL_FORMATS = {"JPEG", "PNG", "WEBP"}
-MAX_UPLOAD_BYTES = 5 * 1024 * 1024  # 5 MB
+MAX_UPLOAD_BYTES = 10 * 1024 * 1024  # 10 MB (server re-compresses + resizes)
 MAX_SIDE = 1600
 THUMB_SIDE = 480
 _PORCELAIN = (250, 244, 234)
@@ -34,7 +34,7 @@ class ImageError(Exception):
 def validate_upload(f):
     """Cheap pre-checks on size and claimed type. Raises ImageError."""
     if f.size and f.size > MAX_UPLOAD_BYTES:
-        raise ImageError("حجم الصورة كبير جداً — الحدّ الأقصى ٥ ميجابايت.")
+        raise ImageError("حجم الصورة كبير جداً — الحدّ الأقصى ١٠ ميجابايت.")
     ext = (f.name.rsplit(".", 1)[-1] if "." in f.name else "").lower()
     ctype = (getattr(f, "content_type", "") or "").lower()
     # The extension must be in the allow-list; if a content-type is present it

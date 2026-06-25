@@ -136,7 +136,7 @@ SERVE_MEDIA=False   # اضبطها True فقط في الحالة (أ) أدناه
 اختر طريقة خدمة `/media/` حسب مسار النشر:
 - **(أ) Cloudflare Tunnel مباشرةً إلى Gunicorn (بلا Caddy/Nginx):** اضبط
   `SERVE_MEDIA=True` ليخدم Django المسار `/media/` بنفسه (مقبول لموقع منخفض الحركة
-  ومُخزَّن على Cloudflare). الحجم الأقصى للرفع 5MB؛ النفق يسمح به افتراضياً.
+  ومُخزَّن على Cloudflare). الحجم الأقصى للرفع 10MB؛ النفق يسمح به افتراضياً.
 - **(ب) Caddy:** أضف خدمة الملفات قبل التمرير العكسي، وأبقِ `SERVE_MEDIA=False`:
   ```
   elzant.com, www.elzant.com {
@@ -146,7 +146,7 @@ SERVE_MEDIA=False   # اضبطها True فقط في الحالة (أ) أدناه
   }
   ```
 - **(ج) Nginx:** ملف المثال [nginx-elzant.conf](nginx-elzant.conf) يحوي
-  `location /media/` و`client_max_body_size 6m` (يتجاوز حدّ الـ5MB). أبقِ
+  `location /media/` و`client_max_body_size 12m` (يتجاوز حدّ الـ10MB). أبقِ
   `SERVE_MEDIA=False`.
 
 النسخ الاحتياطي: انسخ `/srv/elzant/media/` مع قاعدة البيانات (انظر الأسفل).

@@ -330,9 +330,19 @@
   }
   .frame-opt.is-active .prev-stage { outline-color: var(--color-wine-500); }
   .frame-opt.is-active span { color: var(--color-wine-600); font-weight: 600; }
+
+  /* Busy spinner for the submit button while the photo uploads. */
+  .btn-spinner {
+    display: inline-block; width: 1em; height: 1em; vertical-align: -0.15em;
+    margin-inline-end: 0.5em; border-radius: 50%;
+    border: 2px solid currentColor; border-top-color: transparent;
+    animation: btn-spin 0.7s linear infinite;
+  }
 }
+@keyframes btn-spin { to { transform: rotate(360deg); } }
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   .reveal, .up, .intro-inner { opacity: 1 !important; transform: none !important; animation: none !important; transition: none !important; }
+  .btn-spinner { animation: none !important; }
 }
