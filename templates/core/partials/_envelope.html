@@ -5,19 +5,20 @@
   envelope.js. IDs/classes kept for those scripts.
 {% endcomment %}
 <div class="envelope-overlay" id="envelope" role="dialog" aria-modal="true" aria-label="دعوة الزفاف">
+  <div class="envelope-art" style="background-image:url('{% static 'img/hero-bg.jpg' %}')" aria-hidden="true"></div>
   <div class="intro-inner">
-    <p class="label-lat">Wedding Invitation</p>
-    <p class="mt-8 text-sm text-wheat">دعوة زفاف</p>
-    <h1 class="names mt-3 text-5xl leading-tight sm:text-6xl">
-      {{ config.groom_name }} <span class="amp text-3xl">&amp;</span> {{ config.bride_name }}
+    <p class="eyebrow" style="color:var(--color-peach)">An Invitation</p>
+    <p class="mt-7 text-sm tracking-wide text-porcelain-50/75">دعوة زفاف</p>
+    <h1 class="names names-on-art mt-3 text-6xl leading-tight sm:text-7xl">
+      {{ config.groom_name }} <span class="amp text-3xl sm:text-4xl">&amp;</span> {{ config.bride_name }}
     </h1>
-    <div class="seam mx-auto my-8 w-44" aria-hidden="true"></div>
-    <p class="num text-sm text-wheat">{% language 'ar' %}{{ config.wedding_datetime|date:'d . m . Y' }}{% endlanguage %}</p>
+    <div class="mx-auto my-8 h-px w-16 bg-champagne/70"></div>
+    <p class="num text-sm tracking-[0.25em] text-porcelain-50/80">{% language 'ar' %}{{ config.wedding_datetime|date:'d . m . Y' }}{% endlanguage %}</p>
 
     <div class="mt-10">
-      <button type="button" id="envelope-open" class="btn btn-on-dark">الدخول للدعوة</button>
+      <button type="button" id="envelope-open" class="btn btn-on-art">افتح الدعوة</button>
     </div>
-    <button type="button" id="envelope-skip" class="mt-6 text-xs tracking-wide text-wheat/55 underline-offset-4 transition hover:text-wheat hover:underline">تخطّي</button>
+    <button type="button" id="envelope-skip" class="mt-6 text-xs tracking-wide text-porcelain-50/45 underline-offset-4 transition hover:text-porcelain-50/75 hover:underline">تخطّي</button>
   </div>
 </div>
 <script>
