@@ -9,3 +9,6 @@ whitenoise==6.9.0
 
 # WSGI server for production (behind a trusted proxy/tunnel — see DEPLOY.md)
 gunicorn==26.0.0
+
+# Image handling for photo greeting cards (ImageField + resize/EXIF-strip/thumbnail)
+Pillow==12.2.0

@@ -184,8 +184,28 @@ class Greeting(models.Model):
         APPROVED = "approved", "معتمد"
         REJECTED = "rejected", "مرفوض"
 
+    class CardTemplate(models.TextChoices):
+        NO_PHOTO_MINIMAL = "no_photo_minimal", "بدون صورة — راقٍ"
+        PHOTO_STORY = "photo_story", "ستوري بالصورة"
+        PHOTO_FRAME = "photo_frame", "إطار أنيق"
+        FAMILY_WARM = "family_warm", "عائلي دافئ"
+        PALESTINIAN_SOFT = "palestinian_soft", "لمسة فلسطينية"
+        CAIRO_EVENING = "cairo_evening", "غروب القاهرة"
+
+    PHOTO_TEMPLATES = {
+        "photo_story", "photo_frame", "family_warm", "palestinian_soft", "cairo_evening",
+    }
+
     name = models.CharField("اسم المهنّئ", max_length=60)
     message = models.TextField("نص التهنئة", max_length=500)
+    # Optional photo — processed/optimized (EXIF-stripped); original never stored.
+    # Only ever shown publicly once the greeting is APPROVED.
+    uploaded_photo = models.ImageField("الصورة", upload_to="greetings/cards/", null=True, blank=True)
+    photo_thumbnail = models.ImageField(upload_to="greetings/thumbs/", null=True, blank=True)
+    card_template = models.CharField(
+        "قالب البطاقة", max_length=20, choices=CardTemplate.choices,
+        default=CardTemplate.NO_PHOTO_MINIMAL,
+    )
     status = models.CharField(
         max_length=10, choices=Status.choices, default=Status.PENDING, db_index=True
     )
@@ -216,6 +236,22 @@ class Greeting(models.Model):
         if len(code) != 2 or not code.isalpha():
             return ""
         return "".join(chr(0x1F1E6 + ord(c) - ord("A")) for c in code)
+
+    @property
+    def has_photo(self):
+        return bool(self.uploaded_photo)
+
+    def effective_template(self):
+        """The template actually used to render the card.
+
+        A photo template only applies when a photo exists; otherwise (or when a
+        photo was uploaded but no photo-template was picked) fall back sensibly.
+        """
+        if not self.has_photo:
+            return self.CardTemplate.NO_PHOTO_MINIMAL
+        if self.card_template in self.PHOTO_TEMPLATES:
+            return self.card_template
+        return self.CardTemplate.PHOTO_FRAME
 
     @classmethod
     def approved(cls):

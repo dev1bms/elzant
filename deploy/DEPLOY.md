@@ -116,16 +116,53 @@ Caddy يضبط `X-Forwarded-Proto` و`X-Forwarded-For` تلقائياً.
 ويمرّر الباقي لـ 127.0.0.1:8001) مع `certbot --nginx`. **غير مطلوب** لأن WhiteNoise
 يخدم الملفات؛ استخدمه فقط إن كان لديك Nginx بالفعل.
 
-## 7) التحديثات اللاحقة (إعادة نشر)
+## 7) الوسائط (صور التهاني المرفوعة) — مهم
+
+صور الضيوف تُحفظ في `MEDIA_ROOT` خارج Git وخارج `staticfiles/`. WhiteNoise يخدم
+الملفات الثابتة فقط ولا يخدم وسائط المستخدمين، فيجب تأمين خدمة `/media/` صراحةً
+وإلا ظهرت صور مكسورة وتعذّر على الإدارة مراجعتها وفشل تصدير البطاقة (يحتاج الصورة
+من نفس الأصل).
+
+```bash
+# مجلد دائم منسوخ احتياطياً (مملوك لمستخدم التطبيق):
+sudo install -d -o elzant -g elzant /srv/elzant/media
+```
+في `/srv/elzant/.env`:
+```
+MEDIA_ROOT=/srv/elzant/media
+SERVE_MEDIA=False   # اضبطها True فقط في الحالة (أ) أدناه
+```
+
+اختر طريقة خدمة `/media/` حسب مسار النشر:
+- **(أ) Cloudflare Tunnel مباشرةً إلى Gunicorn (بلا Caddy/Nginx):** اضبط
+  `SERVE_MEDIA=True` ليخدم Django المسار `/media/` بنفسه (مقبول لموقع منخفض الحركة
+  ومُخزَّن على Cloudflare). الحجم الأقصى للرفع 5MB؛ النفق يسمح به افتراضياً.
+- **(ب) Caddy:** أضف خدمة الملفات قبل التمرير العكسي، وأبقِ `SERVE_MEDIA=False`:
+  ```
+  elzant.com, www.elzant.com {
+      encode gzip
+      handle_path /media/* { root * /srv/elzant/media; file_server }
+      reverse_proxy 127.0.0.1:8001
+  }
+  ```
+- **(ج) Nginx:** ملف المثال [nginx-elzant.conf](nginx-elzant.conf) يحوي
+  `location /media/` و`client_max_body_size 6m` (يتجاوز حدّ الـ5MB). أبقِ
+  `SERVE_MEDIA=False`.
+
+النسخ الاحتياطي: انسخ `/srv/elzant/media/` مع قاعدة البيانات (انظر الأسفل).
+
+## 8) التحديثات اللاحقة (إعادة نشر)
 ```bash
 sudo bash /srv/elzant/deploy/update.sh
 ```
 
 ---
 
-## النسخ الاحتياطي (مهم — SQLite)
+## النسخ الاحتياطي (مهم — SQLite + الوسائط)
 ```bash
 sqlite3 /srv/elzant/data/db.sqlite3 ".backup '/srv/elzant/data/backup-$(date +\%F).sqlite3'"
+# الصور المرفوعة:
+tar czf /srv/elzant/data/media-$(date +\%F).tar.gz -C /srv/elzant media
 ```
 
 ## استكشاف الأعطال

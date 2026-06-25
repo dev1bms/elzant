@@ -7,6 +7,7 @@ from django.http import HttpResponse
 from django.template.defaultfilters import date as date_filter
 from django.utils import timezone, translation
 from django.utils.html import format_html
+from django.utils.safestring import mark_safe
 
 from .models import Greeting, GreetingSuggestion, WeddingConfig, WeddingGuest
 from .utils import render_message
@@ -224,15 +225,51 @@ class GreetingSuggestionAdmin(admin.ModelAdmin):
 # --------------------------------------------------------------------------- #
 # Greeting
 # --------------------------------------------------------------------------- #
+class HasPhotoFilter(admin.SimpleListFilter):
+    title = "الصورة"
+    parameter_name = "has_photo"
+
+    def lookups(self, request, model_admin):
+        return (("yes", "بصورة"), ("no", "بدون صورة"))
+
+    def queryset(self, request, queryset):
+        if self.value() == "yes":
+            return queryset.exclude(uploaded_photo="")
+        if self.value() == "no":
+            return queryset.filter(uploaded_photo="")
+        return queryset
+
+
 @admin.register(Greeting)
 class GreetingAdmin(admin.ModelAdmin):
-    list_display = ("name", "short_message", "status", "guest", "country", "created_at")
-    list_filter = ("status", "created_at", "country_code")
+    list_display = ("name", "short_message", "thumb", "status", "guest", "country", "created_at")
+    list_filter = ("status", HasPhotoFilter, "card_template", "created_at", "country_code")
     search_fields = ("name", "message", "guest__full_name")
-    readonly_fields = ("created_at", "approved_at", "ip_address", "guest",
-                       "country_code", "country_name")
+    readonly_fields = ("photo_review_note", "photo_preview", "card_template", "created_at",
+                       "approved_at", "ip_address", "guest", "country_code", "country_name")
     actions = ("approve_selected", "reject_selected")
     list_per_page = 50
+
+    @admin.display(description="⚠️ مراجعة")
+    def photo_review_note(self, obj):
+        if obj and obj.has_photo:
+            return mark_safe(
+                '<b style="color:#b45309">الصورة لن تظهر للعامة إلا بعد الاعتماد.</b> '
+                'راجِع محتوى الصورة قبل الموافقة.'
+            )
+        return "—"
+
+    @admin.display(description="معاينة الصورة")
+    def photo_preview(self, obj):
+        if obj and obj.uploaded_photo:
+            return format_html('<img src="{}" style="max-height:320px;border-radius:8px">', obj.uploaded_photo.url)
+        return "— لا صورة —"
+
+    @admin.display(description="صورة")
+    def thumb(self, obj):
+        if obj.photo_thumbnail:
+            return format_html('<img src="{}" style="height:42px;width:42px;object-fit:cover;border-radius:6px">', obj.photo_thumbnail.url)
+        return ""
 
     @admin.display(description="التهنئة")
     def short_message(self, obj):

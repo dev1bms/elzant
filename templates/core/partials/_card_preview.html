@@ -1,0 +1,23 @@
+{% load i18n %}
+{% comment %}
+  A live card preview that mirrors the final shareable card exactly (same
+  .wed-card markup + CSS). The photo <img> has no src — cards.js fills it from
+  the locally-chosen file (object URL, never uploaded until the form is sent).
+  Params: tpl (template key). Optional: stage_class, card_id.
+{% endcomment %}
+<div class="card-stage prev-stage {{ stage_class }}">
+  <div class="wed-card wed-card--{{ tpl }}"{% if card_id %} id="{{ card_id }}"{% endif %} data-template="{{ tpl }}">
+    <div class="wed-card__photo"><img alt="" class="prev-img"></div>
+    <div class="wed-card__panel">
+      <p class="wed-card__eyebrow">with love</p>
+      <h2 class="wed-card__names">{{ config.groom_name }} <span>&amp;</span> {{ config.bride_name }}</h2>
+      <div class="wed-card__rule"></div>
+      <p class="wed-card__message prev-msg">رسالتك ستظهر هنا</p>
+      <p class="wed-card__from prev-from">— اسمك</p>
+      <div class="wed-card__foot">
+        <span class="wed-card__date">{% language 'ar' %}{{ config.wedding_datetime|date:'d . m . Y' }}{% endlanguage %}</span>
+        <span class="wed-card__site">elzant.com</span>
+      </div>
+    </div>
+  </div>
+</div>
