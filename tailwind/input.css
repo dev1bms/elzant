@@ -104,6 +104,7 @@
     transition: border-color .2s ease, color .2s ease, transform .2s ease;
   }
   .chip:hover { border-color: var(--color-wine-500); color: var(--color-wine-600); transform: translateY(-1px); }
+  .chip.is-selected { border-color: var(--color-wine-500); background: var(--color-blush); color: var(--color-wine-700); }
 
   /* ---- Form fields ---- */
   .field {
@@ -184,6 +185,147 @@
   .wed-card__foot { display: flex; flex-direction: column; align-items: center; gap: 14px; }
   .wed-card__date { font-family: var(--font-serif); font-weight: 500; font-size: 42px; letter-spacing: 8px; color: #3a2a22; direction: ltr; }
   .wed-card__site { font-family: var(--font-serif); font-style: italic; font-size: 28px; letter-spacing: 1px; color: var(--color-champagne); }
+}
+
+/* ======================================================================
+   Photo greeting-card templates (1080×1350). Each uses .wed-card__message so
+   card.js can size the message; layout/colours change per modifier class.
+====================================================================== */
+@layer components {
+  .wed-card--photo_story, .wed-card--photo_frame, .wed-card--family_warm,
+  .wed-card--palestinian_soft, .wed-card--cairo_evening {
+    padding: 0;
+    display: block;
+  }
+  .wed-card__photo { width: 100%; overflow: hidden; }
+  .wed-card__photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .wed-card__panel { display: flex; flex-direction: column; align-items: center; }
+
+  /* ---- photo_story: full-bleed photo, soft overlay, text at the base ---- */
+  .wed-card--photo_story { position: relative; }
+  .wed-card--photo_story .wed-card__photo { position: absolute; inset: 0; height: 100%; }
+  .wed-card--photo_story::after {
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background: linear-gradient(to top, rgba(28,18,14,0.88) 0%, rgba(28,18,14,0.30) 46%, rgba(28,18,14,0.42) 100%);
+  }
+  .wed-card--photo_story .wed-card__panel {
+    position: absolute; inset: auto 0 0 0; z-index: 2; padding: 0 100px 118px; text-align: center;
+  }
+  .wed-card--photo_story .wed-card__eyebrow { color: #f3d8d2; }
+  .wed-card--photo_story .wed-card__names { color: #fff; font-size: 116px; }
+  .wed-card--photo_story .wed-card__names span { color: #f1c5bf; }
+  .wed-card--photo_story .wed-card__rule { background: rgba(255,255,255,0.65); margin: 34px 0; }
+  .wed-card--photo_story .wed-card__message { color: #fdf6ee; font-size: 44px; max-width: 840px; text-shadow: 0 1px 10px rgba(0,0,0,0.35); }
+  .wed-card--photo_story .wed-card__from { color: #f3ccc6; margin-top: 40px; }
+  .wed-card--photo_story .wed-card__foot { margin-top: 40px; }
+  .wed-card--photo_story .wed-card__date { color: #fdf6ee; }
+  .wed-card--photo_story .wed-card__site { color: #eccf9f; }
+
+  /* ---- photo_frame: framed photo on top, message below on porcelain ---- */
+  .wed-card--photo_frame { background: linear-gradient(180deg, #fbf6ee, #f3e8d8); }
+  .wed-card--photo_frame .wed-card__photo {
+    height: 640px; margin: 70px 70px 0; border: 8px solid #fff;
+    box-shadow: 0 18px 40px -22px rgba(44,33,27,0.45); border-radius: 4px;
+  }
+  .wed-card--photo_frame .wed-card__panel { padding: 50px 100px 110px; }
+  .wed-card--photo_frame .wed-card__names { font-size: 96px; margin-top: 6px; }
+  .wed-card--photo_frame .wed-card__names span { font-size: 74px; }
+  .wed-card--photo_frame .wed-card__message { font-size: 44px; }
+
+  /* ---- family_warm: medium photo band, message is the hero ---- */
+  .wed-card--family_warm { background: radial-gradient(120% 60% at 80% 6%, rgba(198,140,135,0.16), transparent 55%), linear-gradient(180deg, #fbf6ee, #f1e3d2); }
+  .wed-card--family_warm .wed-card__photo {
+    height: 470px; margin: 92px 150px 0; border-radius: 280px / 230px; border: 6px solid #fff;
+    box-shadow: 0 18px 40px -24px rgba(44,33,27,0.4);
+  }
+  .wed-card--family_warm .wed-card__panel { padding: 56px 110px 110px; }
+  .wed-card--family_warm .wed-card__names { font-size: 84px; }
+  .wed-card--family_warm .wed-card__names span { font-size: 64px; }
+  .wed-card--family_warm .wed-card__message { font-size: 52px; color: #33241c; }
+
+  /* ---- palestinian_soft: framed photo + a soft tatreez accent ---- */
+  .wed-card--palestinian_soft { background: linear-gradient(180deg, #fbf7f0, #f2e9dd); }
+  .wed-card--palestinian_soft .wed-card__photo {
+    height: 560px; margin: 78px 84px 0; border: 6px solid #fff; border-radius: 4px;
+    box-shadow: 0 16px 36px -22px rgba(44,33,27,0.42);
+  }
+  .wed-card--palestinian_soft .wed-card__panel { padding: 40px 100px 104px; position: relative; }
+  .wed-card--palestinian_soft .wed-card__panel::before {
+    content: ""; display: block; width: 300px; height: 16px; margin: 0 auto 34px; opacity: 0.6;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='16' viewBox='0 0 28 16'%3E%3Cpath d='M14 1l5 7-5 7-5-7z' fill='%23a23b34'/%3E%3Cpath d='M0 8l4-3 4 3-4 3zM28 8l-4-3-4 3 4 3z' fill='%235e7a4f'/%3E%3C/svg%3E");
+    background-repeat: repeat-x; background-position: center;
+  }
+  .wed-card--palestinian_soft .wed-card__names { font-size: 90px; }
+  .wed-card--palestinian_soft .wed-card__names span { font-size: 70px; }
+  .wed-card--palestinian_soft .wed-card__message { font-size: 46px; }
+
+  /* ---- cairo_evening: warm Cairo-sunset ground ---- */
+  .wed-card--cairo_evening {
+    background: linear-gradient(180deg, #f7e3c8 0%, #efc9ac 30%, #c98a7e 64%, #6e3a3a 100%);
+    color: #fff;
+  }
+  .wed-card--cairo_evening .wed-card__photo {
+    height: 500px; margin: 96px 110px 0; border: 6px solid rgba(255,255,255,0.85); border-radius: 4px;
+    box-shadow: 0 20px 44px -22px rgba(40,20,18,0.5);
+  }
+  .wed-card--cairo_evening .wed-card__panel { padding: 54px 100px 104px; }
+  .wed-card--cairo_evening .wed-card__eyebrow { color: #ffe7df; }
+  .wed-card--cairo_evening .wed-card__names { color: #fff; font-size: 88px; }
+  .wed-card--cairo_evening .wed-card__names span { color: #ffd9d0; }
+  .wed-card--cairo_evening .wed-card__rule { background: rgba(255,255,255,0.7); }
+  .wed-card--cairo_evening .wed-card__message { color: #fff7f1; font-size: 48px; text-shadow: 0 1px 8px rgba(0,0,0,0.2); }
+  .wed-card--cairo_evening .wed-card__from { color: #ffe2da; }
+  .wed-card--cairo_evening .wed-card__date { color: #fff7f1; }
+  .wed-card--cairo_evening .wed-card__site { color: #ffe7df; }
+}
+
+/* ======================================================================
+   Live-preview modal: pick a photo, see it inside every frame, choose one.
+====================================================================== */
+@layer components {
+  .card-modal {
+    position: fixed; inset: 0; z-index: 90;
+    display: flex; align-items: center; justify-content: center; padding: 16px;
+  }
+  .card-modal.hidden { display: none; }
+  .card-modal__backdrop { position: absolute; inset: 0; background: rgba(44,33,27,0.55); }
+  .card-modal__panel {
+    position: relative; z-index: 1; display: flex; flex-direction: column; gap: 14px;
+    width: 100%; max-width: 430px; max-height: 92vh; overflow-y: auto;
+    background: var(--color-porcelain-50); border: 1px solid var(--color-sand);
+    border-radius: 22px; padding: 18px 18px 20px;
+    box-shadow: 0 40px 90px -40px rgba(44,33,27,0.6);
+  }
+  .card-modal__head { display: flex; align-items: center; justify-content: space-between; }
+  .card-modal__x {
+    font-size: 26px; line-height: 1; color: var(--color-cloud);
+    background: none; border: 0; cursor: pointer; padding: 4px 8px;
+  }
+  .card-modal__x:hover { color: var(--color-wine-600); }
+  .card-modal__preview { margin-inline: auto; width: 80%; max-width: 300px; }
+  .card-modal__hint { margin: 0; font-size: 13px; color: var(--color-ink-soft); }
+  .card-modal__frames {
+    display: flex; gap: 12px; overflow-x: auto; padding-bottom: 6px;
+    scrollbar-width: thin; -webkit-overflow-scrolling: touch;
+  }
+  .card-modal__foot { display: flex; gap: 10px; }
+
+  .frame-opt {
+    flex: 0 0 auto; background: none; border: 0; padding: 0;
+    cursor: pointer; text-align: center;
+  }
+  .frame-opt .prev-stage {
+    width: 76px; border-radius: 7px; pointer-events: none;
+    outline: 2px solid transparent; outline-offset: 2px;
+    box-shadow: 0 8px 18px -12px rgba(44,33,27,0.5);
+    transition: outline-color .15s ease;
+  }
+  .frame-opt span {
+    display: block; margin-top: 7px; font-size: 12px;
+    color: var(--color-cloud); white-space: nowrap;
+  }
+  .frame-opt.is-active .prev-stage { outline-color: var(--color-wine-500); }
+  .frame-opt.is-active span { color: var(--color-wine-600); font-weight: 600; }
 }
 
 @media (prefers-reduced-motion: reduce) {

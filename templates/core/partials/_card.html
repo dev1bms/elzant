@@ -1,20 +1,33 @@
 {% load i18n %}
 <div class="card-stage" id="card-stage">
-  <div class="wed-card" id="card">
-    <div>
-      <p class="wed-card__eyebrow">with love</p>
-      <h2 class="wed-card__names">{{ config.groom_name }} <span>&amp;</span> {{ config.bride_name }}</h2>
-    </div>
-
-    <div class="wed-card__body">
-      <div class="wed-card__rule"></div>
-      <p class="wed-card__message">{{ card.message }}</p>
-      <p class="wed-card__from">— {{ card.name }}</p>
-    </div>
-
-    <div class="wed-card__foot">
-      <span class="wed-card__date">{% language 'ar' %}{{ config.wedding_datetime|date:'d . m . Y' }}{% endlanguage %}</span>
-      <span class="wed-card__site">elzant.com</span>
-    </div>
+  <div class="wed-card wed-card--{{ card.template|default:'no_photo_minimal' }}" id="card">
+    {% if card.photo %}
+      <div class="wed-card__photo"><img src="{{ card.photo }}" alt="صورة التهنئة"></div>
+      <div class="wed-card__panel">
+        <p class="wed-card__eyebrow">with love</p>
+        <h2 class="wed-card__names">{{ config.groom_name }} <span>&amp;</span> {{ config.bride_name }}</h2>
+        <div class="wed-card__rule"></div>
+        <p class="wed-card__message">{{ card.message }}</p>
+        <p class="wed-card__from">— {{ card.name }}</p>
+        <div class="wed-card__foot">
+          <span class="wed-card__date">{% language 'ar' %}{{ config.wedding_datetime|date:'d . m . Y' }}{% endlanguage %}</span>
+          <span class="wed-card__site">elzant.com</span>
+        </div>
+      </div>
+    {% else %}
+      <div>
+        <p class="wed-card__eyebrow">with love</p>
+        <h2 class="wed-card__names">{{ config.groom_name }} <span>&amp;</span> {{ config.bride_name }}</h2>
+      </div>
+      <div class="wed-card__body">
+        <div class="wed-card__rule"></div>
+        <p class="wed-card__message">{{ card.message }}</p>
+        <p class="wed-card__from">— {{ card.name }}</p>
+      </div>
+      <div class="wed-card__foot">
+        <span class="wed-card__date">{% language 'ar' %}{{ config.wedding_datetime|date:'d . m . Y' }}{% endlanguage %}</span>
+        <span class="wed-card__site">elzant.com</span>
+      </div>
+    {% endif %}
   </div>
 </div>

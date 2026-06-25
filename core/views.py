@@ -2,6 +2,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
 from .forms import GreetingForm
+from .imaging import ImageError, process_image
 from .models import Greeting, GreetingSuggestion, WeddingGuest
 from .utils import get_client_ip, lookup_country
 
@@ -13,32 +14,47 @@ from .utils import get_client_ip, lookup_country
 # edge/proxy responsibility (e.g. Cloudflare WAF / tunnel rules). See DEPLOY.md.
 def home(request):
     if request.method == "POST":
-        form = GreetingForm(request.POST)
+        form = GreetingForm(request.POST, request.FILES)
         if form.is_valid():
-            greeting = form.save(commit=False)
-            ip = get_client_ip(request)
-            greeting.ip_address = ip
-            # Best-effort country (disabled by default; never blocks the save).
-            code, name = lookup_country(ip)
-            if code:
-                greeting.country_code = code
-            if name:
-                greeting.country_name = name
-            # Link to a guest if the visitor came from a private invitation link.
-            guest = _guest_from_session(request)
-            if guest:
-                greeting.guest = guest
-            greeting.save()
-            if guest and guest.invitation_status != WeddingGuest.Status.GREETED:
-                guest.invitation_status = WeddingGuest.Status.GREETED
-                guest.save(update_fields=["invitation_status", "updated_at"])
-            # Pass name/message to the thank-you page via the session (not the
-            # pk) so pending records can't be enumerated or read by URL.
-            request.session["card"] = {
-                "name": greeting.name,
-                "message": greeting.message,
-            }
-            return redirect("thank_you")
+            # Process the optional photo first (resize/EXIF-strip/thumbnail). A
+            # bad image re-renders the form with a friendly error and never saves.
+            photo = form.cleaned_data.get("photo")
+            display = thumb = None
+            if photo:
+                try:
+                    display, thumb = process_image(photo)
+                except ImageError as exc:
+                    form.add_error("photo", str(exc))
+            if not form.errors:
+                greeting = form.save(commit=False)
+                ip = get_client_ip(request)
+                greeting.ip_address = ip
+                # Best-effort country (disabled by default; never blocks the save).
+                code, name = lookup_country(ip)
+                if code:
+                    greeting.country_code = code
+                if name:
+                    greeting.country_name = name
+                if display is not None:
+                    greeting.uploaded_photo.save(display.name, display, save=False)
+                    greeting.photo_thumbnail.save(thumb.name, thumb, save=False)
+                # Link to a guest if they came from a private invitation link.
+                guest = _guest_from_session(request)
+                if guest:
+                    greeting.guest = guest
+                greeting.save()
+                if guest and guest.invitation_status != WeddingGuest.Status.GREETED:
+                    guest.invitation_status = WeddingGuest.Status.GREETED
+                    guest.save(update_fields=["invitation_status", "updated_at"])
+                # Pass card data to the thank-you page via the session (not the
+                # pk) so pending records can't be enumerated or read by URL.
+                request.session["card"] = {
+                    "name": greeting.name,
+                    "message": greeting.message,
+                    "photo": greeting.uploaded_photo.url if greeting.has_photo else "",
+                    "template": greeting.effective_template(),
+                }
+                return redirect("thank_you")
     else:
         form = GreetingForm()
     return render(

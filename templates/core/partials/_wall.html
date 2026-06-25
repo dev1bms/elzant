@@ -10,6 +10,9 @@
       <div class="mt-12 columns-1 gap-5 sm:columns-2 [&>*]:mb-5">
         {% for g in greetings %}
           <figure class="msg-card reveal break-inside-avoid">
+            {% if g.photo_thumbnail %}
+              <img src="{{ g.photo_thumbnail.url }}" alt="صورة مرفقة بالتهنئة" loading="lazy" class="mb-4 h-48 w-full rounded-xl object-cover" width="480" height="360">
+            {% endif %}
             <span class="font-serif text-4xl leading-none text-rose-400/70" aria-hidden="true">&ldquo;</span>
             <blockquote class="mt-1 leading-loose text-ink">{{ g.message|linebreaksbr }}</blockquote>
             <figcaption class="mt-4 flex items-center gap-2 text-sm text-wine-600">
