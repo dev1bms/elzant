@@ -33,3 +33,8 @@ Thumbs.db
 
 # Local design source (optimized to static/img/hero-bg.jpg)
 /background.png
+
+# Generated each deploy by `npm run assets:build` — not tracked, so a freshly
+# built copy never blocks `git pull`. (hero-bg.jpg is the SOURCE, kept tracked.)
+/static/img/og-image.png
+/static/img/og-image.jpg
