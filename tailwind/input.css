@@ -180,20 +180,57 @@
   .names-on-art { color: var(--color-porcelain-50); text-shadow: 0 2px 34px rgba(36,24,19,0.55); }
   .names-on-art .amp { color: var(--color-peach); }
 
-  /* ---- Wall cards ---- */
+  /* ====== The greeting gallery — each card a matted little artwork ====== */
+  /* the section is a softly painted golden-hour canvas the cards hang on */
+  .wall-canvas {
+    position: relative;
+    background:
+      radial-gradient(58% 42% at 86% 4%, color-mix(in srgb, var(--color-apricot) 32%, transparent), transparent 60%),
+      radial-gradient(52% 40% at 6% 98%, color-mix(in srgb, var(--color-peach) 26%, transparent), transparent 60%),
+      var(--color-porcelain);
+  }
+  .wall-canvas::after {  /* a soft painted vignette */
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    box-shadow: inset 0 0 160px -60px rgba(124,43,55,0.18);
+  }
+  /* a small gold brushstroke under the heading */
+  .wall-flourish {
+    display: block; width: 7rem; height: 14px; margin: 0.6rem auto 0;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='14' viewBox='0 0 140 14'%3E%3Cpath d='M3 8 Q 36 2 70 7 T 137 6' stroke='%23e3a35f' stroke-width='2.6' fill='none' stroke-linecap='round'/%3E%3Cpath d='M62 11 l8 -8 8 8 -8 8z' fill='%23c2492f' opacity='.7'/%3E%3C/svg%3E") center/contain no-repeat;
+  }
+
   .msg-card {
-    position: relative; background: var(--color-porcelain-50); color: var(--color-ink);
-    border-radius: 1.1rem; padding: 1.7rem 1.5rem; overflow: hidden;
-    border: 1px solid color-mix(in srgb, var(--color-sand) 80%, transparent);
-    box-shadow: 0 30px 56px -40px rgba(58,42,34,0.4);
-    transition: transform .3s ease, box-shadow .3s ease;
+    position: relative; isolation: isolate;
+    background: linear-gradient(180deg, #fffaf0, var(--color-cream));
+    color: var(--color-ink); border-radius: 0.55rem; padding: 2rem 1.75rem 1.6rem;
+    border: 1px solid color-mix(in srgb, var(--color-champagne) 30%, var(--color-sand));
+    box-shadow: 0 30px 56px -36px rgba(58,42,34,0.5);
+    transition: transform .4s cubic-bezier(.2,.8,.2,1), box-shadow .4s ease;
   }
-  .msg-card::before {
-    content: ""; position: absolute; inset: 0 0 auto 0; height: 3px;
-    background: linear-gradient(90deg, var(--color-gold), var(--color-rose-500)); opacity: .85;
+  .msg-card::after {  /* the inner mat frame, like a matted print */
+    content: ""; position: absolute; inset: 0.55rem; pointer-events: none;
+    border: 1px solid color-mix(in srgb, var(--color-champagne) 48%, transparent);
+    border-radius: 0.3rem;
   }
-  .msg-card--photo::before { background: linear-gradient(90deg, var(--color-rose-500), var(--color-wine-500)); }
-  .msg-card:hover { transform: translateY(-4px); box-shadow: 0 46px 82px -40px rgba(58,42,34,0.5); }
+  .msg-card:hover { transform: translateY(-6px) rotate(-.5deg); box-shadow: 0 46px 80px -36px rgba(58,42,34,0.58); }
+  .msg-card:nth-child(even):hover { transform: translateY(-6px) rotate(.5deg); }
+
+  .msg-quote { font-family: var(--font-serif); font-size: 3.6rem; line-height: 0; display: block; height: 1.5rem; color: var(--color-gold); opacity: .6; }
+  .msg-text { font-family: "Markazi Text", serif; font-size: 1.4rem; line-height: 1.8; color: var(--color-ink); }
+
+  /* photo greetings: framed like a small painting */
+  .msg-frame {
+    padding: 0.5rem; background: #fff; border-radius: 0.25rem;
+    border: 1px solid color-mix(in srgb, var(--color-champagne) 42%, var(--color-sand));
+    box-shadow: 0 18px 32px -22px rgba(58,42,34,0.55);
+  }
+  .msg-frame img { display: block; border-radius: 0.12rem; }
+
+  /* the signature — name stays in the clear UI face */
+  .msg-sign { display: flex; align-items: center; gap: 0.6rem; }
+  .msg-sign .dash { height: 1px; width: 1.7rem; background: var(--color-gold); opacity: .85; }
+  .msg-sign .nm { font-weight: 700; color: var(--color-ink); }
+  .msg-sign .flag { font-size: 1.3rem; line-height: 1; }
 
   /* ---- Hero: the artwork is the whole world ---- */
   .hero-art { position: absolute; inset: 0; overflow: hidden; animation: revealArt 1.7s cubic-bezier(.2,.8,.2,1) both; }
