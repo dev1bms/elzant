@@ -247,17 +247,19 @@ class GreetingAdmin(admin.ModelAdmin):
     search_fields = ("name", "message", "guest__full_name")
     readonly_fields = ("photo_review_note", "photo_preview", "card_template", "created_at",
                        "approved_at", "ip_address", "guest", "country_code", "country_name")
-    actions = ("approve_selected", "reject_selected")
+    actions = ("hide_selected", "show_selected")
     list_per_page = 50
 
-    @admin.display(description="⚠️ مراجعة")
+    @admin.display(description="ملاحظة")
     def photo_review_note(self, obj):
+        if obj and obj.is_hidden:
+            return mark_safe('<b style="color:#b45309">هذه التهنئة محظورة — لا تظهر على الجدار.</b>')
         if obj and obj.has_photo:
             return mark_safe(
-                '<b style="color:#b45309">الصورة لن تظهر للعامة إلا بعد الاعتماد.</b> '
-                'راجِع محتوى الصورة قبل الموافقة.'
+                'التهنئة وصورتها ظاهرتان للعامة فور الإرسال. '
+                '<b style="color:#b45309">احظرها إن كانت غير لائقة.</b>'
             )
-        return "—"
+        return "التهنئة ظاهرة للعامة. احظرها إن لزم."
 
     @admin.display(description="معاينة الصورة")
     def photo_preview(self, obj):
@@ -281,12 +283,12 @@ class GreetingAdmin(admin.ModelAdmin):
             return f"{obj.country_flag} {obj.country_name}".strip()
         return "—"
 
-    @admin.action(description="اعتماد المحدد")
-    def approve_selected(self, request, queryset):
-        n = queryset.update(status=Greeting.Status.APPROVED, approved_at=timezone.now())
-        self.message_user(request, f"تم اعتماد {n} تهنئة.")
+    @admin.action(description="حظر / إخفاء المحدد")
+    def hide_selected(self, request, queryset):
+        n = queryset.update(status=Greeting.Status.REJECTED)
+        self.message_user(request, f"تم حظر {n} تهنئة (لن تظهر على الجدار).")
 
-    @admin.action(description="رفض المحدد")
-    def reject_selected(self, request, queryset):
-        n = queryset.update(status=Greeting.Status.REJECTED, approved_at=None)
-        self.message_user(request, f"تم رفض {n} تهنئة.")
+    @admin.action(description="إظهار / إلغاء الحظر")
+    def show_selected(self, request, queryset):
+        n = queryset.update(status=Greeting.Status.APPROVED, approved_at=timezone.now())
+        self.message_user(request, f"تم إظهار {n} تهنئة على الجدار.")

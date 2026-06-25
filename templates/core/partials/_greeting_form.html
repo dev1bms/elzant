@@ -4,7 +4,7 @@
     <div class="reveal sec-head text-center">
       <p class="label-lat">Leave a Wish</p>
       <h2 class="font-display text-4xl font-semibold text-ink sm:text-5xl">اكتب كلمة من القلب</h2>
-      <p class="max-w-sm text-cloud">كلمتك تبقى معهما ذكرى. تظهر على جدار التهاني بعد المراجعة.</p>
+      <p class="max-w-sm text-cloud">كلمتك تبقى معهما ذكرى، وتظهر على جدار التهاني فور إرسالها.</p>
     </div>
 
     <form method="post" action="{% url 'home' %}#greeting" enctype="multipart/form-data" class="reveal mt-11 space-y-6" novalidate>
@@ -61,12 +61,12 @@
         </div>
 
         {% if form.photo.errors %}<p class="mt-2 text-sm text-wine-500">{{ form.photo.errors.0 }}</p>{% endif %}
-        <p class="mt-2 text-xs text-cloud">JPG / PNG / WEBP · حتى ١٠ ميجابايت · ستظهر بعد مراجعة الإدارة.</p>
+        <p class="mt-2 text-xs text-cloud">JPG / PNG / WEBP · حتى ١٠ ميجابايت · تظهر فور الإرسال.</p>
       </div>
 
       <button type="submit" id="greeting-submit" class="btn btn-primary w-full">{% trans "إرسال التهنئة" %}</button>
       <p class="text-center text-xs leading-relaxed text-cloud">
-        يُعرض اسمك ورسالتك وصورتك بعد المراجعة فقط — لا يُعرض رقمك أو بريدك.
+        يُعرض اسمك ورسالتك وصورتك على الجدار فور الإرسال — لا يُعرض رقمك أو بريدك.
         <a href="{% url 'privacy' %}" class="underline underline-offset-2 hover:text-wine-600">إشعار الخصوصية</a>
       </p>
     </form>
