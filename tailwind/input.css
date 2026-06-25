@@ -211,6 +211,18 @@
     content: ""; position: absolute; inset: 0; pointer-events: none;
     background: linear-gradient(to left, transparent 44%, color-mix(in srgb, var(--color-porcelain) 30%, transparent) 100%);
   }
+  /* legibility halo: a soft porcelain glow lifts hero copy off the reflective
+     artwork without a dark overlay. Buttons/countdown keep their own surface. */
+  .hero-copy { text-shadow: 0 1px 2px rgba(255,255,255,0.95), 0 0 18px rgba(251,244,232,0.92); }
+  .hero-copy .btn, .hero-copy .cd-box, .hero-copy .cd-num, .hero-copy .cd-label { text-shadow: none; }
+  /* desktop only: a soft porcelain wash on the left (where the copy sits) so the
+     text reads cleanly over the painting — light, never a dark overlay. */
+  @media (min-width: 1024px) {
+    .art-veil-lg::before {
+      content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+      background: linear-gradient(to left, transparent 50%, color-mix(in srgb, var(--color-porcelain) 58%, transparent) 100%);
+    }
+  }
 
   /* ---- Motion ---- */
   .reveal { opacity: 0; transform: translateY(18px); transition: opacity .9s cubic-bezier(.2,.8,.2,1), transform .9s cubic-bezier(.2,.8,.2,1); }

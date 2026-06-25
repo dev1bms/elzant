@@ -2,25 +2,25 @@
 <section class="relative overflow-hidden bg-porcelain lg:min-h-[100svh]">
 
   {# The artwork — the visual soul. Full-bleed on desktop, large top image on mobile. #}
-  <div class="hero-art hero-breathe art-fade relative h-[58svh] min-h-[340px] w-full lg:absolute lg:inset-0 lg:h-auto">
+  <div class="hero-art hero-breathe art-fade art-veil-lg relative h-[58svh] min-h-[340px] w-full lg:absolute lg:inset-0 lg:h-auto">
     <img src="{% static 'img/hero-bg.jpg' %}"
          alt="لوحة فنية للعروسين محمود ورينان على شرفة تطلّ على غروب البحر المتوسط"
          class="object-[58%_24%] lg:object-[72%_34%]">
   </div>
 
   {# Invitation text — over the sunset's open sky on desktop, below the art on mobile #}
-  <div class="relative z-10 -mt-14 px-6 pb-20 text-center
+  <div class="relative z-10 -mt-6 px-6 pb-20 text-center
               lg:absolute lg:inset-y-0 lg:left-0 lg:-mt-0 lg:flex lg:w-[56%] lg:max-w-2xl lg:items-center lg:px-14 lg:pb-0 lg:text-right">
-    <div class="up d1 mx-auto w-full max-w-md lg:mx-0">
+    <div class="hero-copy up d1 mx-auto w-full max-w-md lg:mx-0">
 
       <p class="eyebrow">An Invitation</p>
 
       <div class="mt-4 leading-relaxed text-ink-soft">
-        <p class="text-sm">يتشرّف</p>
-        <p class="mt-1 font-head text-base text-ink sm:text-lg">{{ config.groom_father }}</p>
-        <p class="label-lat text-base">&amp;</p>
-        <p class="font-head text-base text-ink sm:text-lg">{{ config.bride_father }}</p>
-        <p class="mt-1 text-sm">بدعوتكم لحضور حفل زفاف أبنائهما</p>
+        <p class="text-sm sm:text-base">يتشرّف</p>
+        <p class="mt-1.5 font-head text-xl font-bold text-ink sm:text-2xl">{{ config.groom_father }}</p>
+        <p class="label-lat my-0.5 text-lg">&amp;</p>
+        <p class="font-head text-xl font-bold text-ink sm:text-2xl">{{ config.bride_father }}</p>
+        <p class="mt-1.5 text-sm sm:text-base">بدعوتكم لحضور حفل زفاف أبنائهما</p>
       </div>
 
       <h1 class="names mt-5 text-6xl leading-[1.1] sm:text-7xl">
