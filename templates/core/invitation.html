@@ -5,45 +5,55 @@
 {% block extra_head %}<meta name="robots" content="noindex, nofollow">{% endblock %}
 
 {% block content %}
-<section class="relative overflow-hidden bg-porcelain">
-  <div class="art-frame relative h-[44vh] min-h-[300px] w-full">
-    <img src="{% static 'img/hero-bg.jpg' %}" alt="لوحة العروسين محمود ورينان عند الغروب">
-    <div class="pointer-events-none absolute inset-0" style="background:linear-gradient(to bottom, transparent 30%, rgba(247,240,230,.55) 64%, #f7f0e6 100%)"></div>
+<section class="relative overflow-hidden bg-porcelain lg:min-h-[100svh]">
+
+  {# The artwork — full-bleed on desktop, large top image on mobile #}
+  <div class="hero-art hero-breathe art-fade art-veil-lg relative h-[54svh] min-h-[330px] w-full lg:absolute lg:inset-0 lg:h-auto">
+    <img src="{% static 'img/hero-bg.jpg' %}"
+         alt="لوحة فنية للعروسين محمود ورينان على شرفة تطلّ على غروب البحر المتوسط"
+         class="object-[58%_24%] lg:object-[72%_34%]">
   </div>
 
-  <div class="relative z-10 mx-auto -mt-20 max-w-xl px-6 pb-20 text-center">
-    <p class="up d1 label-lat">Private Invitation</p>
-    <p class="up d2 mt-4 text-sm tracking-wide text-cloud">دعوة خاصة إلى</p>
-    <h1 class="up d2 mt-1 font-display text-4xl font-semibold text-ink sm:text-5xl">{{ guest.full_name }}</h1>
+  <div class="relative z-10 -mt-6 px-6 pb-20 text-center
+              lg:absolute lg:inset-y-0 lg:left-0 lg:-mt-0 lg:flex lg:w-[56%] lg:max-w-2xl lg:items-center lg:px-14 lg:pb-0 lg:text-right">
+    <div class="hero-copy up d1 mx-auto w-full max-w-md lg:mx-0">
 
-    <div class="up d3 rule mx-auto my-6 w-16"></div>
+      <p class="eyebrow">Private Invitation</p>
+      <p class="mt-3 text-sm text-ink-soft">دعوة خاصة إلى</p>
+      <h1 class="mt-1 text-3xl font-bold text-wine-700 sm:text-4xl">{{ guest.full_name }}</h1>
 
-    <div class="up d3 mx-auto max-w-sm text-ink-soft">
-      <p class="text-sm">يتشرّف</p>
-      <p class="mt-1.5 font-display text-lg leading-snug text-ink">{{ config.groom_father }}</p>
-      <p class="my-0.5 label-lat text-base">&amp;</p>
-      <p class="font-display text-lg leading-snug text-ink">{{ config.bride_father }}</p>
-      <p class="mt-1.5 text-sm">بدعوتكم لحضور حفل زفاف أبنائهما</p>
-    </div>
+      <div class="my-6 flex items-center justify-center gap-3 lg:justify-end">
+        <span class="h-px w-10 bg-champagne/70"></span>
+        <span class="text-rose-400">♥</span>
+        <span class="h-px w-10 bg-champagne/70"></span>
+      </div>
 
-    <h2 class="up d4 names mt-6 text-5xl leading-[0.95] sm:text-6xl">{{ config.groom_name }} <span class="amp">&amp;</span> {{ config.bride_name }}</h2>
-    <p class="up d4 num mt-4 text-base tracking-[0.3em] text-ink-soft">{% language 'ar' %}{{ config.wedding_datetime|date:'d . m . Y' }}{% endlanguage %}</p>
-    {% if config.venue_name %}<p class="up d5 mt-1 text-sm text-cloud">{{ config.venue_name }}{% if config.venue_address %} · {{ config.venue_address }}{% endif %}</p>{% endif %}
+      <p class="text-sm text-ink-soft">يتشرّف والداهما بدعوتكم لحضور حفل زفاف</p>
 
-    <div id="countdown" data-target="{{ config.wedding_datetime|date:'c' }}" class="up d5 mt-8 flex items-end justify-center gap-5 sm:gap-7">
-      <div class="flex min-w-[2.7rem] flex-col items-center"><span data-unit="days" class="num text-4xl leading-none text-wine-700">0</span><span class="mt-2 text-[0.62rem] text-cloud">يوم</span></div>
-      <span class="mb-3 h-7 w-px bg-sand"></span>
-      <div class="flex min-w-[2.7rem] flex-col items-center"><span data-unit="hours" class="num text-4xl leading-none text-wine-700">00</span><span class="mt-2 text-[0.62rem] text-cloud">ساعة</span></div>
-      <span class="mb-3 h-7 w-px bg-sand"></span>
-      <div class="flex min-w-[2.7rem] flex-col items-center"><span data-unit="minutes" class="num text-4xl leading-none text-wine-700">00</span><span class="mt-2 text-[0.62rem] text-cloud">دقيقة</span></div>
-      <span class="mb-3 h-7 w-px bg-sand"></span>
-      <div class="flex min-w-[2.7rem] flex-col items-center"><span data-unit="seconds" class="num text-4xl leading-none text-wine-700">00</span><span class="mt-2 text-[0.62rem] text-cloud">ثانية</span></div>
-    </div>
-    <p data-countdown-done class="up d5 mt-6 hidden text-base text-rose-500">تمّ الزفاف بحمد الله</p>
+      <h2 class="names mt-3 text-5xl leading-[1.12] sm:text-6xl">
+        {{ config.groom_name }} <span class="amp text-3xl sm:text-4xl">&amp;</span> {{ config.bride_name }}
+      </h2>
 
-    <div class="up d6 mt-10 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
-      <a href="{% url 'home' %}#greeting" class="btn btn-primary">اكتب تهنئتك</a>
-      <a href="{% url 'home' %}" class="btn btn-ghost">افتح الدعوة العامة</a>
+      <div class="mt-5 flex items-center justify-center gap-4 lg:justify-end">
+        <span class="h-px w-9 bg-champagne/70"></span>
+        <p class="num text-lg text-ink">{% language 'ar' %}{{ config.wedding_datetime|date:'d . m . Y' }}{% endlanguage %}</p>
+        <span class="h-px w-9 bg-champagne/70"></span>
+      </div>
+      {% if config.venue_name %}<p class="mt-2 text-sm text-ink-soft">{{ config.venue_name }}{% if config.venue_address %} · {{ config.venue_address }}{% endif %}</p>{% endif %}
+
+      {# countdown — flip boxes #}
+      <div id="countdown" data-target="{{ config.wedding_datetime|date:'c' }}" class="cd mt-7 justify-center lg:justify-end">
+        <div class="cd-box"><span data-unit="days" class="cd-num">0</span><span class="cd-label">يوم</span></div>
+        <div class="cd-box"><span data-unit="hours" class="cd-num">00</span><span class="cd-label">ساعة</span></div>
+        <div class="cd-box"><span data-unit="minutes" class="cd-num">00</span><span class="cd-label">دقيقة</span></div>
+        <div class="cd-box"><span data-unit="seconds" class="cd-num">00</span><span class="cd-label">ثانية</span></div>
+      </div>
+      <p data-countdown-done class="mt-5 hidden text-base text-wine-600">تمّ الزفاف بحمد الله</p>
+
+      <div class="mt-9 flex flex-col items-center gap-3 sm:flex-row sm:justify-center lg:justify-end">
+        <a href="{% url 'home' %}#greeting" class="btn btn-primary">اكتب تهنئتك</a>
+        <a href="{% url 'home' %}" class="btn btn-ghost">افتح الدعوة العامة</a>
+      </div>
     </div>
   </div>
 </section>
