@@ -16,6 +16,50 @@ def render_message(template, mapping):
     )
 
 
+# Cloudflare returns these for anonymous proxies / Tor / unknown — not real countries.
+_NON_COUNTRY = {"XX", "T1", "AP", "A1", "A2", "O1"}
+
+# Minimal Arabic country names for the tooltip/admin. The flag still works without
+# a name; unknown codes simply get an empty name.
+COUNTRY_NAMES_AR = {
+    "PS": "فلسطين", "EG": "مصر", "SA": "السعودية", "JO": "الأردن",
+    "AE": "الإمارات", "KW": "الكويت", "QA": "قطر", "BH": "البحرين",
+    "OM": "عُمان", "LB": "لبنان", "SY": "سوريا", "IQ": "العراق",
+    "YE": "اليمن", "SD": "السودان", "LY": "ليبيا", "TN": "تونس",
+    "DZ": "الجزائر", "MA": "المغرب", "MR": "موريتانيا", "SO": "الصومال",
+    "DJ": "جيبوتي", "KM": "جزر القمر", "TR": "تركيا", "IR": "إيران",
+    "US": "الولايات المتحدة", "CA": "كندا", "GB": "بريطانيا", "DE": "ألمانيا",
+    "FR": "فرنسا", "NL": "هولندا", "SE": "السويد", "NO": "النرويج",
+    "DK": "الدنمارك", "BE": "بلجيكا", "CH": "سويسرا", "AT": "النمسا",
+    "ES": "إسبانيا", "IT": "إيطاليا", "AU": "أستراليا", "NZ": "نيوزيلندا",
+    "MY": "ماليزيا", "ID": "إندونيسيا", "PK": "باكستان", "IN": "الهند",
+}
+
+
+def flag_from_code(code):
+    """Regional-indicator flag emoji from a 2-letter country code, or ''."""
+    code = (code or "").strip().upper()
+    if len(code) != 2 or not code.isalpha():
+        return ""
+    return "".join(chr(0x1F1E6 + ord(c) - ord("A")) for c in code)
+
+
+def country_from_request(request):
+    """Best-effort (country_code, arabic_name) for the visitor — never raises.
+
+    Prefers Cloudflare's ``CF-IPCountry`` header (set by the tunnel/proxy, needs
+    no database or external call); falls back to a GeoIP lookup if enabled.
+    Returns ("", "") locally / when the country is unknown.
+    """
+    cc = (request.META.get("HTTP_CF_IPCOUNTRY") or "").strip().upper()
+    if not (len(cc) == 2 and cc.isalpha() and cc not in _NON_COUNTRY):
+        cc, _ = lookup_country(get_client_ip(request))
+        cc = (cc or "").strip().upper()
+    if len(cc) != 2 or not cc.isalpha() or cc in _NON_COUNTRY:
+        return ("", "")
+    return (cc, COUNTRY_NAMES_AR.get(cc, ""))
+
+
 def lookup_country(ip):
     """Best-effort (country_code, country_name); disabled by default, never raises.
 

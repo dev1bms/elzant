@@ -5,6 +5,11 @@
       <p class="label-lat">Leave a Wish</p>
       <h2 class="text-4xl text-ink sm:text-5xl">اكتب كلمة من القلب</h2>
       <p class="max-w-sm text-ink-soft">كلمتك تبقى معهما ذكرى، وتظهر على جدار التهاني فور إرسالها.</p>
+      {% if guest %}
+        <p class="mt-2 text-sm text-wine-600">أهلاً بك يا {{ guest.full_name }} — اسمك مُعبّأ، أضِف كلمتك فقط{% if visitor_flag %} <span title="{{ visitor_country }}">{{ visitor_flag }}</span>{% endif %}</p>
+      {% elif visitor_flag %}
+        <p class="mt-2 text-sm text-ink-soft">تكتب من <span title="{{ visitor_country }}">{{ visitor_flag }}</span>{% if visitor_country %} {{ visitor_country }}{% endif %}</p>
+      {% endif %}
     </div>
 
     <form method="post" action="{% url 'home' %}#greeting" enctype="multipart/form-data" class="panel reveal mt-11 space-y-6 p-6 sm:p-8" novalidate>
