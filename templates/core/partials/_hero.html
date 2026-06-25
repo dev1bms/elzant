@@ -34,16 +34,12 @@
       </div>
       {% if config.venue_name %}<p class="mt-2 text-sm text-ink-soft">{{ config.venue_name }}</p>{% endif %}
 
-      {# countdown — woven into the line, not a dashboard #}
-      <div id="countdown" data-target="{{ config.wedding_datetime|date:'c' }}"
-           class="mt-6 flex items-end justify-center gap-3.5 sm:gap-5 lg:justify-end">
-        <div class="flex flex-col items-center"><span data-unit="days" class="num text-2xl leading-none text-wine-600 sm:text-3xl">0</span><span class="mt-1.5 text-[0.62rem] tracking-wide text-cloud">يوم</span></div>
-        <span class="mb-2 text-gold/60">·</span>
-        <div class="flex flex-col items-center"><span data-unit="hours" class="num text-2xl leading-none text-wine-600 sm:text-3xl">00</span><span class="mt-1.5 text-[0.62rem] tracking-wide text-cloud">ساعة</span></div>
-        <span class="mb-2 text-gold/60">·</span>
-        <div class="flex flex-col items-center"><span data-unit="minutes" class="num text-2xl leading-none text-wine-600 sm:text-3xl">00</span><span class="mt-1.5 text-[0.62rem] tracking-wide text-cloud">دقيقة</span></div>
-        <span class="mb-2 text-gold/60">·</span>
-        <div class="flex flex-col items-center"><span data-unit="seconds" class="num text-2xl leading-none text-wine-600 sm:text-3xl">00</span><span class="mt-1.5 text-[0.62rem] tracking-wide text-cloud">ثانية</span></div>
+      {# countdown — flip boxes #}
+      <div id="countdown" data-target="{{ config.wedding_datetime|date:'c' }}" class="cd mt-7 justify-center lg:justify-end">
+        <div class="cd-box"><span data-unit="days" class="cd-num">0</span><span class="cd-label">يوم</span></div>
+        <div class="cd-box"><span data-unit="hours" class="cd-num">00</span><span class="cd-label">ساعة</span></div>
+        <div class="cd-box"><span data-unit="minutes" class="cd-num">00</span><span class="cd-label">دقيقة</span></div>
+        <div class="cd-box"><span data-unit="seconds" class="cd-num">00</span><span class="cd-label">ثانية</span></div>
       </div>
       <p data-countdown-done class="mt-5 hidden text-base text-wine-600">تمّ الزفاف بحمد الله</p>
 
