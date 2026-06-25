@@ -3,6 +3,8 @@ from datetime import datetime
 from zoneinfo import ZoneInfo
 
 from django.db import models
+from django.db.models.signals import post_delete
+from django.dispatch import receiver
 from django.urls import reverse
 
 
@@ -264,3 +266,28 @@ class Greeting(models.Model):
     def visible(cls):
         """Greetings shown publicly on the wall — everything except banned ones."""
         return cls.objects.exclude(status=cls.Status.REJECTED).order_by("-created_at")
+
+    def _delete_photo_files(self):
+        """Remove the uploaded photo + thumbnail from storage (best-effort)."""
+        for f in (self.uploaded_photo, self.photo_thumbnail):
+            if f:
+                f.delete(save=False)
+
+    def hide(self):
+        """Ban: take the photo down (it published instantly) and mark hidden.
+
+        /media/ is served by path with no auth, so the only way to stop serving a
+        banned photo is to delete the file — not just flip the status.
+        """
+        self._delete_photo_files()
+        self.uploaded_photo = ""
+        self.photo_thumbnail = ""
+        self.status = self.Status.REJECTED
+        self.save(update_fields=["status", "uploaded_photo", "photo_thumbnail"])
+
+
+# Don't leave orphaned media files behind. Connecting post_delete also stops
+# Django from "fast-deleting" Greetings, so admin bulk-delete cleans files too.
+@receiver(post_delete, sender=Greeting)
+def _greeting_files_cleanup(sender, instance, **kwargs):
+    instance._delete_photo_files()

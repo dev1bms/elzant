@@ -7,7 +7,6 @@ display-sized JPEG plus a small thumbnail. The original upload is never stored.
 
 import io
 import secrets
-import warnings
 
 from django.core.files.base import ContentFile
 from PIL import Image, ImageOps
@@ -21,10 +20,11 @@ THUMB_SIDE = 480
 _PORCELAIN = (250, 244, 234)
 
 # Decompression-bomb guard: a tiny PNG/WEBP can declare enormous dimensions and
-# blow up RAM when decoded. Cap total pixels (~50MP covers any real phone photo)
-# and turn Pillow's bomb warning into a hard error so it lands in our except.
+# blow up RAM when decoded. Cap total pixels (~50MP covers any real phone photo);
+# process_image checks img.size against this BEFORE load(), and Pillow itself
+# raises DecompressionBombError above 2× this. (No global warnings filter — that
+# would mutate warning handling process-wide.)
 Image.MAX_IMAGE_PIXELS = 50_000_000
-warnings.simplefilter("error", Image.DecompressionBombWarning)
 
 
 class ImageError(Exception):

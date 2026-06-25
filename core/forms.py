@@ -39,6 +39,15 @@ class GreetingForm(forms.ModelForm):
             "message": {"required": "من فضلك اكتب رسالة التهنئة."},
         }
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # The hidden card_template is JS-driven; never block submission on it —
+        # an empty value falls back to the default (see clean_card_template).
+        self.fields["card_template"].required = False
+
+    def clean_card_template(self):
+        return self.cleaned_data.get("card_template") or Greeting.CardTemplate.NO_PHOTO_MINIMAL
+
     def clean_website(self):
         if self.cleaned_data.get("website"):
             raise forms.ValidationError("spam")
