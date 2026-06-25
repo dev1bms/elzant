@@ -1,26 +1,27 @@
 {% load i18n %}
-<section id="wall" class="bg-porcelain px-6 py-28">
-  <div class="mx-auto max-w-3xl">
+<section id="wall" class="wall-canvas px-6 py-28">
+  <div class="relative mx-auto max-w-3xl">
     <div class="reveal sec-head text-center">
-      <p class="label-lat">Messages</p>
+      <p class="label-lat">A Gallery of Words</p>
       <h2 class="text-4xl text-ink sm:text-5xl">جدار التهاني</h2>
+      <span class="wall-flourish" aria-hidden="true"></span>
     </div>
 
     {% if greetings %}
-      <div class="mt-14 columns-1 gap-5 sm:columns-2 [&>*]:mb-5">
+      <div class="mt-14 columns-1 gap-6 sm:columns-2 [&>*]:mb-6">
         {% for g in greetings %}
           <figure class="msg-card reveal break-inside-avoid{% if g.photo_thumbnail %} msg-card--photo{% endif %}">
             {% if g.photo_thumbnail %}
-              <div class="card-mat mb-4">
-                <img src="{{ g.photo_thumbnail.url }}" alt="صورة مرفقة بالتهنئة" loading="lazy" class="h-48 w-full rounded-lg object-cover" width="480" height="360">
+              <div class="msg-frame mb-5">
+                <img src="{{ g.photo_thumbnail.url }}" alt="صورة مرفقة بالتهنئة" loading="lazy" class="h-48 w-full object-cover" width="480" height="360">
               </div>
             {% endif %}
-            <span class="font-serif text-4xl leading-none text-rose-400/70" aria-hidden="true">&ldquo;</span>
-            <blockquote class="mt-1 leading-loose text-ink">{{ g.message|linebreaksbr }}</blockquote>
-            <figcaption class="mt-4 flex items-center gap-2 text-wine-600">
-              <span class="h-px w-5 bg-rose-400/80"></span>
-              <span class="text-base font-bold text-ink">{{ g.name }}</span>
-              {% if g.country_flag %}<span class="text-xl leading-none" title="{{ g.country_name }}">{{ g.country_flag }}</span>{% endif %}
+            <span class="msg-quote" aria-hidden="true">&ldquo;</span>
+            <blockquote class="msg-text mt-1">{{ g.message|linebreaksbr }}</blockquote>
+            <figcaption class="msg-sign mt-5">
+              <span class="dash"></span>
+              <span class="nm">{{ g.name }}</span>
+              {% if g.country_flag %}<span class="flag" title="{{ g.country_name }}">{{ g.country_flag }}</span>{% endif %}
             </figcaption>
           </figure>
         {% endfor %}
