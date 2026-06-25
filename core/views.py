@@ -1,8 +1,9 @@
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 
 from .forms import GreetingForm
-from .models import Greeting
-from .utils import get_client_ip
+from .models import Greeting, GreetingSuggestion, WeddingGuest
+from .utils import get_client_ip, lookup_country
 
 
 # Spam defenses are: CSRF, the hidden honeypot, model/form length limits, and
@@ -15,8 +16,22 @@ def home(request):
         form = GreetingForm(request.POST)
         if form.is_valid():
             greeting = form.save(commit=False)
-            greeting.ip_address = get_client_ip(request)
+            ip = get_client_ip(request)
+            greeting.ip_address = ip
+            # Best-effort country (disabled by default; never blocks the save).
+            code, name = lookup_country(ip)
+            if code:
+                greeting.country_code = code
+            if name:
+                greeting.country_name = name
+            # Link to a guest if the visitor came from a private invitation link.
+            guest = _guest_from_session(request)
+            if guest:
+                greeting.guest = guest
             greeting.save()
+            if guest and guest.invitation_status != WeddingGuest.Status.GREETED:
+                guest.invitation_status = WeddingGuest.Status.GREETED
+                guest.save(update_fields=["invitation_status", "updated_at"])
             # Pass name/message to the thank-you page via the session (not the
             # pk) so pending records can't be enumerated or read by URL.
             request.session["card"] = {
@@ -29,7 +44,11 @@ def home(request):
     return render(
         request,
         "core/home.html",
-        {"form": form, "greetings": Greeting.approved()},
+        {
+            "form": form,
+            "greetings": Greeting.approved(),
+            "suggestions": GreetingSuggestion.active_suggestions(),
+        },
     )
 
 
@@ -38,3 +57,33 @@ def thank_you(request):
     if not card:
         return redirect("home")
     return render(request, "core/thank_you.html", {"card": card})
+
+
+def invitation(request, token):
+    """Personalized invitation page reached via a guest's private link."""
+    guest = get_object_or_404(WeddingGuest, invitation_token=token)
+
+    # Mark as opened (without downgrading a guest who already greeted).
+    if guest.invitation_status != WeddingGuest.Status.GREETED:
+        guest.invitation_status = WeddingGuest.Status.OPENED
+    guest.last_opened_at = timezone.now()
+    guest.save(update_fields=["invitation_status", "last_opened_at", "updated_at"])
+
+    # Remember the token so a greeting written next gets linked to this guest.
+    request.session["invitation_token"] = token
+    return render(
+        request,
+        "core/invitation.html",
+        {"guest": guest, "suggestions": GreetingSuggestion.active_suggestions()},
+    )
+
+
+def privacy(request):
+    return render(request, "core/privacy.html")
+
+
+def _guest_from_session(request):
+    token = request.session.get("invitation_token")
+    if not token:
+        return None
+    return WeddingGuest.objects.filter(invitation_token=token).first()

@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}إشعار الخصوصية — زفاف {{ config.groom_name }} و{{ config.bride_name }}{% endblock %}
+{% block og_title %}إشعار الخصوصية{% endblock %}
+
+{% block content %}
+<section class="bg-ivory-50 px-6 py-24">
+  <div class="mx-auto max-w-2xl">
+    <div class="sec-head text-center">
+      <p class="kicker">Privacy</p>
+      <h1 class="text-3xl font-light text-charcoal sm:text-4xl">إشعار الخصوصية</h1>
+    </div>
+
+    <div class="surface mt-10 p-8 leading-loose text-charcoal-soft">
+      {% if config.privacy_notice_short %}
+        <p class="text-charcoal">{{ config.privacy_notice_short|linebreaksbr }}</p>
+      {% endif %}
+      <ul class="mt-6 space-y-3">
+        <li class="flex gap-2"><span class="text-gold-500">•</span> تُستخدم بياناتكم (الاسم، الهاتف، البريد إن وُجد) فقط لإدارة دعوات الزفاف والتهاني.</li>
+        <li class="flex gap-2"><span class="text-gold-500">•</span> لا يُعرَض الهاتف أو البريد أو عنوان الـIP للعامة إطلاقاً.</li>
+        <li class="flex gap-2"><span class="text-gold-500">•</span> يُستخدم الـIP داخلياً للمراجعة ومكافحة السبام، وقد يُستعمل لتحديد الدولة فقط (يظهر العلم فحسب).</li>
+        <li class="flex gap-2"><span class="text-gold-500">•</span> لا تظهر أي تهنئة على الجدار قبل مراجعتها واعتمادها.</li>
+        <li class="flex gap-2"><span class="text-gold-500">•</span> يمكنكم طلب حذف تهنئتكم أو بيانات دعوتكم بالتواصل مع المسؤول.</li>
+      </ul>
+    </div>
+
+    <p class="mt-8 text-center"><a href="{% url 'home' %}" class="btn btn-line">العودة للصفحة الرئيسية</a></p>
+  </div>
+</section>
+{% endblock %}

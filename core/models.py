@@ -1,7 +1,9 @@
+import secrets
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
 from django.db import models
+from django.urls import reverse
 
 
 def default_wedding_datetime():
@@ -13,10 +15,37 @@ def default_wedding_datetime():
     return datetime(2026, 7, 22, 20, 0, tzinfo=ZoneInfo("Africa/Cairo"))
 
 
-class WeddingConfig(models.Model):
-    """Event settings — a single row (singleton), editable from the admin so
-    the venue/time can change without a redeploy."""
+# Default message templates (admin-editable). Placeholders: {{ guest_name }},
+# {{ invitation_link }}, {{ groom_name }}, {{ bride_name }}, {{ wedding_date }},
+# {{ venue_name }} — substituted by core.utils.render_message.
+DEFAULT_WHATSAPP_TEMPLATE = (
+    "السلام عليكم {{ guest_name }} 🤍\n"
+    "يسعدنا دعوتكم لحضور حفل زفاف {{ groom_name }} و{{ bride_name }} "
+    "يوم {{ wedding_date }}{{ venue_name }}.\n"
+    "هذه دعوتكم الخاصة: {{ invitation_link }}"
+)
+DEFAULT_EMAIL_SUBJECT = "دعوة حفل زفاف {{ groom_name }} و{{ bride_name }}"
+DEFAULT_EMAIL_BODY = (
+    "السلام عليكم ورحمة الله،\n\n"
+    "{{ guest_name }} الكريم،\n"
+    "يتشرّف أهل العروسين بدعوتكم لحضور حفل زفاف {{ groom_name }} و{{ bride_name }} "
+    "يوم {{ wedding_date }}{{ venue_name }}.\n\n"
+    "تفضّلوا بفتح دعوتكم الخاصة من الرابط التالي:\n{{ invitation_link }}\n\n"
+    "بانتظار تشريفكم،"
+)
+DEFAULT_PRIVACY_NOTICE = (
+    "تُستخدم بياناتكم (الاسم ورقم الهاتف والبريد إن وُجد) فقط لإدارة دعوات الزفاف "
+    "والتهاني. لا يُعرَض الهاتف أو البريد أو عنوان الـIP للعامة. يُستخدم الـIP داخلياً "
+    "للمراجعة وقد يُستعمل لتحديد الدولة فقط. يمكنكم طلب حذف تهنئتكم أو بيانات دعوتكم "
+    "بالتواصل مع المسؤول."
+)
 
+
+class WeddingConfig(models.Model):
+    """Event settings — a single row (singleton), editable from the admin so the
+    names, texts, venue, time and message templates change without a redeploy."""
+
+    # Names
     groom_name = models.CharField("اسم العريس", max_length=60, default="محمود")
     bride_name = models.CharField("اسم العروس", max_length=60, default="رينان")
     groom_father = models.CharField(
@@ -26,6 +55,10 @@ class WeddingConfig(models.Model):
     bride_father = models.CharField(
         "والد العروس", max_length=160, default="الشريف فلان الفولاني",
     )
+    groom_family_name_ar = models.CharField("عائلة العريس", max_length=80, blank=True, default="الزنط")
+    bride_family_name_ar = models.CharField("عائلة العروس", max_length=80, blank=True)
+
+    # Event
     wedding_datetime = models.DateTimeField(
         "موعد الزفاف (يُخزَّن بتوقيت القاهرة)", default=default_wedding_datetime
     )
@@ -33,6 +66,18 @@ class WeddingConfig(models.Model):
     venue_address = models.CharField("العنوان", max_length=255, blank=True)
     map_url = models.URLField("رابط الخريطة", blank=True)
     hijri_text = models.CharField("التاريخ الهجري (يدوي)", max_length=60, blank=True)
+
+    # Texts
+    invitation_intro_text = models.TextField(
+        "نص الدعوة (سطر تمهيدي)", blank=True,
+        default="يتشرّفان بدعوتكم لمشاركتهما فرحة العمر",
+    )
+    privacy_notice_short = models.TextField("إشعار الخصوصية المختصر", blank=True, default=DEFAULT_PRIVACY_NOTICE)
+
+    # Message templates
+    default_whatsapp_message_template = models.TextField("قالب رسالة واتساب", blank=True, default=DEFAULT_WHATSAPP_TEMPLATE)
+    default_email_subject = models.CharField("عنوان بريد الدعوة", max_length=200, blank=True, default=DEFAULT_EMAIL_SUBJECT)
+    default_email_body_template = models.TextField("قالب بريد الدعوة", blank=True, default=DEFAULT_EMAIL_BODY)
 
     class Meta:
         verbose_name = "إعدادات الزفاف"
@@ -51,6 +96,86 @@ class WeddingConfig(models.Model):
         return obj
 
 
+def generate_invitation_token():
+    return secrets.token_urlsafe(16)
+
+
+class WeddingGuest(models.Model):
+    """An invited guest with a private, unguessable invitation link."""
+
+    class Group(models.TextChoices):
+        GROOM_FAMILY = "groom_family", "عائلة العريس"
+        BRIDE_FAMILY = "bride_family", "عائلة العروس"
+        FRIENDS = "friends", "أصدقاء"
+        COLLEAGUES = "colleagues", "زملاء"
+        GENERAL = "general", "ضيوف عامون"
+
+    class Status(models.TextChoices):
+        DRAFT = "draft", "مسودة"
+        READY = "ready", "جاهزة"
+        SENT_WHATSAPP = "sent_whatsapp", "أُرسلت عبر واتساب"
+        SENT_EMAIL = "sent_email", "أُرسلت عبر البريد"
+        OPENED = "opened", "فُتحت"
+        GREETED = "greeted", "كتب تهنئة"
+
+    full_name = models.CharField("الاسم الكامل", max_length=120)
+    phone_number = models.CharField("رقم الهاتف", max_length=30, blank=True)
+    email = models.EmailField("البريد الإلكتروني", blank=True)
+    group = models.CharField("المجموعة", max_length=20, choices=Group.choices, default=Group.GENERAL, db_index=True)
+    guest_count = models.PositiveSmallIntegerField("عدد الأفراد", default=1)
+    notes = models.TextField("ملاحظات", blank=True)
+    invitation_token = models.CharField(max_length=32, unique=True, default=generate_invitation_token, editable=False)
+    invitation_status = models.CharField("الحالة", max_length=15, choices=Status.choices, default=Status.DRAFT, db_index=True)
+    last_opened_at = models.DateTimeField("آخر فتح", null=True, blank=True)
+    invited_at = models.DateTimeField("تاريخ الإرسال", null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["full_name"]
+        verbose_name = "مدعو"
+        verbose_name_plural = "المدعوون"
+
+    def __str__(self):
+        return self.full_name
+
+    def save(self, *args, **kwargs):
+        if not self.invitation_token:
+            self.invitation_token = generate_invitation_token()
+        super().save(*args, **kwargs)
+
+    def get_absolute_url(self):
+        return reverse("invitation", args=[self.invitation_token])
+
+
+class GreetingSuggestion(models.Model):
+    """Ready-made greeting text the visitor can pick with one tap."""
+
+    class Category(models.TextChoices):
+        RELIGIOUS = "religious", "ديني"
+        FAMILY = "family", "عائلي"
+        SHORT = "short", "قصير"
+        FORMAL = "formal", "رسمي"
+        NICE = "nice", "جميل"
+
+    text_ar = models.TextField("نص التهنئة", max_length=300)
+    category = models.CharField("الفئة", max_length=15, choices=Category.choices, blank=True)
+    active = models.BooleanField("مفعّل", default=True)
+    sequence = models.PositiveSmallIntegerField("الترتيب", default=0)
+
+    class Meta:
+        ordering = ["sequence", "id"]
+        verbose_name = "تهنئة جاهزة"
+        verbose_name_plural = "التهاني الجاهزة"
+
+    def __str__(self):
+        return (self.text_ar[:50] + "…") if len(self.text_ar) > 50 else self.text_ar
+
+    @classmethod
+    def active_suggestions(cls):
+        return list(cls.objects.filter(active=True)[:10])
+
+
 class Greeting(models.Model):
     """A visitor's greeting — shown on the wall only after approval."""
 
@@ -62,15 +187,19 @@ class Greeting(models.Model):
     name = models.CharField("اسم المهنّئ", max_length=60)
     message = models.TextField("نص التهنئة", max_length=500)
     status = models.CharField(
-        max_length=10,
-        choices=Status.choices,
-        default=Status.PENDING,
-        db_index=True,
+        max_length=10, choices=Status.choices, default=Status.PENDING, db_index=True
+    )
+    # Linked when the greeting was written from a guest's private invitation link.
+    guest = models.ForeignKey(
+        WeddingGuest, null=True, blank=True, on_delete=models.SET_NULL, related_name="greetings"
     )
     created_at = models.DateTimeField(auto_now_add=True)
     approved_at = models.DateTimeField(null=True, blank=True)
-    # Stored for moderation / anti-spam only — never displayed publicly.
+    # Stored for moderation only — never displayed publicly.
     ip_address = models.GenericIPAddressField(null=True, blank=True)
+    # Optional, best-effort country (only the flag/name is ever shown publicly).
+    country_code = models.CharField(max_length=2, blank=True)
+    country_name = models.CharField(max_length=80, blank=True)
 
     class Meta:
         ordering = ["-created_at"]
@@ -79,6 +208,14 @@ class Greeting(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.get_status_display()})"
+
+    @property
+    def country_flag(self):
+        """Regional-indicator flag emoji from the 2-letter country code, or ''."""
+        code = (self.country_code or "").strip().upper()
+        if len(code) != 2 or not code.isalpha():
+            return ""
+        return "".join(chr(0x1F1E6 + ord(c) - ord("A")) for c in code)
 
     @classmethod
     def approved(cls):
