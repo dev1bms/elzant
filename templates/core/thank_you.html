@@ -4,13 +4,14 @@
 {% block title %}شكراً لك — زفاف {{ config.groom_name }} و{{ config.bride_name }}{% endblock %}
 
 {% block content %}
-<section class="bg-porcelain px-6 py-20">
-  <div class="mx-auto max-w-xl text-center">
+<section class="relative isolate overflow-hidden bg-ground px-6 py-20">
+  <div class="bloom" aria-hidden="true"></div>
+  <div class="relative z-10 mx-auto max-w-xl text-center">
     <p class="up d1 label-lat">Thank You</p>
-    <h1 class="up d1 mt-3 font-display text-4xl font-semibold text-ink sm:text-5xl">وصلت تهنئتك يا {{ card.name }}</h1>
-    <p class="up d2 mt-3 text-cloud">ظهرت تهنئتك على جدار التهاني 🤍 وهذه بطاقتك — احفظها وشاركها:</p>
+    <h1 class="up d1 mt-3 text-3xl text-ivory sm:text-4xl">وصلت تهنئتك يا {{ card.name }}</h1>
+    <p class="up d2 mt-4 text-wheat">ظهرت تهنئتك على جدار التهاني 🤍 وهذه بطاقتك — احفظها وشاركها:</p>
 
-    <div class="up d3 mt-10">
+    <div class="up d3 card-mat mx-auto mt-10 max-w-md">
       {% include "core/partials/_card.html" %}
     </div>
 
@@ -21,9 +22,9 @@
       </button>
       <button id="card-share" type="button" class="btn btn-ghost">{% trans "مشاركة عبر واتساب" %}</button>
     </div>
-    <p class="up d4 mt-4 text-xs text-cloud">إن لم يدعم جهازك مشاركة الصور، نزّل البطاقة وأرفقها يدوياً في واتساب.</p>
+    <p class="up d4 mt-4 text-xs text-wheat/80">إن لم يدعم جهازك مشاركة الصور، نزّل البطاقة وأرفقها يدوياً في واتساب.</p>
 
-    <a href="{% url 'home' %}" class="up d4 mt-9 inline-block text-sm text-wine-600 underline underline-offset-4 transition hover:text-wine-500">العودة للصفحة الرئيسية</a>
+    <a href="{% url 'home' %}" class="up d4 mt-9 inline-block text-sm text-saffron underline underline-offset-4 transition hover:text-saffron-hi">العودة للصفحة الرئيسية</a>
   </div>
 </section>
 {% endblock %}

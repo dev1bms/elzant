@@ -1,13 +1,13 @@
 {% load i18n %}
-<section id="greeting" class="bg-porcelain-200 px-6 py-24">
+<section id="greeting" class="bg-ground px-6 py-24">
   <div class="mx-auto max-w-lg">
     <div class="reveal sec-head text-center">
       <p class="label-lat">Leave a Wish</p>
-      <h2 class="font-display text-4xl font-semibold text-ink sm:text-5xl">اكتب كلمة من القلب</h2>
-      <p class="max-w-sm text-cloud">كلمتك تبقى معهما ذكرى، وتظهر على جدار التهاني فور إرسالها.</p>
+      <h2 class="text-4xl text-ivory sm:text-5xl">اكتب كلمة من القلب</h2>
+      <p class="max-w-sm text-wheat">كلمتك تبقى معهما ذكرى، وتظهر على جدار التهاني فور إرسالها.</p>
     </div>
 
-    <form method="post" action="{% url 'home' %}#greeting" enctype="multipart/form-data" class="reveal mt-11 space-y-6" novalidate>
+    <form method="post" action="{% url 'home' %}#greeting" enctype="multipart/form-data" class="panel reveal mt-11 space-y-6 p-6 sm:p-8" novalidate>
       {% csrf_token %}
       <div class="hidden" aria-hidden="true">{{ form.website }}</div>
 
