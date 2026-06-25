@@ -4,7 +4,7 @@ from django.utils import timezone
 from .forms import GreetingForm
 from .imaging import ImageError, process_image
 from .models import Greeting, GreetingSuggestion, WeddingGuest
-from .utils import get_client_ip, lookup_country
+from .utils import country_from_request, flag_from_code, get_client_ip
 
 
 # Spam defenses are: CSRF, the hidden honeypot, model/form length limits, and
@@ -13,6 +13,9 @@ from .utils import get_client_ip, lookup_country
 # across Gunicorn workers and can unfairly block guests. Throttling is an
 # edge/proxy responsibility (e.g. Cloudflare WAF / tunnel rules). See DEPLOY.md.
 def home(request):
+    guest = _guest_from_session(request)             # an invited visitor, or None
+    vcode, vname = country_from_request(request)     # visitor country (Cloudflare/GeoIP)
+
     if request.method == "POST":
         form = GreetingForm(request.POST, request.FILES)
         if form.is_valid():
@@ -30,19 +33,16 @@ def home(request):
                 # Post-moderation: publish immediately; the admin can hide later.
                 greeting.status = Greeting.Status.APPROVED
                 greeting.approved_at = timezone.now()
-                ip = get_client_ip(request)
-                greeting.ip_address = ip
-                # Best-effort country (disabled by default; never blocks the save).
-                code, name = lookup_country(ip)
-                if code:
-                    greeting.country_code = code
-                if name:
-                    greeting.country_name = name
+                greeting.ip_address = get_client_ip(request)
+                # Visitor country → flag on the wall (best-effort; never blocks the save).
+                if vcode:
+                    greeting.country_code = vcode
+                if vname:
+                    greeting.country_name = vname
                 if display is not None:
                     greeting.uploaded_photo.save(display.name, display, save=False)
                     greeting.photo_thumbnail.save(thumb.name, thumb, save=False)
-                # Link to a guest if they came from a private invitation link.
-                guest = _guest_from_session(request)
+                # Link to the guest if they came from a private invitation link.
                 if guest:
                     greeting.guest = guest
                 greeting.save()
@@ -59,7 +59,8 @@ def home(request):
                 }
                 return redirect("thank_you")
     else:
-        form = GreetingForm()
+        # Invited visitor → pre-fill their name (still editable).
+        form = GreetingForm(initial={"name": guest.full_name}) if guest else GreetingForm()
     return render(
         request,
         "core/home.html",
@@ -67,6 +68,9 @@ def home(request):
             "form": form,
             "greetings": Greeting.visible(),
             "suggestions": GreetingSuggestion.active_suggestions(),
+            "guest": guest,
+            "visitor_flag": flag_from_code(vcode),
+            "visitor_country": vname,
         },
     )
 
