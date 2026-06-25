@@ -15,7 +15,7 @@ pip install -r requirements.txt
 # 2) تبعيات الواجهة + بناء CSS والأصول
 npm install
 npm run css:build          # ينتج static/css/output.css
-npm run assets:build       # يولّد og-image.png و qr.svg (يقرأ SITE_URL)
+npm run assets:build       # يولّد og-image.png من og-image.svg
 
 # 3) قاعدة البيانات وحساب الإدارة
 python manage.py migrate

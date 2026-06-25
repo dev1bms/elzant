@@ -12,7 +12,7 @@ cd "$APP"
 # Assets that `npm run assets:build` regenerates each deploy. Reset them to the
 # committed version first so a previous build's bytes don't leave the tree dirty
 # and break `git pull --ff-only`. This only discards generated, tracked images.
-GENERATED="static/img/og-image.png static/img/qr.svg"
+GENERATED="static/img/og-image.png"
 git checkout -- $GENERATED 2>/dev/null || true
 
 # Refuse to clobber any *other* local edits — report them and stop instead.
