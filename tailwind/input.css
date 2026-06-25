@@ -4,16 +4,31 @@
 @source "../static/js/**/*.js";
 
 /* ======================================================================
-   elzant.com — Golden-Hour Mediterranean Editorial
-   Warm porcelain page the couple's artwork dissolves into. Markazi Text
-   (display/names) · Tajawal (body) · Cormorant Garamond (Latin/dates).
-   Wine + muted rose accents; champagne only as a rare hairline. Self-hosted
-   fonts; minimal motion; RTL.
+   elzant.com — درب القاهرة · The Lantern Seam at Dusk
+   A Palestinian thobe laid across a Cairo evening: warm aubergine night lit by
+   one golden-hour bloom; the "road to Egypt" (درب مصر) tatreez seam stitches the
+   two families together; ivory keepsake panels float as lit lanterns.
+   Aref Ruqaa (names) · Cairo (geometric headings) · Tajawal (body) · Cormorant
+   (Latin/numerals). Self-hosted fonts; one motion beat; RTL.
+   NOTE: the downloadable keepsake card keeps the original porcelain/wine palette
+   + Markazi face — only the website chrome changes here.
 ====================================================================== */
 @theme {
-  --font-display: "Markazi Text", "Tajawal", serif;
+  --font-display: "Aref Ruqaa", "Markazi Text", serif;  /* ceremonial names */
+  --font-kufi: "Cairo", "Tajawal", sans-serif;          /* geometric headings */
   --font-body: "Tajawal", sans-serif;
-  --font-serif: "Cormorant Garamond", Georgia, serif;
+  --font-serif: "Cormorant Garamond", Georgia, serif;   /* Latin / numerals */
+
+  /* ---- Lantern Seam chrome: warm aubergine night + thobe threads ---- */
+  --color-ground: #231521;          /* warm aubergine page ground (never #000) */
+  --color-ground-indigo: #1d2942;   /* alternate band behind details/countdown */
+  --color-madder: #c2492f;          /* tatreez red · primary CTA */
+  --color-saffron: #e3a83f;         /* the lantern bloom · countdown · focus */
+  --color-saffron-hi: #f2cd86;      /* lit filament (hover/raised) */
+  --color-olive: #6f7a3f;           /* third tatreez row · pins · underlines */
+  --color-ivory: #f4ead7;           /* light panels + primary text on dark */
+  --color-wheat: #cbb085;           /* muted secondary text (AA on ground) */
+  --color-mauve: #b07b8e;           /* DECORATIVE ONLY — the & + tatreez stops */
 
   /* Warm porcelain / sand */
   --color-porcelain-50: #fbf6ee;
@@ -46,100 +61,119 @@
   body {
     font-family: var(--font-body);
     font-weight: 400;
-    color: var(--color-ink);
-    background-color: var(--color-porcelain);
+    color: var(--color-ivory);
+    background-color: var(--color-ground);
     -webkit-font-smoothing: antialiased;
   }
-  /* Markazi has tall metrics; give headings calm leading */
-  h1, h2, h3, .font-display { font-family: var(--font-display); line-height: 1.1; }
-  ::selection { background: var(--color-wine-500); color: var(--color-porcelain-50); }
+  /* Headings default to geometric Cairo 700; names/wordmarks opt into Aref Ruqaa. */
+  h1, h2, h3 { font-family: var(--font-kufi); font-weight: 700; line-height: 1.18; }
+  .font-display, .names { font-family: var(--font-display); font-weight: 700; line-height: 1.06; }
+  ::selection { background: var(--color-madder); color: var(--color-ivory); }
+  :focus-visible { outline: 2px solid var(--color-saffron); outline-offset: 3px; border-radius: 3px; }
 }
 
 @layer components {
   /* ---- Labels & rules ---- */
   .eyebrow {
-    font-family: var(--font-body);
-    font-size: 0.72rem;
-    font-weight: 500;
-    letter-spacing: 0.34em;
-    color: var(--color-cloud);
+    font-family: var(--font-serif); font-style: italic;
+    font-size: 0.95rem; letter-spacing: 0.2em; color: var(--color-wheat);
   }
   .label-lat {
-    font-family: var(--font-serif);
-    font-style: italic;
-    font-size: 1.05rem;
-    letter-spacing: 0.04em;
-    color: var(--color-rose-500);
+    font-family: var(--font-serif); font-style: italic;
+    font-size: 1.05rem; letter-spacing: 0.12em; color: var(--color-saffron);
   }
-  .num { font-family: var(--font-serif); direction: ltr; unicode-bidi: isolate; font-weight: 500; }
-  .rule { height: 1px; background: var(--color-sand); border: 0; }
-  .rule-champagne { height: 1px; background: var(--color-champagne); opacity: 0.55; }
+  .num { font-family: var(--font-serif); direction: ltr; unicode-bidi: isolate; font-weight: 500; letter-spacing: 0.06em; }
+  .rule { height: 1px; width: 4rem; margin-inline: auto; background: var(--color-saffron); opacity: 0.6; border: 0; }
+  .rule-champagne { height: 1px; background: var(--color-champagne); opacity: 0.55; } /* keepsake card only */
 
-  /* ---- Buttons (flat, warm, restrained) ---- */
+  /* ---- Buttons ---- */
   .btn {
     display: inline-flex; align-items: center; justify-content: center; gap: 0.55rem;
-    border-radius: 9999px; padding: 0.9rem 2.3rem; font-weight: 500; letter-spacing: 0.01em;
-    transition: background-color .3s ease, color .3s ease, border-color .3s ease, transform .3s ease;
+    border-radius: 9999px; padding: 0.9rem 2.3rem; font-weight: 500;
+    transition: background-color .3s ease, color .3s ease, border-color .3s ease, transform .3s ease, box-shadow .3s ease;
   }
-  .btn-primary { background: var(--color-wine-500); color: var(--color-porcelain-50); }
-  .btn-primary:hover { background: var(--color-wine-600); transform: translateY(-1px); }
-  .btn-ghost { border: 1px solid color-mix(in srgb, var(--color-ink) 28%, transparent); color: var(--color-ink); }
-  .btn-ghost:hover { background: var(--color-ink); color: var(--color-porcelain-50); }
-  .btn-on-dark { border: 1px solid rgba(247,240,230,0.42); color: var(--color-porcelain-50); }
-  .btn-on-dark:hover { background: var(--color-porcelain-50); color: var(--color-espresso-900); }
+  .btn-primary { background: var(--color-madder); color: var(--color-ivory); box-shadow: 0 16px 34px -18px var(--color-madder); }
+  .btn-primary:hover { background: #d2573c; transform: translateY(-1px); }
+  .btn-ghost { border: 1px solid color-mix(in srgb, var(--color-saffron) 58%, transparent); color: var(--color-saffron); }
+  .btn-ghost:hover { background: var(--color-saffron); color: var(--color-ground); border-color: var(--color-saffron); }
+  .btn-on-dark { border: 1px solid color-mix(in srgb, var(--color-saffron) 55%, transparent); color: var(--color-ivory); }
+  .btn-on-dark:hover { background: var(--color-saffron); color: var(--color-ground); }
 
-  /* ---- Surfaces ---- */
+  /* ---- Surfaces: ivory lantern panels float on the aubergine night ---- */
   .panel {
-    background: linear-gradient(180deg, var(--color-porcelain-50), var(--color-porcelain));
-    border: 1px solid var(--color-porcelain-200);
-    border-radius: 1.25rem;
+    background: linear-gradient(180deg, #f7efe0, var(--color-ivory));
+    border: 1px solid color-mix(in srgb, var(--color-saffron) 28%, #e7d6b8);
+    border-radius: 1.25rem; color: var(--color-ground);
+    box-shadow: 0 44px 90px -48px rgba(0,0,0,0.75);
+  }
+  /* aubergine mat that frames a LIGHT keepsake card on the dark page */
+  .card-mat {
+    background: color-mix(in srgb, var(--color-ground) 86%, #000);
+    border: 1px solid color-mix(in srgb, var(--color-saffron) 22%, transparent);
+    border-radius: 1.1rem; padding: 0.85rem;
   }
   .sec-head { display: flex; flex-direction: column; align-items: center; gap: 0.7rem; }
 
-  /* ---- Suggestion chips ---- */
+  /* ---- Suggestion chips (inside the light form panel) ---- */
   .chip {
-    border-radius: 9999px; border: 1px solid var(--color-sand);
-    background: var(--color-porcelain-50); color: var(--color-ink);
+    border-radius: 9999px; border: 1px solid #e0cfae;
+    background: #fbf4e6; color: #5a4632;
     padding: 0.45rem 0.95rem; font-size: 0.875rem;
-    transition: border-color .2s ease, color .2s ease, transform .2s ease;
+    transition: border-color .2s ease, color .2s ease, background-color .2s ease, transform .2s ease;
   }
-  .chip:hover { border-color: var(--color-wine-500); color: var(--color-wine-600); transform: translateY(-1px); }
-  .chip.is-selected { border-color: var(--color-wine-500); background: var(--color-blush); color: var(--color-wine-700); }
+  .chip:hover { border-color: var(--color-madder); color: var(--color-madder); transform: translateY(-1px); }
+  .chip.is-selected { border-color: var(--color-madder); background: color-mix(in srgb, var(--color-madder) 13%, #fff); color: var(--color-madder); }
 
-  /* ---- Form fields ---- */
+  /* ---- Form fields (light) ---- */
   .field {
-    width: 100%; border-radius: 0.85rem; border: 1px solid var(--color-sand);
-    background: var(--color-porcelain-50); color: var(--color-ink);
+    width: 100%; border-radius: 0.85rem; border: 1px solid #e0cfae;
+    background: #fffaf0; color: var(--color-ground);
     padding: 0.95rem 1.15rem; transition: border-color .2s ease, box-shadow .2s ease;
   }
-  .field::placeholder { color: color-mix(in srgb, var(--color-cloud) 75%, transparent); }
-  .field:focus { outline: none; border-color: var(--color-wine-500); box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-wine-500) 14%, transparent); }
+  .field::placeholder { color: #a8967c; }
+  .field:focus { outline: none; border-color: var(--color-saffron); box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-saffron) 32%, transparent); }
 
-  /* ---- Hero: artwork dissolving into the page ---- */
-  .art-frame { position: relative; overflow: hidden; }
-  .art-frame img { width: 100%; height: 100%; object-fit: cover; object-position: 62% 32%; display: block; }
-  /* bottom fade into porcelain (mobile / stacked) */
-  .art-fade-b::after {
-    content: ""; position: absolute; inset: 0; pointer-events: none;
-    background: linear-gradient(to bottom, transparent 38%, color-mix(in srgb, var(--color-porcelain) 70%, transparent) 72%, var(--color-porcelain) 100%);
-  }
-  /* inner-edge fade toward the text column (desktop split, RTL: fade left) */
-  .art-fade-s::after {
-    content: ""; position: absolute; inset: 0; pointer-events: none;
-    background: linear-gradient(to left, transparent 55%, color-mix(in srgb, var(--color-porcelain) 60%, transparent) 82%, var(--color-porcelain) 100%);
-  }
+  /* ---- Names wordmark (Aref Ruqaa; no letter-spacing — breaks Arabic joins) ---- */
+  .names { font-family: var(--font-display); font-weight: 700; color: var(--color-ivory); }
+  .names .amp { font-family: var(--font-serif); font-weight: 500; font-style: italic; color: var(--color-mauve); }
 
-  /* ---- Names wordmark (no letter-spacing: it would break Arabic joins) ---- */
-  .names { font-family: var(--font-display); font-weight: 700; color: var(--color-wine-700); }
-  .names .amp { font-family: var(--font-serif); font-weight: 500; font-style: italic; color: var(--color-rose-500); }
-
-  /* ---- Wall cards ---- */
+  /* ---- Wall cards: ivory lanterns with a tatreez-thread top edge ---- */
   .msg-card {
-    background: var(--color-porcelain-50); border: 1px solid var(--color-porcelain-200);
-    border-radius: 1.1rem; padding: 1.6rem 1.5rem;
+    position: relative; background: var(--color-ivory); color: var(--color-ground);
+    border-radius: 1rem; padding: 1.6rem 1.5rem; border-top: 3px solid var(--color-madder);
+    box-shadow: 0 30px 60px -38px rgba(0,0,0,0.75);
     transition: transform .3s ease, box-shadow .3s ease;
   }
-  .msg-card:hover { transform: translateY(-3px); box-shadow: 0 22px 44px -28px rgba(44,33,27,0.4); }
+  .msg-card--photo { border-top-color: var(--color-olive); }
+  .msg-card:hover { transform: translateY(-3px); box-shadow: 0 38px 72px -34px rgba(0,0,0,0.82); }
+
+  /* ---- درب مصر — the road-to-Egypt tatreez seam (the signature) ---- */
+  .seam {
+    height: 16px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='16' viewBox='0 0 28 16'%3E%3Cpath d='M14 1l5 7-5 7-5-7z' fill='%23c2492f'/%3E%3Cpath d='M0 8l4-3 4 3-4 3zM28 8l-4-3-4 3 4 3z' fill='%236f7a3f'/%3E%3C/svg%3E");
+    background-repeat: repeat-x; background-position: center;
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 18%, #000 82%, transparent);
+            mask-image: linear-gradient(90deg, transparent, #000 18%, #000 82%, transparent);
+    opacity: 0.92;
+  }
+  /* hero band: three stacked rows (madder ▸ saffron ▸ olive) — the road turns toward Cairo */
+  .seam--band {
+    height: 48px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='48' viewBox='0 0 28 48'%3E%3Cpath d='M14 1l5 7-5 7-5-7z' fill='%23c2492f'/%3E%3Cpath d='M0 8l4-3 4 3-4 3zM28 8l-4-3-4 3 4 3z' fill='%236f7a3f'/%3E%3Cpath d='M14 17l5 7-5 7-5-7z' fill='%23e3a83f'/%3E%3Cpath d='M0 24l4-3 4 3-4 3zM28 24l-4-3-4 3 4 3z' fill='%23c2492f'/%3E%3Cpath d='M14 33l5 7-5 7-5-7z' fill='%236f7a3f'/%3E%3Cpath d='M0 40l4-3 4 3-4 3zM28 40l-4-3-4 3 4 3z' fill='%23e3a83f'/%3E%3C/svg%3E");
+  }
+  /* the one motion beat: the band stitches itself right-to-left, once */
+  .seam--draw { animation: stitch 1s cubic-bezier(.4,0,.2,1) both; }
+  @keyframes stitch { from { clip-path: inset(0 0 0 100%); } to { clip-path: inset(0 0 0 0); } }
+
+  /* ---- golden-hour bloom: the single warm light source (top-right) ---- */
+  .bloom { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 0; }
+  .bloom::before {
+    content: ""; position: absolute; top: -12%; right: 4%; width: 78vw; height: 78vw;
+    max-width: 760px; max-height: 760px; border-radius: 50%;
+    background: radial-gradient(circle, color-mix(in srgb, var(--color-saffron) 32%, transparent) 0%, color-mix(in srgb, var(--color-madder) 15%, transparent) 40%, transparent 68%);
+    animation: bloom 1.5s ease both;
+  }
+  @keyframes bloom { from { opacity: 0; transform: scale(.86); } to { opacity: 1; transform: none; } }
 
   /* ---- Motion ---- */
   .reveal { opacity: 0; transform: translateY(18px); transition: opacity .9s cubic-bezier(.2,.8,.2,1), transform .9s cubic-bezier(.2,.8,.2,1); }
@@ -153,8 +187,10 @@
   html.show-envelope { overflow: hidden; }
   .envelope-overlay {
     position: fixed; inset: 0; z-index: 60; display: none; align-items: center; justify-content: center;
-    padding: 28px; color: var(--color-porcelain-50);
-    background: var(--color-espresso-900);
+    padding: 28px; color: var(--color-ivory);
+    background:
+      radial-gradient(78% 56% at 72% 12%, color-mix(in srgb, var(--color-saffron) 20%, transparent), transparent 60%),
+      var(--color-ground);
   }
   .show-envelope .envelope-overlay { display: flex; }
   .envelope-overlay.is-closing { opacity: 0; transform: translateY(-12px); transition: opacity .7s ease, transform .7s ease; }
@@ -176,12 +212,12 @@
       linear-gradient(180deg, #fbf6ee 0%, #f3e8d8 100%);
   }
   .wed-card__eyebrow { font-family: var(--font-serif); font-style: italic; font-size: 38px; color: var(--color-rose-500); margin: 0; }
-  .wed-card__names { font-family: var(--font-display); font-weight: 700; font-size: 138px; line-height: 1.02; color: var(--color-wine-700); margin: 22px 0 0; white-space: nowrap; }
+  .wed-card__names { font-family: "Markazi Text", serif; font-weight: 700; font-size: 138px; line-height: 1.02; color: var(--color-wine-700); margin: 22px 0 0; white-space: nowrap; }
   .wed-card__names span { font-family: var(--font-serif); font-style: italic; font-weight: 500; color: var(--color-rose-500); font-size: 104px; }
   .wed-card__body { display: flex; flex-direction: column; align-items: center; }
   .wed-card__rule { width: 56px; height: 1.5px; background: var(--color-champagne); margin: 46px 0; }
   .wed-card__message { font-family: var(--font-body); font-weight: 400; font-size: 50px; line-height: 1.8; color: #3a2a22; margin: 0; max-width: 800px; white-space: pre-wrap; overflow-wrap: anywhere; }
-  .wed-card__from { font-family: var(--font-display); font-weight: 600; font-size: 46px; color: var(--color-wine-600); margin: 52px 0 0; white-space: nowrap; }
+  .wed-card__from { font-family: "Markazi Text", serif; font-weight: 600; font-size: 46px; color: var(--color-wine-600); margin: 52px 0 0; white-space: nowrap; }
   .wed-card__foot { display: flex; flex-direction: column; align-items: center; gap: 14px; }
   .wed-card__date { font-family: var(--font-serif); font-weight: 500; font-size: 42px; letter-spacing: 8px; color: #3a2a22; direction: ltr; }
   .wed-card__site { font-family: var(--font-serif); font-style: italic; font-size: 28px; letter-spacing: 1px; color: var(--color-champagne); }
@@ -343,6 +379,8 @@
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  .reveal, .up, .intro-inner { opacity: 1 !important; transform: none !important; animation: none !important; transition: none !important; }
+  .reveal, .up, .intro-inner, .seam--draw, .bloom::before {
+    opacity: 1 !important; transform: none !important; animation: none !important; transition: none !important; clip-path: none !important;
+  }
   .btn-spinner { animation: none !important; }
 }

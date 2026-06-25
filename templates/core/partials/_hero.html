@@ -1,50 +1,52 @@
 {% load static i18n %}
-<section class="relative overflow-hidden bg-porcelain">
-  <div class="mx-auto grid max-w-6xl items-center lg:min-h-screen lg:grid-cols-2">
+<section class="relative isolate overflow-hidden bg-ground">
+  <div class="bloom" aria-hidden="true"></div>
 
-    {# Artwork — dissolves into the porcelain page (not a boxed photo) #}
-    <div class="art-frame up d2 relative h-[56vh] min-h-[340px] w-full lg:h-screen lg:max-h-[880px]">
-      <img src="{% static 'img/hero-bg.jpg' %}" alt="لوحة العروسين محمود ورينان عند الغروب">
-      <div class="pointer-events-none absolute inset-0 lg:hidden" style="background:linear-gradient(to bottom, transparent 34%, rgba(247,240,230,.55) 66%, #f7f0e6 100%)"></div>
-      <div class="pointer-events-none absolute inset-0 hidden lg:block" style="background:linear-gradient(to left, transparent 50%, rgba(247,240,230,.55) 80%, #f7f0e6 100%)"></div>
+  <div class="relative z-10 mx-auto flex min-h-screen max-w-2xl flex-col items-center justify-center px-6 py-24 text-center">
+    <p class="up d1 eyebrow">An Evening Celebration</p>
+    <div class="up d1 rule mt-5"></div>
+
+    {# Invitation — both fathers (small, on dark → Tajawal, not the heavy display face) #}
+    <div class="up d2 mt-8 max-w-md leading-relaxed text-wheat">
+      <p class="text-sm">يتشرّف</p>
+      <p class="mt-2 text-lg text-ivory/90">{{ config.groom_father }}</p>
+      <p class="my-1 label-lat text-base">&amp;</p>
+      <p class="text-lg text-ivory/90">{{ config.bride_father }}</p>
+      <p class="mt-3 text-sm">بدعوتكم لحضور حفل زفاف أبنائهما</p>
     </div>
 
-    {# Invitation, names, date, countdown, CTA — on clean porcelain #}
-    <div class="relative z-10 -mt-20 px-6 pb-20 text-center lg:mt-0 lg:px-14 lg:pb-0 lg:text-right">
-      <p class="up d1 label-lat">Wedding Invitation</p>
+    {# The two names — Aref Ruqaa, ivory, with a Dusk-Mauve ligature #}
+    <h1 class="up d3 names mt-9 text-7xl leading-[1.12] sm:text-8xl">
+      {{ config.groom_name }}<span class="amp my-2 block text-4xl sm:text-5xl">&amp;</span>{{ config.bride_name }}
+    </h1>
 
-      <div class="up d2 mx-auto mt-5 max-w-sm text-ink-soft lg:mx-0">
-        <p class="text-sm leading-relaxed">يتشرّف</p>
-        <p class="mt-2 font-display text-xl leading-snug text-ink">{{ config.groom_father }}</p>
-        <p class="my-0.5 label-lat text-base">&amp;</p>
-        <p class="font-display text-xl leading-snug text-ink">{{ config.bride_father }}</p>
-        <p class="mt-2 text-sm leading-relaxed">بدعوتكم لحضور حفل زفاف أبنائهما</p>
+    {# درب مصر — the road-to-Egypt seam stitches the families together #}
+    <div class="up d3 seam seam--band seam--draw mt-9 w-full max-w-[18rem]" aria-hidden="true"></div>
+
+    <p class="up d4 num mt-8 text-lg text-wheat">{% language 'ar' %}{{ config.wedding_datetime|date:'d . m . Y' }}{% endlanguage %}</p>
+    {% if config.venue_name %}<p class="up d4 mt-1 text-sm text-wheat/80">{{ config.venue_name }}</p>{% endif %}
+
+    {# countdown — saffron digits in midnight-indigo tiles #}
+    <div id="countdown" data-target="{{ config.wedding_datetime|date:'c' }}"
+         class="up d5 mt-9 flex items-stretch justify-center gap-2.5 sm:gap-3.5">
+      <div class="flex min-w-[3.5rem] flex-col items-center rounded-xl border border-saffron/30 bg-ground-indigo/55 px-3 py-2.5">
+        <span data-unit="days" class="num text-3xl leading-none text-saffron sm:text-4xl">0</span><span class="mt-1.5 text-[0.62rem] text-wheat">يوم</span>
       </div>
-
-      <h1 class="up d3 names mt-7 text-6xl leading-[0.95] sm:text-7xl">
-        {{ config.groom_name }} <span class="amp">&amp;</span> {{ config.bride_name }}
-      </h1>
-
-      <p class="up d4 num mt-5 text-lg tracking-[0.3em] text-ink-soft">{% language 'ar' %}{{ config.wedding_datetime|date:'d . m . Y' }}{% endlanguage %}</p>
-      {% if config.venue_name %}<p class="up d4 mt-1 text-sm tracking-wide text-cloud">{{ config.venue_name }}</p>{% endif %}
-
-      {# integrated countdown — minimal #}
-      <div id="countdown" data-target="{{ config.wedding_datetime|date:'c' }}"
-           class="up d5 mt-8 flex items-end justify-center gap-5 sm:gap-7 lg:justify-start">
-        <div class="flex min-w-[2.7rem] flex-col items-center"><span data-unit="days" class="num text-4xl leading-none text-wine-700 sm:text-5xl">0</span><span class="mt-2 text-[0.62rem] text-cloud">يوم</span></div>
-        <span class="mb-3 h-7 w-px bg-sand"></span>
-        <div class="flex min-w-[2.7rem] flex-col items-center"><span data-unit="hours" class="num text-4xl leading-none text-wine-700 sm:text-5xl">00</span><span class="mt-2 text-[0.62rem] text-cloud">ساعة</span></div>
-        <span class="mb-3 h-7 w-px bg-sand"></span>
-        <div class="flex min-w-[2.7rem] flex-col items-center"><span data-unit="minutes" class="num text-4xl leading-none text-wine-700 sm:text-5xl">00</span><span class="mt-2 text-[0.62rem] text-cloud">دقيقة</span></div>
-        <span class="mb-3 h-7 w-px bg-sand"></span>
-        <div class="flex min-w-[2.7rem] flex-col items-center"><span data-unit="seconds" class="num text-4xl leading-none text-wine-700 sm:text-5xl">00</span><span class="mt-2 text-[0.62rem] text-cloud">ثانية</span></div>
+      <div class="flex min-w-[3.5rem] flex-col items-center rounded-xl border border-saffron/30 bg-ground-indigo/55 px-3 py-2.5">
+        <span data-unit="hours" class="num text-3xl leading-none text-saffron sm:text-4xl">00</span><span class="mt-1.5 text-[0.62rem] text-wheat">ساعة</span>
       </div>
-      <p data-countdown-done class="up d5 mt-6 hidden text-base tracking-wide text-rose-500">تمّ الزفاف بحمد الله</p>
-
-      <div class="up d6 mt-9 flex flex-col items-center gap-3 sm:flex-row sm:justify-center lg:justify-start">
-        <a href="#greeting" class="btn btn-primary">اكتب تهنئتك</a>
-        <a href="#wall" class="btn btn-ghost">شاهد التهاني</a>
+      <div class="flex min-w-[3.5rem] flex-col items-center rounded-xl border border-saffron/30 bg-ground-indigo/55 px-3 py-2.5">
+        <span data-unit="minutes" class="num text-3xl leading-none text-saffron sm:text-4xl">00</span><span class="mt-1.5 text-[0.62rem] text-wheat">دقيقة</span>
       </div>
+      <div class="flex min-w-[3.5rem] flex-col items-center rounded-xl border border-saffron/30 bg-ground-indigo/55 px-3 py-2.5">
+        <span data-unit="seconds" class="num text-3xl leading-none text-saffron sm:text-4xl">00</span><span class="mt-1.5 text-[0.62rem] text-wheat">ثانية</span>
+      </div>
+    </div>
+    <p data-countdown-done class="up d5 mt-6 hidden text-base text-saffron">تمّ الزفاف بحمد الله</p>
+
+    <div class="up d6 mt-10 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+      <a href="#greeting" class="btn btn-primary">اكتب تهنئتك</a>
+      <a href="#wall" class="btn btn-ghost">شاهد التهاني</a>
     </div>
   </div>
 </section>

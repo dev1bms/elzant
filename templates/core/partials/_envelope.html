@@ -6,18 +6,18 @@
 {% endcomment %}
 <div class="envelope-overlay" id="envelope" role="dialog" aria-modal="true" aria-label="دعوة الزفاف">
   <div class="intro-inner">
-    <p class="label-lat text-rose-300">Wedding Invitation</p>
-    <p class="mt-8 text-sm text-porcelain-50/70">دعوة زفاف</p>
-    <h1 class="mt-3 font-display text-5xl font-semibold leading-tight text-porcelain-50 sm:text-6xl">
-      {{ config.groom_name }} <span class="num text-3xl not-italic text-rose-300">&amp;</span> {{ config.bride_name }}
+    <p class="label-lat">Wedding Invitation</p>
+    <p class="mt-8 text-sm text-wheat">دعوة زفاف</p>
+    <h1 class="names mt-3 text-5xl leading-tight sm:text-6xl">
+      {{ config.groom_name }} <span class="amp text-3xl">&amp;</span> {{ config.bride_name }}
     </h1>
-    <div class="mx-auto my-7 h-px w-14 bg-champagne/50"></div>
-    <p class="num text-sm tracking-[0.3em] text-porcelain-50/70">{% language 'ar' %}{{ config.wedding_datetime|date:'d . m . Y' }}{% endlanguage %}</p>
+    <div class="seam mx-auto my-8 w-44" aria-hidden="true"></div>
+    <p class="num text-sm text-wheat">{% language 'ar' %}{{ config.wedding_datetime|date:'d . m . Y' }}{% endlanguage %}</p>
 
     <div class="mt-10">
       <button type="button" id="envelope-open" class="btn btn-on-dark">الدخول للدعوة</button>
     </div>
-    <button type="button" id="envelope-skip" class="mt-6 text-xs tracking-wide text-porcelain-50/40 underline-offset-4 transition hover:text-porcelain-50/70 hover:underline">تخطّي</button>
+    <button type="button" id="envelope-skip" class="mt-6 text-xs tracking-wide text-wheat/55 underline-offset-4 transition hover:text-wheat hover:underline">تخطّي</button>
   </div>
 </div>
 <script>
