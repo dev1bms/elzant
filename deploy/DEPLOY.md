@@ -130,14 +130,14 @@ sudo install -d -o elzant -g elzant /srv/elzant/media
 في `/srv/elzant/.env`:
 ```
 MEDIA_ROOT=/srv/elzant/media
-SERVE_MEDIA=False   # اضبطها True فقط في الحالة (أ) أدناه
+# SERVE_MEDIA=True  ← الافتراضي؛ Django يخدم /media/ تلقائياً فتعمل الصور مباشرةً
 ```
 
-اختر طريقة خدمة `/media/` حسب مسار النشر:
-- **(أ) Cloudflare Tunnel مباشرةً إلى Gunicorn (بلا Caddy/Nginx):** اضبط
-  `SERVE_MEDIA=True` ليخدم Django المسار `/media/` بنفسه (مقبول لموقع منخفض الحركة
-  ومُخزَّن على Cloudflare). الحجم الأقصى للرفع 10MB؛ النفق يسمح به افتراضياً.
-- **(ب) Caddy:** أضف خدمة الملفات قبل التمرير العكسي، وأبقِ `SERVE_MEDIA=False`:
+**افتراضياً `SERVE_MEDIA=True`** فيخدم Django المسار `/media/` بنفسه — تعمل الصور
+على أي مسار نشر دون إعداد إضافي (مقبول لموقع منخفض الحركة ومُخزَّن على Cloudflare).
+الحجم الأقصى للرفع 10MB؛ نفق Cloudflare يسمح به افتراضياً. لكفاءة أعلى يمكن أن يخدم
+الوسيط `/media/` بدل Django (واضبط حينها `SERVE_MEDIA=False`):
+- **Caddy:**
   ```
   elzant.com, www.elzant.com {
       encode gzip
@@ -145,9 +145,8 @@ SERVE_MEDIA=False   # اضبطها True فقط في الحالة (أ) أدناه
       reverse_proxy 127.0.0.1:8001
   }
   ```
-- **(ج) Nginx:** ملف المثال [nginx-elzant.conf](nginx-elzant.conf) يحوي
-  `location /media/` و`client_max_body_size 12m` (يتجاوز حدّ الـ10MB). أبقِ
-  `SERVE_MEDIA=False`.
+- **Nginx:** ملف المثال [nginx-elzant.conf](nginx-elzant.conf) يحوي
+  `location /media/` و`client_max_body_size 12m` (يتجاوز حدّ الـ10MB).
 
 النسخ الاحتياطي: انسخ `/srv/elzant/media/` مع قاعدة البيانات (انظر الأسفل).
 
