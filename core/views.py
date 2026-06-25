@@ -27,6 +27,9 @@ def home(request):
                     form.add_error("photo", str(exc))
             if not form.errors:
                 greeting = form.save(commit=False)
+                # Post-moderation: publish immediately; the admin can hide later.
+                greeting.status = Greeting.Status.APPROVED
+                greeting.approved_at = timezone.now()
                 ip = get_client_ip(request)
                 greeting.ip_address = ip
                 # Best-effort country (disabled by default; never blocks the save).
@@ -47,7 +50,7 @@ def home(request):
                     guest.invitation_status = WeddingGuest.Status.GREETED
                     guest.save(update_fields=["invitation_status", "updated_at"])
                 # Pass card data to the thank-you page via the session (not the
-                # pk) so pending records can't be enumerated or read by URL.
+                # pk) so records can't be enumerated or read by URL.
                 request.session["card"] = {
                     "name": greeting.name,
                     "message": greeting.message,
@@ -62,7 +65,7 @@ def home(request):
         "core/home.html",
         {
             "form": form,
-            "greetings": Greeting.approved(),
+            "greetings": Greeting.visible(),
             "suggestions": GreetingSuggestion.active_suggestions(),
         },
     )

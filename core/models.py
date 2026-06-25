@@ -177,12 +177,13 @@ class GreetingSuggestion(models.Model):
 
 
 class Greeting(models.Model):
-    """A visitor's greeting — shown on the wall only after approval."""
+    """A visitor's greeting — published to the wall immediately; the admin can
+    hide (ban) anything inappropriate afterwards (post-moderation)."""
 
     class Status(models.TextChoices):
-        PENDING = "pending", "قيد المراجعة"
-        APPROVED = "approved", "معتمد"
-        REJECTED = "rejected", "مرفوض"
+        PENDING = "pending", "بانتظار"   # legacy; treated as visible
+        APPROVED = "approved", "ظاهرة"   # published / live
+        REJECTED = "rejected", "محظورة"  # hidden by the admin
 
     class CardTemplate(models.TextChoices):
         NO_PHOTO_MINIMAL = "no_photo_minimal", "بدون صورة — راقٍ"
@@ -199,7 +200,7 @@ class Greeting(models.Model):
     name = models.CharField("اسم المهنّئ", max_length=60)
     message = models.TextField("نص التهنئة", max_length=500)
     # Optional photo — processed/optimized (EXIF-stripped); original never stored.
-    # Only ever shown publicly once the greeting is APPROVED.
+    # Published with the greeting; hidden only if the admin bans it.
     uploaded_photo = models.ImageField("الصورة", upload_to="greetings/cards/", null=True, blank=True)
     photo_thumbnail = models.ImageField(upload_to="greetings/thumbs/", null=True, blank=True)
     card_template = models.CharField(
@@ -207,13 +208,14 @@ class Greeting(models.Model):
         default=CardTemplate.NO_PHOTO_MINIMAL,
     )
     status = models.CharField(
-        max_length=10, choices=Status.choices, default=Status.PENDING, db_index=True
+        max_length=10, choices=Status.choices, default=Status.APPROVED, db_index=True
     )
     # Linked when the greeting was written from a guest's private invitation link.
     guest = models.ForeignKey(
         WeddingGuest, null=True, blank=True, on_delete=models.SET_NULL, related_name="greetings"
     )
     created_at = models.DateTimeField(auto_now_add=True)
+    # When it went live (set on creation; greetings publish immediately).
     approved_at = models.DateTimeField(null=True, blank=True)
     # Stored for moderation only — never displayed publicly.
     ip_address = models.GenericIPAddressField(null=True, blank=True)
@@ -241,6 +243,11 @@ class Greeting(models.Model):
     def has_photo(self):
         return bool(self.uploaded_photo)
 
+    @property
+    def is_hidden(self):
+        """True when the admin has banned/hidden this greeting."""
+        return self.status == self.Status.REJECTED
+
     def effective_template(self):
         """The template actually used to render the card.
 
@@ -254,7 +261,6 @@ class Greeting(models.Model):
         return self.CardTemplate.PHOTO_FRAME
 
     @classmethod
-    def approved(cls):
-        return cls.objects.filter(status=cls.Status.APPROVED).order_by(
-            "-approved_at", "-created_at"
-        )
+    def visible(cls):
+        """Greetings shown publicly on the wall — everything except banned ones."""
+        return cls.objects.exclude(status=cls.Status.REJECTED).order_by("-created_at")
