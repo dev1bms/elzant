@@ -148,13 +148,13 @@ STATICFILES_DIRS = [BASE_DIR / "static"]
 
 # User-uploaded media (greeting photos) — kept separate from static files and out
 # of git (see .gitignore). In production set MEDIA_ROOT to a persistent, backed-up
-# path and make sure /media/ is served (see deploy/DEPLOY.md → "Media").
-#   • Behind Caddy/Nginx: let the proxy serve /media/ and leave SERVE_MEDIA off.
-#   • Gunicorn directly behind Cloudflare Tunnel (no file proxy): set SERVE_MEDIA=True
-#     so Django serves /media/ itself (fine for this low-traffic, Cloudflare-cached site).
+# path. WhiteNoise never serves user media, so /media/ needs its own route.
+# SERVE_MEDIA defaults ON so Django serves /media/ itself and photos work out of
+# the box on any deploy (fine for this low-traffic, Cloudflare-cached site). If a
+# proxy (Caddy/Nginx) serves /media/ for efficiency, set SERVE_MEDIA=False.
 MEDIA_URL = "media/"
 MEDIA_ROOT = env("MEDIA_ROOT", default=str(BASE_DIR / "media"))
-SERVE_MEDIA = env.bool("SERVE_MEDIA", default=False)
+SERVE_MEDIA = env.bool("SERVE_MEDIA", default=True)
 
 # Use WhiteNoise's compressed+hashed storage only in production. In DEBUG keep
 # the plain storage so {% static %} works without running collectstatic.
