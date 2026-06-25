@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}دعوة خاصة — {{ guest.full_name }}{% endblock %}
+{% block extra_head %}<meta name="robots" content="noindex, nofollow">{% endblock %}
+
+{% block content %}
+<section class="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-ink-900 px-6 py-20 text-center text-ivory-50"
+         style="background-image: linear-gradient(rgba(20,14,12,0.55), rgba(20,14,12,0.80)), url('{% static 'img/hero-bg.jpg' %}'); background-size: cover; background-position: center;">
+  <div class="relative">
+    <p class="up d1 kicker">Private Invitation</p>
+
+    <p class="up d2 mt-9 text-sm tracking-[0.3em] text-ivory-100/70">دعوة خاصة إلى</p>
+    <h1 class="up d2 mt-3 text-4xl font-light leading-tight text-ivory-50 drop-shadow-[0_2px_12px_rgba(0,0,0,0.5)] sm:text-5xl">{{ guest.full_name }}</h1>
+
+    <div class="up d3 mx-auto my-7 h-px w-16 bg-gold-400/60"></div>
+
+    <div class="up d3 mx-auto max-w-lg text-ivory-100/85 drop-shadow-[0_1px_8px_rgba(0,0,0,0.5)]">
+      <p class="text-xs tracking-[0.3em] text-ivory-100/55">يتشرّف</p>
+      <p class="mt-3 text-base leading-relaxed">{{ config.groom_father }}</p>
+      <p class="eyebrow my-1 text-lg text-rose-300">&amp;</p>
+      <p class="text-base leading-relaxed">{{ config.bride_father }}</p>
+      <p class="mt-3 text-xs tracking-[0.25em] text-ivory-100/55">بدعوتكم لحضور حفل زفاف أبنائهما</p>
+    </div>
+
+    <h2 class="up d4 mt-5 text-5xl font-light leading-[1.08] drop-shadow-[0_2px_12px_rgba(0,0,0,0.5)] sm:text-6xl">
+      {{ config.groom_name }}<span class="eyebrow mx-3 align-middle text-3xl text-rose-300">&amp;</span>{{ config.bride_name }}
+    </h2>
+    <p class="up d4 num mt-5 text-base tracking-[0.35em] text-ivory-100/80">{% language 'ar' %}{{ config.wedding_datetime|date:'d . m . Y' }}{% endlanguage %}</p>
+    {% if config.venue_name %}
+      <p class="up d5 mt-2 text-sm text-ivory-100/70">{{ config.venue_name }}{% if config.venue_address %} · {{ config.venue_address }}{% endif %}</p>
+    {% endif %}
+
+    <div id="countdown" data-target="{{ config.wedding_datetime|date:'c' }}"
+         class="up d5 mt-9 flex items-center justify-center gap-4 sm:gap-7">
+      <div class="flex min-w-[3rem] flex-col items-center"><span data-unit="days" class="num text-4xl font-light leading-none text-ivory-50">0</span><span class="mt-2 text-[0.62rem] tracking-[0.22em] text-ivory-100/60">يوم</span></div>
+      <span class="h-9 w-px bg-ivory-100/20"></span>
+      <div class="flex min-w-[3rem] flex-col items-center"><span data-unit="hours" class="num text-4xl font-light leading-none text-ivory-50">00</span><span class="mt-2 text-[0.62rem] tracking-[0.22em] text-ivory-100/60">ساعة</span></div>
+      <span class="h-9 w-px bg-ivory-100/20"></span>
+      <div class="flex min-w-[3rem] flex-col items-center"><span data-unit="minutes" class="num text-4xl font-light leading-none text-ivory-50">00</span><span class="mt-2 text-[0.62rem] tracking-[0.22em] text-ivory-100/60">دقيقة</span></div>
+      <span class="h-9 w-px bg-ivory-100/20"></span>
+      <div class="flex min-w-[3rem] flex-col items-center"><span data-unit="seconds" class="num text-4xl font-light leading-none text-ivory-50">00</span><span class="mt-2 text-[0.62rem] tracking-[0.22em] text-ivory-100/60">ثانية</span></div>
+    </div>
+    <p data-countdown-done class="up d5 mt-7 hidden text-lg tracking-wide text-rose-300">تمّ الزفاف بحمد الله</p>
+
+    <div class="up d6 mt-11 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+      <a href="{% url 'home' %}#greeting" class="btn btn-solid">اكتب تهنئتك</a>
+      <a href="{% url 'home' %}" class="btn btn-line-light">افتح الدعوة العامة</a>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+  <script src="{% static 'js/countdown.js' %}" defer></script>
+{% endblock %}

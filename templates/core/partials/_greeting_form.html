@@ -17,6 +17,19 @@
         {% if form.name.errors %}<p class="mt-2 text-sm text-burgundy-500">{{ form.name.errors.0 }}</p>{% endif %}
       </div>
 
+      {% if suggestions %}
+        <div>
+          <p class="mb-2.5 text-sm text-charcoal-soft">لا تعرف ماذا تكتب؟ اختر تهنئة جاهزة ثم عدّلها:</p>
+          <div class="flex flex-wrap gap-2" id="suggestion-chips">
+            {% for s in suggestions %}
+              <button type="button"
+                      class="suggestion-chip rounded-full border border-sand-300 bg-white px-3.5 py-1.5 text-sm text-charcoal transition hover:-translate-y-0.5 hover:border-burgundy-500 hover:text-burgundy-600"
+                      data-text="{{ s.text_ar }}">{{ s.text_ar|truncatechars:34 }}</button>
+            {% endfor %}
+          </div>
+        </div>
+      {% endif %}
+
       <div>
         <label for="{{ form.message.id_for_label }}" class="mb-2 block text-sm tracking-wide text-charcoal-soft">رسالتك للعروسين</label>
         {{ form.message }}
@@ -24,6 +37,10 @@
       </div>
 
       <button type="submit" class="btn btn-solid w-full">{% trans "إرسال التهنئة" %}</button>
+      <p class="text-center text-xs leading-relaxed text-charcoal-soft/70">
+        يُعرض اسمك ورسالتك بعد المراجعة فقط — لا يُعرض رقمك أو بريدك.
+        <a href="{% url 'privacy' %}" class="underline underline-offset-2 hover:text-burgundy-600">إشعار الخصوصية</a>
+      </p>
     </form>
   </div>
 </section>

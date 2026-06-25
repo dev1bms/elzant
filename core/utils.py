@@ -1,4 +1,50 @@
 import ipaddress
+import re
+
+_PLACEHOLDER_RE = re.compile(r"{{\s*(\w+)\s*}}")
+
+
+def render_message(template, mapping):
+    """Substitute {{ key }} placeholders in an admin-edited template string.
+
+    Unknown placeholders are left as-is. No code execution — plain text only.
+    """
+    if not template:
+        return ""
+    return _PLACEHOLDER_RE.sub(
+        lambda m: str(mapping.get(m.group(1), m.group(0))), template
+    )
+
+
+def lookup_country(ip):
+    """Best-effort (country_code, country_name); disabled by default, never raises.
+
+    Enable with GEOIP_ENABLED=True + a local MaxMind GeoLite2-Country.mmdb
+    (GEOIP_PATH) and ``pip install geoip2`` — no external API call per request.
+    Results are cached per IP for 24h. Returns (None, None) when unavailable.
+    """
+    from django.conf import settings
+    from django.core.cache import cache
+
+    if not ip or not getattr(settings, "GEOIP_ENABLED", False):
+        return (None, None)
+
+    cache_key = f"geoip:{ip}"
+    cached = cache.get(cache_key)
+    if cached is not None:
+        return cached
+
+    result = (None, None)
+    try:  # all optional — any failure leaves the country blank
+        from django.contrib.gis.geoip2 import GeoIP2
+
+        info = GeoIP2().country(ip)
+        result = (info.get("country_code") or "", info.get("country_name") or "")
+    except Exception:
+        result = (None, None)
+
+    cache.set(cache_key, result, 60 * 60 * 24)
+    return result
 
 
 def _valid_ip(value):

@@ -182,3 +182,28 @@ SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 # guests). Spam defenses here are CSRF + honeypot + length limits + manual
 # moderation. Production throttling is an edge/proxy responsibility (e.g.
 # Cloudflare WAF / tunnel rate rules). See deploy/DEPLOY.md.
+
+# ---------------------------------------------------------------------------
+# Optional geolocation for the public wall (country flag only). Disabled by
+# default; enabling needs a local GeoLite2-Country.mmdb + `pip install geoip2`.
+# Failure never blocks a greeting. See core.utils.lookup_country.
+# ---------------------------------------------------------------------------
+GEOIP_ENABLED = env.bool("GEOIP_ENABLED", default=False)
+GEOIP_PATH = env("GEOIP_PATH", default="")  # dir or path to the .mmdb file
+
+# ---------------------------------------------------------------------------
+# Email (optional). Defaults to the console backend (prints to logs); configure
+# SMTP via env to actually send invitation emails.
+# ---------------------------------------------------------------------------
+EMAIL_BACKEND = env("EMAIL_BACKEND", default="django.core.mail.backends.console.EmailBackend")
+EMAIL_HOST = env("EMAIL_HOST", default="")
+EMAIL_PORT = env.int("EMAIL_PORT", default=587)
+EMAIL_HOST_USER = env("EMAIL_HOST_USER", default="")
+EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", default="")
+EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS", default=True)
+DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="elzant <no-reply@elzant.com>")
+
+
+def email_is_configured():
+    """True when a real (non-console) email backend with a host is set up."""
+    return bool(EMAIL_HOST) and "console" not in EMAIL_BACKEND
