@@ -11,5 +11,5 @@ def wedding(request):
         "config": WeddingConfig.get(),
         "site_url": site_url,
         "canonical_url": f"{site_url}{request.path}",
-        "og_image": f"{site_url}{static('img/og-image.png')}",
+        "og_image": f"{site_url}{static('img/og-image.jpg')}",
     }

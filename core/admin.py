@@ -3,6 +3,7 @@ from urllib.parse import quote
 
 from django.conf import settings
 from django.contrib import admin
+from django.db.models import Q
 from django.http import HttpResponse
 from django.template.defaultfilters import date as date_filter
 from django.utils import timezone, translation
@@ -233,10 +234,12 @@ class HasPhotoFilter(admin.SimpleListFilter):
         return (("yes", "بصورة"), ("no", "بدون صورة"))
 
     def queryset(self, request, queryset):
+        # Legacy rows (pre-0006) have uploaded_photo NULL, not "" — handle both.
+        empty = Q(uploaded_photo="") | Q(uploaded_photo__isnull=True)
         if self.value() == "yes":
-            return queryset.exclude(uploaded_photo="")
+            return queryset.exclude(empty)
         if self.value() == "no":
-            return queryset.filter(uploaded_photo="")
+            return queryset.filter(empty)
         return queryset
 
 
@@ -285,8 +288,12 @@ class GreetingAdmin(admin.ModelAdmin):
 
     @admin.action(description="حظر / إخفاء المحدد")
     def hide_selected(self, request, queryset):
-        n = queryset.update(status=Greeting.Status.REJECTED)
-        self.message_user(request, f"تم حظر {n} تهنئة (لن تظهر على الجدار).")
+        # Per-row (not .update) so each greeting's photo file is taken down too.
+        n = 0
+        for greeting in queryset:
+            greeting.hide()
+            n += 1
+        self.message_user(request, f"تم حظر {n} تهنئة (وحُذفت صورها إن وُجدت).")
 
     @admin.action(description="إظهار / إلغاء الحظر")
     def show_selected(self, request, queryset):

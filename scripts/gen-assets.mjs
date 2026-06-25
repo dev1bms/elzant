@@ -29,5 +29,11 @@ const overlay = Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="${W}
   </g>
 </svg>`);
 
-await sharp(art).composite([{ input: overlay }]).png().toFile("static/img/og-image.png");
-console.log("✓ static/img/og-image.png (1200×630, artwork + names)");
+// JPEG (not PNG): a 1200×630 photograph as lossless RGBA PNG is ~1.4 MB, over
+// WhatsApp's link-preview budget; opaque JPEG q82 is ~120 KB with the same look.
+await sharp(art)
+  .composite([{ input: overlay }])
+  .flatten({ background: "#fbf4e8" })
+  .jpeg({ quality: 82, mozjpeg: true })
+  .toFile("static/img/og-image.jpg");
+console.log("✓ static/img/og-image.jpg (1200×630, artwork + names)");
