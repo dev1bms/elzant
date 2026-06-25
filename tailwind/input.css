@@ -14,46 +14,44 @@
    + Markazi face — only the website chrome changes here.
 ====================================================================== */
 @theme {
-  --font-display: "Aref Ruqaa", "Markazi Text", serif;  /* ceremonial names */
-  --font-kufi: "Cairo", "Tajawal", sans-serif;          /* geometric headings */
-  --font-body: "Tajawal", sans-serif;
-  --font-serif: "Cormorant Garamond", Georgia, serif;   /* Latin / numerals */
+  --font-display: "Aref Ruqaa", "Markazi Text", serif;  /* couple names — expressive */
+  --font-head: "Markazi Text", serif;                    /* headings + invitation — elegant */
+  --font-body: "Tajawal", sans-serif;                    /* body */
+  --font-serif: "Cormorant Garamond", Georgia, serif;    /* Latin / numerals */
 
-  /* ---- Lantern Seam chrome: warm aubergine night + thobe threads ---- */
-  --color-ground: #231521;          /* warm aubergine page ground (never #000) */
-  --color-ground-indigo: #1d2942;   /* alternate band behind details/countdown */
-  --color-madder: #c2492f;          /* tatreez red · primary CTA */
-  --color-saffron: #e3a83f;         /* the lantern bloom · countdown · focus */
-  --color-saffron-hi: #f2cd86;      /* lit filament (hover/raised) */
-  --color-olive: #6f7a3f;           /* third tatreez row · pins · underlines */
-  --color-ivory: #f4ead7;           /* light panels + primary text on dark */
-  --color-wheat: #cbb085;           /* muted secondary text (AA on ground) */
-  --color-mauve: #b07b8e;           /* DECORATIVE ONLY — the & + tatreez stops */
+  /* ====== Sunset on the Mediterranean — sampled from the wedding artwork ====== */
+  /* Warm light atmosphere (sky / sun / lantern) */
+  --color-apricot: #f4c088;       /* the glowing sky — hero atmosphere */
+  --color-peach:   #f8d6ad;       /* soft sky highlight */
+  --color-gold:    #e3a35f;       /* sun + lantern gold — light accents */
+  --color-coral:   #d9835f;       /* deep sunset coral — depth */
 
-  /* Warm porcelain / sand */
-  --color-porcelain-50: #fbf6ee;
-  --color-porcelain: #f7f0e6;
-  --color-porcelain-200: #f1e7d7;
-  --color-sand: #e9dcc7;
-  --color-blush: #ecd6cf;
+  /* Porcelain / sand surfaces (the dress, the whitewashed walls) */
+  --color-porcelain-50: #fdf8f0;
+  --color-porcelain:    #fbf4e8;  /* page base */
+  --color-porcelain-200:#f4e9d6;
+  --color-cream:        #f6ead6;
+  --color-sand:         #ecdcc2;
+  --color-blush:        #f1dcd0;
 
-  /* Rose / wine */
-  --color-rose-200: #e7cdc7;
-  --color-rose-400: #c68c87;
-  --color-rose-500: #b27a76;
-  --color-wine-500: #7a2f38;
-  --color-wine-600: #65232c;
-  --color-wine-700: #511a23;
+  /* Rose / burgundy (bougainvillea + the romance) */
+  --color-rose-200: #eccdc6;
+  --color-rose-400: #cf8f86;
+  --color-rose-500: #b9637a;      /* bougainvillea rose */
+  --color-wine-500: #7c2b37;      /* deep burgundy — primary CTA */
+  --color-wine-600: #67212c;
+  --color-wine-700: #4f1822;
 
-  /* Espresso (dark surfaces) */
-  --color-espresso-900: #271a14;
-  --color-espresso-800: #34241c;
+  /* Espresso (the tux — the dark anchor) */
+  --color-espresso-900: #241813;
+  --color-espresso-800: #3a2820;
 
-  /* Text */
-  --color-ink: #2c211b;
-  --color-ink-soft: #6f5e52;
-  --color-cloud: #8a7a6d;
-  --color-champagne: #bfa06a;
+  /* Accents + text */
+  --color-olive:     #7d7a4d;     /* rare green (map pin) */
+  --color-champagne: #c9a86a;     /* subtle gold hairline only */
+  --color-ink:       #3a2a22;     /* warm near-black body text */
+  --color-ink-soft:  #6e5a4c;     /* secondary text */
+  --color-cloud:     #9b8675;     /* muted captions */
 }
 
 @layer base {
@@ -61,140 +59,155 @@
   body {
     font-family: var(--font-body);
     font-weight: 400;
-    color: var(--color-ivory);
-    background-color: var(--color-ground);
+    color: var(--color-ink);
+    background-color: var(--color-porcelain);
     -webkit-font-smoothing: antialiased;
+    position: relative;
   }
-  /* Headings default to geometric Cairo 700; names/wordmarks opt into Aref Ruqaa. */
-  h1, h2, h3 { font-family: var(--font-kufi); font-weight: 700; line-height: 1.18; }
-  .font-display, .names { font-family: var(--font-display); font-weight: 700; line-height: 1.06; }
-  ::selection { background: var(--color-madder); color: var(--color-ivory); }
-  :focus-visible { outline: 2px solid var(--color-saffron); outline-offset: 3px; border-radius: 3px; }
+  /* A faint, fixed golden-hour glow so the whole page lives inside the sunset. */
+  body::before {
+    content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+    background:
+      radial-gradient(70% 50% at 82% 0%, color-mix(in srgb, var(--color-apricot) 40%, transparent), transparent 60%),
+      radial-gradient(60% 40% at 6% 4%, color-mix(in srgb, var(--color-peach) 28%, transparent), transparent 55%);
+  }
+  /* Headings = elegant Markazi; couple names opt into expressive Aref Ruqaa. */
+  h1, h2, h3 { font-family: var(--font-head); font-weight: 600; line-height: 1.16; color: var(--color-ink); }
+  .font-display, .names { font-family: var(--font-display); font-weight: 700; line-height: 1.04; }
+  ::selection { background: var(--color-wine-500); color: var(--color-porcelain-50); }
+  :focus-visible { outline: 2px solid var(--color-wine-500); outline-offset: 3px; border-radius: 3px; }
 }
 
 @layer components {
   /* ---- Labels & rules ---- */
   .eyebrow {
     font-family: var(--font-serif); font-style: italic;
-    font-size: 0.95rem; letter-spacing: 0.2em; color: var(--color-wheat);
+    font-size: 1rem; letter-spacing: 0.18em; color: var(--color-gold);
   }
   .label-lat {
     font-family: var(--font-serif); font-style: italic;
-    font-size: 1.05rem; letter-spacing: 0.12em; color: var(--color-saffron);
+    font-size: 1.05rem; letter-spacing: 0.1em; color: var(--color-rose-500);
   }
-  .num { font-family: var(--font-serif); direction: ltr; unicode-bidi: isolate; font-weight: 500; letter-spacing: 0.06em; }
-  .rule { height: 1px; width: 4rem; margin-inline: auto; background: var(--color-saffron); opacity: 0.6; border: 0; }
-  .rule-champagne { height: 1px; background: var(--color-champagne); opacity: 0.55; } /* keepsake card only */
+  .num { font-family: var(--font-serif); direction: ltr; unicode-bidi: isolate; font-weight: 500; letter-spacing: 0.08em; }
+  .rule { height: 1px; width: 4rem; margin-inline: auto; background: var(--color-champagne); opacity: 0.75; border: 0; }
+  .rule-champagne { height: 1px; background: var(--color-champagne); opacity: 0.55; } /* keepsake card */
 
   /* ---- Buttons ---- */
   .btn {
     display: inline-flex; align-items: center; justify-content: center; gap: 0.55rem;
-    border-radius: 9999px; padding: 0.9rem 2.3rem; font-weight: 500;
+    border-radius: 9999px; padding: 0.92rem 2.4rem; font-weight: 500; font-size: 1rem;
     transition: background-color .3s ease, color .3s ease, border-color .3s ease, transform .3s ease, box-shadow .3s ease;
   }
-  .btn-primary { background: var(--color-madder); color: var(--color-ivory); box-shadow: 0 16px 34px -18px var(--color-madder); }
-  .btn-primary:hover { background: #d2573c; transform: translateY(-1px); }
-  .btn-ghost { border: 1px solid color-mix(in srgb, var(--color-saffron) 58%, transparent); color: var(--color-saffron); }
-  .btn-ghost:hover { background: var(--color-saffron); color: var(--color-ground); border-color: var(--color-saffron); }
-  .btn-on-dark { border: 1px solid color-mix(in srgb, var(--color-saffron) 55%, transparent); color: var(--color-ivory); }
-  .btn-on-dark:hover { background: var(--color-saffron); color: var(--color-ground); }
-
-  /* ---- Surfaces: ivory lantern panels float on the aubergine night ---- */
-  .panel {
-    background: linear-gradient(180deg, #f7efe0, var(--color-ivory));
-    border: 1px solid color-mix(in srgb, var(--color-saffron) 28%, #e7d6b8);
-    border-radius: 1.25rem; color: var(--color-ground);
-    box-shadow: 0 44px 90px -48px rgba(0,0,0,0.75);
+  .btn-primary { background: var(--color-wine-500); color: var(--color-porcelain-50); box-shadow: 0 18px 38px -20px var(--color-wine-500); }
+  .btn-primary:hover { background: var(--color-wine-600); transform: translateY(-2px); box-shadow: 0 24px 46px -20px var(--color-wine-600); }
+  .btn-ghost { border: 1px solid color-mix(in srgb, var(--color-wine-500) 45%, transparent); color: var(--color-wine-600); }
+  .btn-ghost:hover { background: var(--color-wine-500); color: var(--color-porcelain-50); border-color: var(--color-wine-500); transform: translateY(-1px); }
+  .btn-on-art {
+    border: 1px solid rgba(251,244,232,0.72); color: var(--color-porcelain-50);
+    background: rgba(36,24,19,0.16); backdrop-filter: blur(3px);
   }
-  /* aubergine mat that frames a LIGHT keepsake card on the dark page */
+  .btn-on-art:hover { background: var(--color-porcelain-50); color: var(--color-espresso-900); transform: translateY(-1px); }
+  .btn-on-dark { border: 1px solid rgba(251,244,232,0.5); color: var(--color-porcelain-50); }
+  .btn-on-dark:hover { background: var(--color-porcelain-50); color: var(--color-espresso-900); }
+
+  /* ---- Surfaces ---- */
+  .panel {
+    background: linear-gradient(180deg, var(--color-porcelain-50), var(--color-cream));
+    border: 1px solid color-mix(in srgb, var(--color-champagne) 30%, var(--color-sand));
+    border-radius: 1.4rem; color: var(--color-ink);
+    box-shadow: 0 50px 92px -52px rgba(58,42,34,0.4);
+  }
+  /* soft warm frame around an in-page keepsake card */
   .card-mat {
-    background: color-mix(in srgb, var(--color-ground) 86%, #000);
-    border: 1px solid color-mix(in srgb, var(--color-saffron) 22%, transparent);
-    border-radius: 1.1rem; padding: 0.85rem;
+    background: linear-gradient(180deg, #ffffff, var(--color-cream));
+    border: 1px solid color-mix(in srgb, var(--color-champagne) 42%, var(--color-sand));
+    border-radius: 1.2rem; padding: 0.8rem;
+    box-shadow: 0 44px 84px -46px rgba(58,42,34,0.45);
   }
   .sec-head { display: flex; flex-direction: column; align-items: center; gap: 0.7rem; }
 
-  /* ---- Suggestion chips (inside the light form panel) ---- */
+  /* ---- Suggestion chips ---- */
   .chip {
-    border-radius: 9999px; border: 1px solid #e0cfae;
-    background: #fbf4e6; color: #5a4632;
+    border-radius: 9999px; border: 1px solid var(--color-sand);
+    background: var(--color-porcelain-50); color: var(--color-ink-soft);
     padding: 0.45rem 0.95rem; font-size: 0.875rem;
     transition: border-color .2s ease, color .2s ease, background-color .2s ease, transform .2s ease;
   }
-  .chip:hover { border-color: var(--color-madder); color: var(--color-madder); transform: translateY(-1px); }
-  .chip.is-selected { border-color: var(--color-madder); background: color-mix(in srgb, var(--color-madder) 13%, #fff); color: var(--color-madder); }
+  .chip:hover { border-color: var(--color-wine-500); color: var(--color-wine-600); transform: translateY(-1px); }
+  .chip.is-selected { border-color: var(--color-wine-500); background: var(--color-blush); color: var(--color-wine-700); }
 
-  /* ---- Form fields (light) ---- */
+  /* ---- Form fields ---- */
   .field {
-    width: 100%; border-radius: 0.85rem; border: 1px solid #e0cfae;
-    background: #fffaf0; color: var(--color-ground);
+    width: 100%; border-radius: 0.9rem; border: 1px solid var(--color-sand);
+    background: #fffdf8; color: var(--color-ink);
     padding: 0.95rem 1.15rem; transition: border-color .2s ease, box-shadow .2s ease;
   }
-  .field::placeholder { color: #a8967c; }
-  .field:focus { outline: none; border-color: var(--color-saffron); box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-saffron) 32%, transparent); }
+  .field::placeholder { color: var(--color-cloud); }
+  .field:focus { outline: none; border-color: var(--color-wine-500); box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-wine-500) 16%, transparent); }
 
-  /* ---- Names wordmark (Aref Ruqaa; no letter-spacing — breaks Arabic joins) ---- */
-  .names { font-family: var(--font-display); font-weight: 700; color: var(--color-ivory); }
-  .names .amp { font-family: var(--font-serif); font-weight: 500; font-style: italic; color: var(--color-mauve); }
+  /* ---- Couple names (Aref Ruqaa; never letter-spaced — breaks Arabic joins) ---- */
+  .names { font-family: var(--font-display); font-weight: 700; color: var(--color-wine-700); }
+  .names .amp { font-family: var(--font-serif); font-weight: 500; font-style: italic; color: var(--color-rose-500); }
+  .names-on-art { color: var(--color-porcelain-50); text-shadow: 0 2px 34px rgba(36,24,19,0.55); }
+  .names-on-art .amp { color: var(--color-peach); }
 
-  /* ---- Wall cards: ivory lanterns with a tatreez-thread top edge ---- */
+  /* ---- Wall cards ---- */
   .msg-card {
-    position: relative; background: var(--color-ivory); color: var(--color-ground);
-    border-radius: 1rem; padding: 1.6rem 1.5rem; border-top: 3px solid var(--color-madder);
-    box-shadow: 0 30px 60px -38px rgba(0,0,0,0.75);
+    position: relative; background: var(--color-porcelain-50); color: var(--color-ink);
+    border-radius: 1.1rem; padding: 1.7rem 1.5rem; overflow: hidden;
+    border: 1px solid color-mix(in srgb, var(--color-sand) 80%, transparent);
+    box-shadow: 0 30px 56px -40px rgba(58,42,34,0.4);
     transition: transform .3s ease, box-shadow .3s ease;
   }
-  .msg-card--photo { border-top-color: var(--color-olive); }
-  .msg-card:hover { transform: translateY(-3px); box-shadow: 0 38px 72px -34px rgba(0,0,0,0.82); }
+  .msg-card::before {
+    content: ""; position: absolute; inset: 0 0 auto 0; height: 3px;
+    background: linear-gradient(90deg, var(--color-gold), var(--color-rose-500)); opacity: .85;
+  }
+  .msg-card--photo::before { background: linear-gradient(90deg, var(--color-rose-500), var(--color-wine-500)); }
+  .msg-card:hover { transform: translateY(-4px); box-shadow: 0 46px 82px -40px rgba(58,42,34,0.5); }
 
-  /* ---- درب مصر — the road-to-Egypt tatreez seam (the signature) ---- */
-  .seam {
-    height: 16px;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='16' viewBox='0 0 28 16'%3E%3Cpath d='M14 1l5 7-5 7-5-7z' fill='%23c2492f'/%3E%3Cpath d='M0 8l4-3 4 3-4 3zM28 8l-4-3-4 3 4 3z' fill='%236f7a3f'/%3E%3C/svg%3E");
-    background-repeat: repeat-x; background-position: center;
-    -webkit-mask-image: linear-gradient(90deg, transparent, #000 18%, #000 82%, transparent);
-            mask-image: linear-gradient(90deg, transparent, #000 18%, #000 82%, transparent);
-    opacity: 0.92;
+  /* ---- Hero: the artwork is the whole world ---- */
+  .hero-art { position: absolute; inset: 0; overflow: hidden; animation: revealArt 1.7s cubic-bezier(.2,.8,.2,1) both; }
+  .hero-art img { width: 100%; height: 100%; object-fit: cover; display: block; will-change: transform; }
+  .hero-breathe img { animation: breathe 28s ease-in-out infinite alternate; }
+  @keyframes revealArt { from { opacity: 0; transform: scale(1.06); } to { opacity: 1; transform: scale(1); } }
+  @keyframes breathe { from { transform: scale(1.01); } to { transform: scale(1.08); } }
+  /* bottom fade so the painting continues into the page (the "continuation") */
+  .art-fade::after {
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background: linear-gradient(180deg, transparent 50%, color-mix(in srgb, var(--color-porcelain) 88%, transparent) 86%, var(--color-porcelain) 100%);
   }
-  /* hero band: three stacked rows (madder ▸ saffron ▸ olive) — the road turns toward Cairo */
-  .seam--band {
-    height: 48px;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='48' viewBox='0 0 28 48'%3E%3Cpath d='M14 1l5 7-5 7-5-7z' fill='%23c2492f'/%3E%3Cpath d='M0 8l4-3 4 3-4 3zM28 8l-4-3-4 3 4 3z' fill='%236f7a3f'/%3E%3Cpath d='M14 17l5 7-5 7-5-7z' fill='%23e3a83f'/%3E%3Cpath d='M0 24l4-3 4 3-4 3zM28 24l-4-3-4 3 4 3z' fill='%23c2492f'/%3E%3Cpath d='M14 33l5 7-5 7-5-7z' fill='%236f7a3f'/%3E%3Cpath d='M0 40l4-3 4 3-4 3zM28 40l-4-3-4 3 4 3z' fill='%23e3a83f'/%3E%3C/svg%3E");
+  /* a soft lift behind hero text (very light, not a dark overlay) */
+  .art-veil::after {
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background: linear-gradient(to left, transparent 44%, color-mix(in srgb, var(--color-porcelain) 30%, transparent) 100%);
   }
-  /* the one motion beat: the band stitches itself right-to-left, once */
-  .seam--draw { animation: stitch 1s cubic-bezier(.4,0,.2,1) both; }
-  @keyframes stitch { from { clip-path: inset(0 0 0 100%); } to { clip-path: inset(0 0 0 0); } }
-
-  /* ---- golden-hour bloom: the single warm light source (top-right) ---- */
-  .bloom { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 0; }
-  .bloom::before {
-    content: ""; position: absolute; top: -12%; right: 4%; width: 78vw; height: 78vw;
-    max-width: 760px; max-height: 760px; border-radius: 50%;
-    background: radial-gradient(circle, color-mix(in srgb, var(--color-saffron) 32%, transparent) 0%, color-mix(in srgb, var(--color-madder) 15%, transparent) 40%, transparent 68%);
-    animation: bloom 1.5s ease both;
-  }
-  @keyframes bloom { from { opacity: 0; transform: scale(.86); } to { opacity: 1; transform: none; } }
 
   /* ---- Motion ---- */
   .reveal { opacity: 0; transform: translateY(18px); transition: opacity .9s cubic-bezier(.2,.8,.2,1), transform .9s cubic-bezier(.2,.8,.2,1); }
   .reveal.is-visible { opacity: 1; transform: none; }
   @keyframes up { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: none; } }
   .up { opacity: 0; animation: up 1s cubic-bezier(.2,.8,.2,1) forwards; }
-  .d1{animation-delay:.10s} .d2{animation-delay:.22s} .d3{animation-delay:.36s}
-  .d4{animation-delay:.50s} .d5{animation-delay:.64s} .d6{animation-delay:.78s}
+  .d1{animation-delay:.15s} .d2{animation-delay:.32s} .d3{animation-delay:.5s}
+  .d4{animation-delay:.68s} .d5{animation-delay:.86s} .d6{animation-delay:1.04s}
 
-  /* ---- Intro / opening overlay (envelope IDs kept for JS) ---- */
+  /* ---- Intro: entering a cinematic invitation (artwork softly blurred) ---- */
   html.show-envelope { overflow: hidden; }
   .envelope-overlay {
     position: fixed; inset: 0; z-index: 60; display: none; align-items: center; justify-content: center;
-    padding: 28px; color: var(--color-ivory);
-    background:
-      radial-gradient(78% 56% at 72% 12%, color-mix(in srgb, var(--color-saffron) 20%, transparent), transparent 60%),
-      var(--color-ground);
+    padding: 28px; color: var(--color-porcelain-50); overflow: hidden;
+  }
+  .envelope-art {
+    position: absolute; inset: 0; background-size: cover; background-position: 60% 38%;
+    transform: scale(1.12); filter: blur(9px) saturate(1.06) brightness(0.96);
+  }
+  .envelope-overlay::after {
+    content: ""; position: absolute; inset: 0;
+    background: linear-gradient(180deg, rgba(36,24,19,0.42) 0%, rgba(36,24,19,0.58) 60%, rgba(36,24,19,0.74) 100%);
   }
   .show-envelope .envelope-overlay { display: flex; }
-  .envelope-overlay.is-closing { opacity: 0; transform: translateY(-12px); transition: opacity .7s ease, transform .7s ease; }
-  .intro-inner { text-align: center; max-width: 30rem; animation: up 1s cubic-bezier(.2,.8,.2,1) both; }
+  .envelope-overlay.is-closing { opacity: 0; transform: scale(1.03); transition: opacity .85s ease, transform .85s ease; }
+  .intro-inner { position: relative; z-index: 1; text-align: center; max-width: 32rem; animation: up 1.1s cubic-bezier(.2,.8,.2,1) both; }
 
   /* ---- Shareable card 1080×1350 (geometry stable for card.js) ---- */
   .card-stage {
@@ -207,9 +220,10 @@
     justify-content: space-between; align-items: center; padding: 150px 112px 120px;
     text-align: center; color: var(--color-ink);
     background:
-      radial-gradient(120% 60% at 85% 8%, rgba(198,140,135,0.18), transparent 55%),
-      radial-gradient(120% 60% at 12% 100%, rgba(191,160,106,0.12), transparent 55%),
-      linear-gradient(180deg, #fbf6ee 0%, #f3e8d8 100%);
+      radial-gradient(95% 52% at 50% -8%, rgba(244,192,136,0.34), transparent 62%),   /* apricot sky */
+      radial-gradient(72% 46% at 8% 106%, rgba(227,163,95,0.24), transparent 60%),     /* sun / lantern */
+      radial-gradient(62% 42% at 98% 98%, rgba(185,99,122,0.13), transparent 60%),      /* rose hint */
+      linear-gradient(180deg, #fdf6ea 0%, #f7ead6 100%);
   }
   .wed-card__eyebrow { font-family: var(--font-serif); font-style: italic; font-size: 38px; color: var(--color-rose-500); margin: 0; }
   .wed-card__names { font-family: "Markazi Text", serif; font-weight: 700; font-size: 138px; line-height: 1.02; color: var(--color-wine-700); margin: 22px 0 0; white-space: nowrap; }
@@ -379,8 +393,8 @@
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  .reveal, .up, .intro-inner, .seam--draw, .bloom::before {
-    opacity: 1 !important; transform: none !important; animation: none !important; transition: none !important; clip-path: none !important;
+  .reveal, .up, .intro-inner, .hero-art, .hero-breathe img, .art-fade::after {
+    opacity: 1 !important; transform: none !important; animation: none !important; transition: none !important;
   }
   .btn-spinner { animation: none !important; }
 }

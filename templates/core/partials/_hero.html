@@ -1,52 +1,56 @@
 {% load static i18n %}
-<section class="relative isolate overflow-hidden bg-ground">
-  <div class="bloom" aria-hidden="true"></div>
+<section class="relative overflow-hidden bg-porcelain lg:min-h-[100svh]">
 
-  <div class="relative z-10 mx-auto flex min-h-screen max-w-2xl flex-col items-center justify-center px-6 py-24 text-center">
-    <p class="up d1 eyebrow">An Evening Celebration</p>
-    <div class="up d1 rule mt-5"></div>
+  {# The artwork — the visual soul. Full-bleed on desktop, large top image on mobile. #}
+  <div class="hero-art hero-breathe art-fade relative h-[58svh] min-h-[340px] w-full lg:absolute lg:inset-0 lg:h-auto">
+    <img src="{% static 'img/hero-bg.jpg' %}"
+         alt="لوحة فنية للعروسين محمود ورينان على شرفة تطلّ على غروب البحر المتوسط"
+         class="object-[58%_24%] lg:object-[72%_34%]">
+  </div>
 
-    {# Invitation — both fathers (small, on dark → Tajawal, not the heavy display face) #}
-    <div class="up d2 mt-8 max-w-md leading-relaxed text-wheat">
-      <p class="text-sm">يتشرّف</p>
-      <p class="mt-2 text-lg text-ivory/90">{{ config.groom_father }}</p>
-      <p class="my-1 label-lat text-base">&amp;</p>
-      <p class="text-lg text-ivory/90">{{ config.bride_father }}</p>
-      <p class="mt-3 text-sm">بدعوتكم لحضور حفل زفاف أبنائهما</p>
-    </div>
+  {# Invitation text — over the sunset's open sky on desktop, below the art on mobile #}
+  <div class="relative z-10 -mt-14 px-6 pb-20 text-center
+              lg:absolute lg:inset-y-0 lg:left-0 lg:-mt-0 lg:flex lg:w-[56%] lg:max-w-2xl lg:items-center lg:px-14 lg:pb-0 lg:text-right">
+    <div class="up d1 mx-auto w-full max-w-md lg:mx-0">
 
-    {# The two names — Aref Ruqaa, ivory, with a Dusk-Mauve ligature #}
-    <h1 class="up d3 names mt-9 text-7xl leading-[1.12] sm:text-8xl">
-      {{ config.groom_name }}<span class="amp my-2 block text-4xl sm:text-5xl">&amp;</span>{{ config.bride_name }}
-    </h1>
+      <p class="eyebrow">An Invitation</p>
 
-    {# درب مصر — the road-to-Egypt seam stitches the families together #}
-    <div class="up d3 seam seam--band seam--draw mt-9 w-full max-w-[18rem]" aria-hidden="true"></div>
-
-    <p class="up d4 num mt-8 text-lg text-wheat">{% language 'ar' %}{{ config.wedding_datetime|date:'d . m . Y' }}{% endlanguage %}</p>
-    {% if config.venue_name %}<p class="up d4 mt-1 text-sm text-wheat/80">{{ config.venue_name }}</p>{% endif %}
-
-    {# countdown — saffron digits in midnight-indigo tiles #}
-    <div id="countdown" data-target="{{ config.wedding_datetime|date:'c' }}"
-         class="up d5 mt-9 flex items-stretch justify-center gap-2.5 sm:gap-3.5">
-      <div class="flex min-w-[3.5rem] flex-col items-center rounded-xl border border-saffron/30 bg-ground-indigo/55 px-3 py-2.5">
-        <span data-unit="days" class="num text-3xl leading-none text-saffron sm:text-4xl">0</span><span class="mt-1.5 text-[0.62rem] text-wheat">يوم</span>
+      <div class="mt-4 leading-relaxed text-ink-soft">
+        <p class="text-sm">يتشرّف</p>
+        <p class="mt-1 font-head text-base text-ink sm:text-lg">{{ config.groom_father }}</p>
+        <p class="label-lat text-base">&amp;</p>
+        <p class="font-head text-base text-ink sm:text-lg">{{ config.bride_father }}</p>
+        <p class="mt-1 text-sm">بدعوتكم لحضور حفل زفاف أبنائهما</p>
       </div>
-      <div class="flex min-w-[3.5rem] flex-col items-center rounded-xl border border-saffron/30 bg-ground-indigo/55 px-3 py-2.5">
-        <span data-unit="hours" class="num text-3xl leading-none text-saffron sm:text-4xl">00</span><span class="mt-1.5 text-[0.62rem] text-wheat">ساعة</span>
-      </div>
-      <div class="flex min-w-[3.5rem] flex-col items-center rounded-xl border border-saffron/30 bg-ground-indigo/55 px-3 py-2.5">
-        <span data-unit="minutes" class="num text-3xl leading-none text-saffron sm:text-4xl">00</span><span class="mt-1.5 text-[0.62rem] text-wheat">دقيقة</span>
-      </div>
-      <div class="flex min-w-[3.5rem] flex-col items-center rounded-xl border border-saffron/30 bg-ground-indigo/55 px-3 py-2.5">
-        <span data-unit="seconds" class="num text-3xl leading-none text-saffron sm:text-4xl">00</span><span class="mt-1.5 text-[0.62rem] text-wheat">ثانية</span>
-      </div>
-    </div>
-    <p data-countdown-done class="up d5 mt-6 hidden text-base text-saffron">تمّ الزفاف بحمد الله</p>
 
-    <div class="up d6 mt-10 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
-      <a href="#greeting" class="btn btn-primary">اكتب تهنئتك</a>
-      <a href="#wall" class="btn btn-ghost">شاهد التهاني</a>
+      <h1 class="names mt-5 text-6xl leading-[1.1] sm:text-7xl">
+        {{ config.groom_name }} <span class="amp text-4xl sm:text-5xl">&amp;</span> {{ config.bride_name }}
+      </h1>
+
+      <div class="mt-5 flex items-center justify-center gap-4 lg:justify-end">
+        <span class="h-px w-9 bg-champagne/70"></span>
+        <p class="num text-lg text-ink">{% language 'ar' %}{{ config.wedding_datetime|date:'d . m . Y' }}{% endlanguage %}</p>
+        <span class="h-px w-9 bg-champagne/70"></span>
+      </div>
+      {% if config.venue_name %}<p class="mt-2 text-sm text-ink-soft">{{ config.venue_name }}</p>{% endif %}
+
+      {# countdown — woven into the line, not a dashboard #}
+      <div id="countdown" data-target="{{ config.wedding_datetime|date:'c' }}"
+           class="mt-6 flex items-end justify-center gap-3.5 sm:gap-5 lg:justify-end">
+        <div class="flex flex-col items-center"><span data-unit="days" class="num text-2xl leading-none text-wine-600 sm:text-3xl">0</span><span class="mt-1.5 text-[0.62rem] tracking-wide text-cloud">يوم</span></div>
+        <span class="mb-2 text-gold/60">·</span>
+        <div class="flex flex-col items-center"><span data-unit="hours" class="num text-2xl leading-none text-wine-600 sm:text-3xl">00</span><span class="mt-1.5 text-[0.62rem] tracking-wide text-cloud">ساعة</span></div>
+        <span class="mb-2 text-gold/60">·</span>
+        <div class="flex flex-col items-center"><span data-unit="minutes" class="num text-2xl leading-none text-wine-600 sm:text-3xl">00</span><span class="mt-1.5 text-[0.62rem] tracking-wide text-cloud">دقيقة</span></div>
+        <span class="mb-2 text-gold/60">·</span>
+        <div class="flex flex-col items-center"><span data-unit="seconds" class="num text-2xl leading-none text-wine-600 sm:text-3xl">00</span><span class="mt-1.5 text-[0.62rem] tracking-wide text-cloud">ثانية</span></div>
+      </div>
+      <p data-countdown-done class="mt-5 hidden text-base text-wine-600">تمّ الزفاف بحمد الله</p>
+
+      <div class="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center lg:justify-end">
+        <a href="#greeting" class="btn btn-primary">اكتب تهنئتك</a>
+        <a href="#wall" class="btn btn-ghost">شاهد التهاني</a>
+      </div>
     </div>
   </div>
 </section>

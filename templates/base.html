@@ -21,7 +21,7 @@
   <link rel="stylesheet" href="{% static 'css/output.css' %}">
   {% block extra_head %}{% endblock %}
 </head>
-<body class="bg-ground text-ivory">
+<body class="bg-porcelain text-ink">
 
   {% block envelope %}{% endblock %}
 
@@ -29,14 +29,16 @@
     {% block content %}{% endblock %}
   </main>
 
-  <div class="seam" aria-hidden="true"></div>
-  <footer class="bg-ground px-6 py-16 text-center text-ivory">
-    <p class="label-lat">Mahmoud &amp; Rinan</p>
-    <p class="names mt-4 text-4xl">{{ config.groom_name }} <span class="amp text-2xl">&amp;</span> {{ config.bride_name }}</p>
-    <div class="rule my-6"></div>
-    <p class="num text-sm text-wheat">{% language 'ar' %}{{ config.wedding_datetime|date:'d . m . Y' }}{% endlanguage %}</p>
-    <p class="mt-6"><a href="{{ site_url }}" class="label-lat transition hover:text-saffron-hi">elzant.com</a></p>
-    <p class="mt-3"><a href="{% url 'privacy' %}" class="text-xs tracking-wide text-wheat/55 underline-offset-4 transition hover:text-wheat hover:underline">إشعار الخصوصية</a></p>
+  <footer class="relative overflow-hidden bg-espresso-900 px-6 py-20 text-center text-porcelain-50">
+    <div class="pointer-events-none absolute inset-0" style="background:radial-gradient(60% 50% at 50% 0%, rgba(227,163,95,0.16), transparent 60%)"></div>
+    <div class="relative">
+      <p class="label-lat text-rose-400">Mahmoud &amp; Rinan</p>
+      <p class="names mt-4 text-5xl" style="color:var(--color-porcelain-50)">{{ config.groom_name }} <span class="amp text-3xl" style="color:var(--color-peach)">&amp;</span> {{ config.bride_name }}</p>
+      <div class="rule my-7"></div>
+      <p class="num text-sm tracking-[0.3em] text-porcelain-50/70">{% language 'ar' %}{{ config.wedding_datetime|date:'d . m . Y' }}{% endlanguage %}</p>
+      <p class="mt-7"><a href="{{ site_url }}" class="label-lat text-rose-200 transition hover:text-peach">elzant.com</a></p>
+      <p class="mt-3"><a href="{% url 'privacy' %}" class="text-xs tracking-wide text-porcelain-50/45 underline-offset-4 transition hover:text-porcelain-50/75 hover:underline">إشعار الخصوصية</a></p>
+    </div>
   </footer>
 
   {% block extra_js %}{% endblock %}
