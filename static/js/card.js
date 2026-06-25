@@ -43,7 +43,9 @@ if (card && stage) {
   function withBusy(btn, fn) {
     return async function (e) {
       const target = e.currentTarget;
-      const label = target.textContent;
+      // Preserve full markup (incl. the inline <svg> icon), not just text,
+      // so restoring the label doesn't strip the icon.
+      const original = target.innerHTML;
       target.disabled = true;
       target.textContent = "جارٍ التجهيز…";
       try {
@@ -55,7 +57,7 @@ if (card && stage) {
         }
       } finally {
         target.disabled = false;
-        target.textContent = label;
+        target.innerHTML = original;
       }
     };
   }

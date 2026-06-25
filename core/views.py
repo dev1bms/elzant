@@ -1,15 +1,15 @@
 from django.shortcuts import redirect, render
-from django_ratelimit.decorators import ratelimit
 
 from .forms import GreetingForm
 from .models import Greeting
 from .utils import get_client_ip
 
 
-# Rate-limit greeting submissions per IP. Active only when RATELIMIT_ENABLE is
-# True (off in local dev); honeypot + moderation + length limits are the always-
-# on defenses. GET requests are never limited (method="POST").
-@ratelimit(key="ip", rate="5/h", method="POST", block=True)
+# Spam defenses are: CSRF, the hidden honeypot, model/form length limits, and
+# manual moderation (nothing reaches the wall unapproved). Request throttling is
+# intentionally NOT handled in-app — a per-process LocMem bucket is unreliable
+# across Gunicorn workers and can unfairly block guests. Throttling is an
+# edge/proxy responsibility (e.g. Cloudflare WAF / tunnel rules). See DEPLOY.md.
 def home(request):
     if request.method == "POST":
         form = GreetingForm(request.POST)

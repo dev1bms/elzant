@@ -9,6 +9,7 @@ import os
 from pathlib import Path
 
 import environ
+from django.core.exceptions import ImproperlyConfigured
 
 # Build paths inside the project like this: BASE_DIR / "subdir".
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -24,7 +25,12 @@ environ.Env.read_env(BASE_DIR / ".env")
 # Read SECRET_KEY straight from the environment: django-environ treats values
 # starting with "$" as references to other variables, which would break a random
 # key that happens to start with "$". read_env() has populated os.environ above.
-SECRET_KEY = os.environ["SECRET_KEY"]
+try:
+    SECRET_KEY = os.environ["SECRET_KEY"]
+except KeyError as exc:
+    raise ImproperlyConfigured(
+        "SECRET_KEY environment variable is required (set it in .env)."
+    ) from exc
 DEBUG = env.bool("DEBUG", default=False)
 ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=[])
 CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS", default=[])
@@ -166,11 +172,13 @@ SECURE_SSL_REDIRECT = not DEBUG
 SESSION_COOKIE_SECURE = not DEBUG
 CSRF_COOKIE_SECURE = not DEBUG
 SECURE_HSTS_SECONDS = 0  # enable after HTTPS is verified on the VPS
-# Trust the X-Forwarded-Proto header when behind a reverse proxy (production).
+# Trust X-Forwarded-Proto from the proxy/tunnel in front of Gunicorn so HTTPS is
+# detected correctly (Cloudflare Tunnel, Caddy, etc. set it). Gunicorn must not
+# be exposed directly to the public, or a client could spoof this header.
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
-# ---------------------------------------------------------------------------
-# Spam control — django-ratelimit toggle (only effective if the package is
-# installed and compatible). Honeypot + manual moderation remain primary.
-# ---------------------------------------------------------------------------
-RATELIMIT_ENABLE = env.bool("RATELIMIT_ENABLE", default=False)
+# NOTE: request throttling is intentionally NOT handled in-app (an in-process
+# LocMem bucket is unreliable across Gunicorn workers and can unfairly block
+# guests). Spam defenses here are CSRF + honeypot + length limits + manual
+# moderation. Production throttling is an edge/proxy responsibility (e.g.
+# Cloudflare WAF / tunnel rate rules). See deploy/DEPLOY.md.

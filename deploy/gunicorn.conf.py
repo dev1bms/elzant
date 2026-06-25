@@ -1,4 +1,6 @@
-# Gunicorn configuration for elzant.com (runs behind Nginx).
+# Gunicorn configuration for elzant.com. Listens locally; put a trusted
+# proxy/tunnel (Cloudflare Tunnel / Caddy) in front for HTTPS. WhiteNoise serves
+# static files, so no separate web server is required. See deploy/DEPLOY.md.
 # Start with: gunicorn -c deploy/gunicorn.conf.py elzant.wsgi:application
 
 bind = "127.0.0.1:8001"
