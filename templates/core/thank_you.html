@@ -4,26 +4,26 @@
 {% block title %}شكراً لك — زفاف {{ config.groom_name }} و{{ config.bride_name }}{% endblock %}
 
 {% block content %}
-<section class="bg-ivory-50 px-6 py-20">
+<section class="bg-porcelain px-6 py-20">
   <div class="mx-auto max-w-xl text-center">
-    <p class="up d1 kicker">Thank you</p>
-    <h1 class="up d1 mt-4 text-3xl font-light text-charcoal sm:text-4xl">وصلت تهنئتك يا {{ card.name }}</h1>
-    <p class="up d2 mt-3 text-charcoal-soft">ستظهر على جدار التهاني بعد المراجعة. وهذه بطاقتك — احفظها وشاركها:</p>
+    <p class="up d1 label-lat">Thank You</p>
+    <h1 class="up d1 mt-3 font-display text-4xl font-semibold text-ink sm:text-5xl">وصلت تهنئتك يا {{ card.name }}</h1>
+    <p class="up d2 mt-3 text-cloud">ستظهر على جدار التهاني بعد المراجعة. وهذه بطاقتك — احفظها وشاركها:</p>
 
     <div class="up d3 mt-10">
       {% include "core/partials/_card.html" %}
     </div>
 
     <div class="up d3 mt-9 flex flex-col gap-3 sm:flex-row sm:justify-center">
-      <button id="card-download" type="button" class="btn btn-solid">
+      <button id="card-download" type="button" class="btn btn-primary">
         <svg viewBox="0 0 24 24" class="h-4 w-4 fill-current"><path d="M5 20h14v-2H5v2zM12 4v9.17l3.59-3.58L17 11l-5 5-5-5 1.41-1.41L11 13.17V4h1z"/></svg>
         {% trans "تحميل البطاقة" %}
       </button>
-      <button id="card-share" type="button" class="btn btn-line">{% trans "مشاركة عبر واتساب" %}</button>
+      <button id="card-share" type="button" class="btn btn-ghost">{% trans "مشاركة عبر واتساب" %}</button>
     </div>
-    <p class="up d4 mt-4 text-xs text-charcoal-soft/70">إن لم يدعم جهازك مشاركة الصور، نزّل البطاقة وأرفقها يدوياً في واتساب.</p>
+    <p class="up d4 mt-4 text-xs text-cloud">إن لم يدعم جهازك مشاركة الصور، نزّل البطاقة وأرفقها يدوياً في واتساب.</p>
 
-    <a href="{% url 'home' %}" class="up d4 mt-9 inline-block text-sm text-burgundy-500 underline underline-offset-4 transition hover:text-burgundy-400">العودة للصفحة الرئيسية</a>
+    <a href="{% url 'home' %}" class="up d4 mt-9 inline-block text-sm text-wine-600 underline underline-offset-4 transition hover:text-wine-500">العودة للصفحة الرئيسية</a>
   </div>
 </section>
 {% endblock %}

@@ -2,11 +2,7 @@ from django import forms
 
 from .models import Greeting
 
-_FIELD_CLASS = (
-    "w-full rounded-lg border border-sand-300 bg-white px-5 py-4 text-charcoal "
-    "placeholder:text-charcoal-soft/50 outline-none transition "
-    "focus:border-burgundy-500 focus:ring-1 focus:ring-burgundy-500/30"
-)
+_FIELD_CLASS = "field"  # styled by the design system (tailwind/input.css)
 
 
 class GreetingForm(forms.ModelForm):

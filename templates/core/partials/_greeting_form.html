@@ -1,45 +1,43 @@
 {% load i18n %}
-<section id="greeting" class="bg-ivory-50 px-6 py-24">
+<section id="greeting" class="bg-porcelain-200 px-6 py-24">
   <div class="mx-auto max-w-lg">
     <div class="reveal sec-head text-center">
-      <p class="kicker">Leave a wish</p>
-      <h2 class="text-3xl font-light text-charcoal sm:text-4xl">اكتب تهنئتك</h2>
-      <p class="max-w-sm text-charcoal-soft">كلمة من قلبك تبقى معهما. تظهر على جدار التهاني بعد المراجعة.</p>
+      <p class="label-lat">Leave a Wish</p>
+      <h2 class="font-display text-4xl font-semibold text-ink sm:text-5xl">اكتب كلمة من القلب</h2>
+      <p class="max-w-sm text-cloud">كلمتك تبقى معهما ذكرى. تظهر على جدار التهاني بعد المراجعة.</p>
     </div>
 
-    <form method="post" action="{% url 'home' %}#greeting" class="reveal mt-12 space-y-7" novalidate>
+    <form method="post" action="{% url 'home' %}#greeting" class="reveal mt-11 space-y-6" novalidate>
       {% csrf_token %}
       <div class="hidden" aria-hidden="true">{{ form.website }}</div>
 
       <div>
-        <label for="{{ form.name.id_for_label }}" class="mb-2 block text-sm tracking-wide text-charcoal-soft">الاسم</label>
+        <label for="{{ form.name.id_for_label }}" class="mb-2 block text-sm text-ink-soft">الاسم</label>
         {{ form.name }}
-        {% if form.name.errors %}<p class="mt-2 text-sm text-burgundy-500">{{ form.name.errors.0 }}</p>{% endif %}
+        {% if form.name.errors %}<p class="mt-2 text-sm text-wine-500">{{ form.name.errors.0 }}</p>{% endif %}
       </div>
 
       {% if suggestions %}
         <div>
-          <p class="mb-2.5 text-sm text-charcoal-soft">لا تعرف ماذا تكتب؟ اختر تهنئة جاهزة ثم عدّلها:</p>
+          <p class="mb-2.5 text-sm text-ink-soft">لا تعرف ماذا تكتب؟ اختر تهنئة ثم عدّلها:</p>
           <div class="flex flex-wrap gap-2" id="suggestion-chips">
             {% for s in suggestions %}
-              <button type="button"
-                      class="suggestion-chip rounded-full border border-sand-300 bg-white px-3.5 py-1.5 text-sm text-charcoal transition hover:-translate-y-0.5 hover:border-burgundy-500 hover:text-burgundy-600"
-                      data-text="{{ s.text_ar }}">{{ s.text_ar|truncatechars:34 }}</button>
+              <button type="button" class="chip" data-text="{{ s.text_ar }}">{{ s.text_ar|truncatechars:34 }}</button>
             {% endfor %}
           </div>
         </div>
       {% endif %}
 
       <div>
-        <label for="{{ form.message.id_for_label }}" class="mb-2 block text-sm tracking-wide text-charcoal-soft">رسالتك للعروسين</label>
+        <label for="{{ form.message.id_for_label }}" class="mb-2 block text-sm text-ink-soft">رسالتك للعروسين</label>
         {{ form.message }}
-        {% if form.message.errors %}<p class="mt-2 text-sm text-burgundy-500">{{ form.message.errors.0 }}</p>{% endif %}
+        {% if form.message.errors %}<p class="mt-2 text-sm text-wine-500">{{ form.message.errors.0 }}</p>{% endif %}
       </div>
 
-      <button type="submit" class="btn btn-solid w-full">{% trans "إرسال التهنئة" %}</button>
-      <p class="text-center text-xs leading-relaxed text-charcoal-soft/70">
+      <button type="submit" class="btn btn-primary w-full">{% trans "إرسال التهنئة" %}</button>
+      <p class="text-center text-xs leading-relaxed text-cloud">
         يُعرض اسمك ورسالتك بعد المراجعة فقط — لا يُعرض رقمك أو بريدك.
-        <a href="{% url 'privacy' %}" class="underline underline-offset-2 hover:text-burgundy-600">إشعار الخصوصية</a>
+        <a href="{% url 'privacy' %}" class="underline underline-offset-2 hover:text-wine-600">إشعار الخصوصية</a>
       </p>
     </form>
   </div>

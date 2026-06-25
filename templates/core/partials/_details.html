@@ -1,36 +1,29 @@
 {% load i18n %}
-<section id="details" class="bg-ivory-100 px-6 py-24">
+<section id="details" class="bg-porcelain px-6 py-24">
   <div class="mx-auto max-w-xl text-center">
     <div class="reveal sec-head">
-      <p class="kicker">The Celebration</p>
-      <h2 class="text-3xl font-light text-charcoal sm:text-4xl">تفاصيل الحفل</h2>
+      <p class="label-lat">The Celebration</p>
+      <h2 class="font-display text-4xl font-semibold text-ink sm:text-5xl">تفاصيل الحفل</h2>
     </div>
 
-    <div class="reveal mx-auto mt-12 max-w-md">
-      <p class="num text-2xl tracking-[0.22em] text-charcoal">{% language 'ar' %}{{ config.wedding_datetime|date:'d . m . Y' }}{% endlanguage %}</p>
-      <p class="mt-2 text-charcoal-soft">{% language 'ar' %}{{ config.wedding_datetime|date:'l' }}{% endlanguage %} · الساعة {{ config.wedding_datetime|time:'G:i' }}</p>
+    <div class="reveal mx-auto mt-10 max-w-md">
+      <p class="num text-2xl tracking-[0.2em] text-ink">{% language 'ar' %}{{ config.wedding_datetime|date:'d . m . Y' }}{% endlanguage %}</p>
+      <p class="mt-2 text-cloud">{% language 'ar' %}{{ config.wedding_datetime|date:'l' }}{% endlanguage %} · الساعة <span class="num">{{ config.wedding_datetime|time:'G:i' }}</span></p>
 
-      <div class="hr-thin mx-auto my-10 w-24"></div>
+      <div class="rule mx-auto my-9 w-20"></div>
 
-      {% if config.venue_name %}
-        <p class="text-lg font-medium text-charcoal">{{ config.venue_name }}</p>
-      {% endif %}
-      {% if config.venue_address %}
-        <p class="mt-1.5 text-charcoal-soft">{{ config.venue_address }}</p>
-      {% endif %}
-      {% if config.hijri_text %}
-        <p class="mt-3 text-sm text-charcoal-soft">{{ config.hijri_text }}</p>
-      {% endif %}
+      {% if config.venue_name %}<p class="font-display text-2xl text-ink">{{ config.venue_name }}</p>{% endif %}
+      {% if config.venue_address %}<p class="mt-1.5 text-cloud">{{ config.venue_address }}</p>{% endif %}
+      {% if config.hijri_text %}<p class="mt-3 text-sm text-cloud">{{ config.hijri_text }}</p>{% endif %}
 
       {% if config.map_url %}
-        <a href="{{ config.map_url }}" target="_blank" rel="noopener" class="btn btn-line mt-9">
+        <a href="{{ config.map_url }}" target="_blank" rel="noopener" class="btn btn-ghost mt-9">
           <svg viewBox="0 0 24 24" class="h-4 w-4 fill-current"><path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg>
           {% trans "الموقع على الخريطة" %}
         </a>
       {% endif %}
-
       {% if not config.venue_name and not config.venue_address and not config.map_url %}
-        <p class="mt-2 text-sm text-charcoal-soft/70">تفاصيل القاعة تُضاف قريباً</p>
+        <p class="mt-2 text-sm text-cloud">تفاصيل القاعة تُضاف قريباً</p>
       {% endif %}
     </div>
   </div>
