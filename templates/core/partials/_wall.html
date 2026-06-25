@@ -17,10 +17,10 @@
             {% endif %}
             <span class="font-serif text-4xl leading-none text-rose-400/70" aria-hidden="true">&ldquo;</span>
             <blockquote class="mt-1 leading-loose text-ink">{{ g.message|linebreaksbr }}</blockquote>
-            <figcaption class="mt-4 flex items-center gap-2 text-sm text-wine-600">
+            <figcaption class="mt-4 flex items-center gap-2 text-wine-600">
               <span class="h-px w-5 bg-rose-400/80"></span>
-              <span class="font-display text-lg">{{ g.name }}</span>
-              {% if g.country_flag %}<span class="text-base leading-none" title="{{ g.country_name }}">{{ g.country_flag }}</span>{% endif %}
+              <span class="text-base font-bold text-ink">{{ g.name }}</span>
+              {% if g.country_flag %}<span class="text-xl leading-none" title="{{ g.country_name }}">{{ g.country_flag }}</span>{% endif %}
             </figcaption>
           </figure>
         {% endfor %}
