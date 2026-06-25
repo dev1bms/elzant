@@ -15,8 +15,8 @@
   <meta name="twitter:card" content="summary_large_image">
 
   {# Self-hosted fonts (same-origin → reliably embedded in the card export) #}
+  <link rel="preload" href="{% static 'fonts/rubik-arabic.woff2' %}" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="{% static 'fonts/aref-ruqaa-700-arabic.woff2' %}" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="{% static 'fonts/tajawal-400-normal-arabic.woff2' %}" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="{% static 'css/fonts.css' %}">
   <link rel="stylesheet" href="{% static 'css/output.css' %}">
   {% block extra_head %}{% endblock %}

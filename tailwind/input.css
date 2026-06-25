@@ -14,10 +14,11 @@
    + Markazi face — only the website chrome changes here.
 ====================================================================== */
 @theme {
-  --font-display: "Aref Ruqaa", "Markazi Text", serif;  /* couple names — expressive */
-  --font-head: "Markazi Text", serif;                    /* headings + invitation — elegant */
-  --font-body: "Tajawal", sans-serif;                    /* body */
-  --font-serif: "Cormorant Garamond", Georgia, serif;    /* Latin / numerals */
+  --font-display: "Aref Ruqaa", "Markazi Text", serif;       /* couple names — expressive */
+  --font-head: "Rubik", "Cairo", "Tajawal", sans-serif;      /* headings — clear + bold */
+  --font-body: "Rubik", "Cairo", "Tajawal", sans-serif;      /* body — clear + bold */
+  --font-num: "Rubik", "Cormorant Garamond", sans-serif;     /* numerals / countdown */
+  --font-serif: "Cormorant Garamond", Georgia, serif;        /* italic Latin accent + keepsake card */
 
   /* ====== Sunset on the Mediterranean — sampled from the wedding artwork ====== */
   /* Warm light atmosphere (sky / sun / lantern) */
@@ -58,7 +59,7 @@
   html { scroll-behavior: smooth; }
   body {
     font-family: var(--font-body);
-    font-weight: 400;
+    font-weight: 500;                 /* Rubik medium — clearer, bolder Arabic */
     color: var(--color-ink);
     background-color: var(--color-porcelain);
     -webkit-font-smoothing: antialiased;
@@ -72,7 +73,7 @@
       radial-gradient(60% 40% at 6% 4%, color-mix(in srgb, var(--color-peach) 28%, transparent), transparent 55%);
   }
   /* Headings = elegant Markazi; couple names opt into expressive Aref Ruqaa. */
-  h1, h2, h3 { font-family: var(--font-head); font-weight: 600; line-height: 1.16; color: var(--color-ink); }
+  h1, h2, h3 { font-family: var(--font-head); font-weight: 700; line-height: 1.2; color: var(--color-ink); }
   .font-display, .names { font-family: var(--font-display); font-weight: 700; line-height: 1.04; }
   ::selection { background: var(--color-wine-500); color: var(--color-porcelain-50); }
   :focus-visible { outline: 2px solid var(--color-wine-500); outline-offset: 3px; border-radius: 3px; }
@@ -88,7 +89,35 @@
     font-family: var(--font-serif); font-style: italic;
     font-size: 1.05rem; letter-spacing: 0.1em; color: var(--color-rose-500);
   }
-  .num { font-family: var(--font-serif); direction: ltr; unicode-bidi: isolate; font-weight: 500; letter-spacing: 0.08em; }
+  .num { font-family: var(--font-num); direction: ltr; unicode-bidi: isolate; font-weight: 600; letter-spacing: 0.04em; }
+
+  /* ---- Countdown: flip boxes (each cell flips when its value changes) ---- */
+  .cd { display: flex; align-items: stretch; justify-content: center; gap: 0.55rem; }
+  .cd-box {
+    display: flex; flex-direction: column; align-items: center; gap: 0.3rem;
+    min-width: 4.1rem; padding: 0.7rem 0.5rem 0.6rem; perspective: 360px;
+    border-radius: 0.95rem;
+    background: linear-gradient(180deg, #fffaf1, var(--color-cream));
+    border: 1px solid color-mix(in srgb, var(--color-champagne) 38%, var(--color-sand));
+    box-shadow: 0 16px 32px -22px rgba(58,42,34,0.55), inset 0 1px 0 rgba(255,255,255,0.7);
+  }
+  .cd-box::before {  /* the flip-clock seam across the middle */
+    content: ""; position: absolute; left: 0.5rem; right: 0.5rem; top: 50%; height: 1px;
+    background: color-mix(in srgb, var(--color-champagne) 40%, transparent); opacity: 0.5; pointer-events: none;
+  }
+  .cd-box { position: relative; }
+  .cd-num {
+    font-family: var(--font-num); direction: ltr; font-weight: 700; font-size: 2.05rem; line-height: 1;
+    color: var(--color-wine-600); display: inline-block; transform-origin: center;
+    backface-visibility: hidden;
+  }
+  .cd-num.is-flip { animation: cdflip .5s cubic-bezier(.4,0,.2,1); }
+  @keyframes cdflip {
+    0%   { transform: rotateX(0deg); }
+    50%  { transform: rotateX(-90deg); }
+    100% { transform: rotateX(0deg); }
+  }
+  .cd-label { font-size: 0.64rem; color: var(--color-cloud); font-weight: 500; }
   .rule { height: 1px; width: 4rem; margin-inline: auto; background: var(--color-champagne); opacity: 0.75; border: 0; }
   .rule-champagne { height: 1px; background: var(--color-champagne); opacity: 0.55; } /* keepsake card */
 
@@ -230,7 +259,7 @@
   .wed-card__names span { font-family: var(--font-serif); font-style: italic; font-weight: 500; color: var(--color-rose-500); font-size: 104px; }
   .wed-card__body { display: flex; flex-direction: column; align-items: center; }
   .wed-card__rule { width: 56px; height: 1.5px; background: var(--color-champagne); margin: 46px 0; }
-  .wed-card__message { font-family: var(--font-body); font-weight: 400; font-size: 50px; line-height: 1.8; color: #3a2a22; margin: 0; max-width: 800px; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .wed-card__message { font-family: "Tajawal", sans-serif; font-weight: 400; font-size: 50px; line-height: 1.8; color: #3a2a22; margin: 0; max-width: 800px; white-space: pre-wrap; overflow-wrap: anywhere; }
   .wed-card__from { font-family: "Markazi Text", serif; font-weight: 600; font-size: 46px; color: var(--color-wine-600); margin: 52px 0 0; white-space: nowrap; }
   .wed-card__foot { display: flex; flex-direction: column; align-items: center; gap: 14px; }
   .wed-card__date { font-family: var(--font-serif); font-weight: 500; font-size: 42px; letter-spacing: 8px; color: #3a2a22; direction: ltr; }
@@ -393,7 +422,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  .reveal, .up, .intro-inner, .hero-art, .hero-breathe img, .art-fade::after {
+  .reveal, .up, .intro-inner, .hero-art, .hero-breathe img, .art-fade::after, .cd-num.is-flip {
     opacity: 1 !important; transform: none !important; animation: none !important; transition: none !important;
   }
   .btn-spinner { animation: none !important; }

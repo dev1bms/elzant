@@ -1,6 +1,6 @@
 // Live countdown to a fixed instant. The target carries a timezone offset
 // (derived from Cairo time) so every visitor counts down to the same moment
-// regardless of their device timezone.
+// regardless of their device timezone. Each cell flips when its value changes.
 (function () {
   "use strict";
 
@@ -19,11 +19,26 @@
   var doneEl = el.querySelector("[data-countdown-done]") ||
     document.querySelector("[data-countdown-done]");
 
+  var reduce = window.matchMedia &&
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
   function pad(n) {
     return n < 10 ? "0" + n : "" + n;
   }
+  // Update a cell; when the value changes, flip it (the text swaps while the
+  // cell is rotated edge-on, ~midway through the 0.5s flip animation).
   function set(node, value) {
-    if (node) node.textContent = String(value); // English (Western) digits
+    if (!node) return;
+    var v = String(value); // English (Western) digits
+    if (node.textContent === v) return;
+    if (reduce || !node.classList.contains("cd-num")) {
+      node.textContent = v;
+      return;
+    }
+    node.classList.remove("is-flip");
+    void node.offsetWidth; // restart the animation
+    node.classList.add("is-flip");
+    setTimeout(function () { node.textContent = v; }, 245);
   }
 
   var timer;
