@@ -61,10 +61,10 @@
         </div>
 
         {% if form.photo.errors %}<p class="mt-2 text-sm text-wine-500">{{ form.photo.errors.0 }}</p>{% endif %}
-        <p class="mt-2 text-xs text-cloud">JPG / PNG / WEBP · حتى ٥ ميجابايت · ستظهر بعد مراجعة الإدارة.</p>
+        <p class="mt-2 text-xs text-cloud">JPG / PNG / WEBP · حتى ١٠ ميجابايت · ستظهر بعد مراجعة الإدارة.</p>
       </div>
 
-      <button type="submit" class="btn btn-primary w-full">{% trans "إرسال التهنئة" %}</button>
+      <button type="submit" id="greeting-submit" class="btn btn-primary w-full">{% trans "إرسال التهنئة" %}</button>
       <p class="text-center text-xs leading-relaxed text-cloud">
         يُعرض اسمك ورسالتك وصورتك بعد المراجعة فقط — لا يُعرض رقمك أو بريدك.
         <a href="{% url 'privacy' %}" class="underline underline-offset-2 hover:text-wine-600">إشعار الخصوصية</a>

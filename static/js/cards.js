@@ -170,4 +170,19 @@
     if (modal && !modal.classList.contains("hidden")) fitAll();
   });
   if (msgInput) msgInput.addEventListener("input", function () { if (objectUrl) syncContent(); });
+
+  // ---- upload feedback: the photo is sent when the form is submitted (the
+  // server then compresses + resizes it). Show a busy state during that upload. ----
+  var form = picker.closest("form");
+  if (form) {
+    form.addEventListener("submit", function () {
+      var submit = form.querySelector('button[type="submit"]');
+      if (!submit || submit.disabled) return;  // also guards against double-submit
+      var hasPhoto = picker.files && picker.files.length;
+      submit.disabled = true;
+      submit.innerHTML =
+        '<span class="btn-spinner" aria-hidden="true"></span>' +
+        (hasPhoto ? "جارٍ رفع الصورة…" : "جارٍ الإرسال…");
+    });
+  }
 })();
