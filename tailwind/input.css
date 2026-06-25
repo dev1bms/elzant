@@ -197,7 +197,11 @@
     padding: 0;
     display: block;
   }
-  .wed-card__photo { width: 100%; overflow: hidden; }
+  /* width:auto (not 100%) so side margins shrink the box and keep it centered.
+     With width:100% + RTL flow the box overflowed left by the margin, shifting
+     the photo off-centre. Framed templates set their own margins; photo_story
+     fills via position:absolute + inset:0. */
+  .wed-card__photo { width: auto; overflow: hidden; box-sizing: border-box; }
   .wed-card__photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
   .wed-card__panel { display: flex; flex-direction: column; align-items: center; }
 
