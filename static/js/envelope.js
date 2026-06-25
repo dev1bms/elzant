@@ -10,18 +10,24 @@
   var KEY = "elzant_envelope_opened";
   var closed = false;
 
+  function onKeydown(e) {
+    if (e.key === "Escape") close();
+  }
+
   function close() {
     if (closed) return;
     closed = true;
+    document.removeEventListener("keydown", onKeydown); // no lingering listener
     try {
       localStorage.setItem(KEY, "1");
     } catch (e) {}
     overlay.classList.add("is-closing");
-    // After the fade, drop the scroll lock and remove the overlay from flow.
+    // After the fade (CSS transition is 0.7s), drop the scroll lock and remove
+    // the overlay from flow.
     window.setTimeout(function () {
       html.classList.remove("show-envelope");
       overlay.style.display = "none";
-    }, 500);
+    }, 700);
   }
 
   var openBtn = document.getElementById("envelope-open");
@@ -30,9 +36,7 @@
   if (skipBtn) skipBtn.addEventListener("click", close);
 
   // Convenience: close on Escape or when clicking the backdrop.
-  document.addEventListener("keydown", function (e) {
-    if (e.key === "Escape") close();
-  });
+  document.addEventListener("keydown", onKeydown);
   overlay.addEventListener("click", function (e) {
     if (e.target === overlay) close();
   });
