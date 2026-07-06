@@ -2,6 +2,7 @@ import csv
 from urllib.parse import quote
 
 from django.conf import settings
+from django import forms
 from django.contrib import admin
 from django.db.models import Q
 from django.http import HttpResponse
@@ -337,16 +338,49 @@ class InviterProfileAdmin(admin.ModelAdmin):
         return obj.user.invited_guests.count()
 
 
+class WhatsAppConfigForm(forms.ModelForm):
+    """Secrets are masked (never rendered back to the browser) and preserved when
+    left blank — so re-saving the page never wipes a stored secret."""
+
+    class Meta:
+        model = WhatsAppConfig
+        fields = "__all__"
+        _mask = {"autocomplete": "new-password",
+                 "placeholder": "••••••• (اتركه فارغاً للإبقاء على القيمة الحالية)"}
+        widgets = {
+            "api_token": forms.PasswordInput(render_value=False, attrs=_mask),
+            "app_secret": forms.PasswordInput(render_value=False, attrs=_mask),
+            "verify_token": forms.PasswordInput(render_value=False, attrs=_mask),
+        }
+
+    def _keep_if_blank(self, field):
+        # Blank submission means "unchanged" — keep whatever is already stored.
+        return self.cleaned_data.get(field) or getattr(self.instance, field, "")
+
+    def clean_api_token(self):
+        return self._keep_if_blank("api_token")
+
+    def clean_app_secret(self):
+        return self._keep_if_blank("app_secret")
+
+    def clean_verify_token(self):
+        return self._keep_if_blank("verify_token")
+
+
 @admin.register(WhatsAppConfig)
 class WhatsAppConfigAdmin(admin.ModelAdmin):
+    form = WhatsAppConfigForm
     list_display = ("__str__", "enabled", "default_template_name", "template_lang")
-    readonly_fields = ("test_send_button",)
+    readonly_fields = ("secrets_state", "test_send_button")
     fieldsets = (
         ("التشغيل", {"fields": ("enabled",)}),
-        ("Cloud API", {"fields": ("phone_number_id", "waba_id")}),
+        ("Cloud API", {"fields": ("phone_number_id", "waba_id", "api_version")}),
         ("القالب الافتراضي", {"fields": ("default_template_name", "template_lang", "default_country_code")}),
-        ("الاختبار", {"fields": ("test_recipient", "test_send_button"),
-                      "description": "الأسرار (التوكن/App Secret/Verify Token) تُقرأ من .env فقط — لا تُخزَّن هنا."}),
+        ("الأسرار (تُدار من هنا — مقنّعة، superuser فقط)",
+         {"fields": ("api_token", "app_secret", "verify_token", "secrets_state"),
+          "description": "تُخزَّن في قاعدة البيانات وتُعرَض مقنّعة. اترك الحقل فارغاً للإبقاء على قيمته الحالية. "
+                         "احمِ ملف قاعدة البيانات ونسخه الاحتياطية."}),
+        ("الاختبار", {"fields": ("test_recipient", "test_send_button")}),
     )
 
     def has_add_permission(self, request):
@@ -354,6 +388,23 @@ class WhatsAppConfigAdmin(admin.ModelAdmin):
 
     def has_delete_permission(self, request, obj=None):
         return False
+
+    def has_view_permission(self, request, obj=None):
+        return request.user.is_superuser
+
+    def has_change_permission(self, request, obj=None):
+        return request.user.is_superuser
+
+    @admin.display(description="حالة الأسرار")
+    def secrets_state(self, obj):
+        if not obj or not obj.pk:
+            return "—"
+        def mark(v):
+            return "مضبوط ✓" if v else "غير مضبوط ✗"
+        return format_html(
+            "التوكن: {} · App Secret: {} · Verify Token: {}",
+            mark(obj.api_token), mark(obj.app_secret), mark(obj.verify_token),
+        )
 
     @admin.display(description="إرسال رسالة اختبار")
     def test_send_button(self, obj):

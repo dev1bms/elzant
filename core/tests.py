@@ -19,9 +19,6 @@ from core.whatsapp import WhatsAppError, normalize_phone, send_invitation
 WA_SETTINGS = dict(
     ALLOWED_HOSTS=["testserver"],
     SECURE_SSL_REDIRECT=False,
-    WHATSAPP_APP_SECRET="unit-test-secret",
-    WHATSAPP_VERIFY_TOKEN="unit-verify-token",
-    WHATSAPP_TOKEN="unit-token",
 )
 
 
@@ -73,6 +70,10 @@ class WebhookTests(TestCase):
     def setUp(self):
         self.client = Client()
         self.url = reverse("whatsapp_webhook")
+        cfg = WhatsAppConfig.get()
+        cfg.app_secret = "unit-test-secret"
+        cfg.verify_token = "unit-verify-token"
+        cfg.save()
         self.guest = WeddingGuest.objects.create(
             full_name="رنا", phone_number="01009990000", phone_e164="201009990000",
             wa_message_id="wamid.ABC", wa_status=WhatsAppStatus.SENT,
@@ -140,6 +141,7 @@ class SendInvitationTests(TestCase):
     def setUp(self):
         cfg = WhatsAppConfig.get()
         cfg.default_template_name = "invite_ar"
+        cfg.api_token = "unit-token"
         cfg.save()
         self.cfg = cfg
         self.guest = WeddingGuest.objects.create(

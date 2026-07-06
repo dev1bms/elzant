@@ -5,8 +5,9 @@ webhook signatures. Uses the standard-library ``urllib`` (no ``requests``
 dependency) with explicit timeouts and friendly error handling.
 
 SECURITY:
-- Secrets (token, app secret, verify token) come from settings/.env only; they
-  are never stored in the DB, never returned to clients, never logged verbatim.
+- Secrets (token, app secret, verify token) are managed in the admin
+  (WhatsAppConfig) — masked and superuser-only — never returned to clients and
+  never logged verbatim. Protect the SQLite file and its backups accordingly.
 - ``verify_webhook_signature`` enforces HMAC-SHA256 over the raw body; unsigned
   or mismatched requests are rejected.
 - ``send_invitation`` honours WhatsAppConfig.enabled: when off (safe mode) it
@@ -21,7 +22,6 @@ import urllib.error
 import urllib.request
 from dataclasses import dataclass
 
-from django.conf import settings
 from django.utils import timezone
 
 GRAPH_BASE = "https://graph.facebook.com"
@@ -84,7 +84,8 @@ def verify_webhook_signature(request):
     Rejects (False) when the app secret is unset or the header is missing/malformed
     so an unsigned request can never be treated as authentic.
     """
-    secret = (getattr(settings, "WHATSAPP_APP_SECRET", "") or "").encode()
+    from .models import WhatsAppConfig
+    secret = (WhatsAppConfig.get().app_secret or "").encode()
     if not secret:
         return False
     header = request.META.get("HTTP_X_HUB_SIGNATURE_256", "")
@@ -98,12 +99,11 @@ def verify_webhook_signature(request):
 # --------------------------------------------------------------------------- #
 # Low-level Graph API template send
 # --------------------------------------------------------------------------- #
-def _graph_url(phone_number_id):
-    version = getattr(settings, "WHATSAPP_API_VERSION", "v21.0")
-    return f"{GRAPH_BASE}/{version}/{phone_number_id}/messages"
+def _graph_url(phone_number_id, version="v21.0"):
+    return f"{GRAPH_BASE}/{version or 'v21.0'}/{phone_number_id}/messages"
 
 
-def send_template(to_e164, template_name, lang, components, *, phone_number_id, token):
+def send_template(to_e164, template_name, lang, components, *, phone_number_id, token, api_version="v21.0"):
     """POST a template message to the Cloud API. Returns the wa_message_id.
 
     Raises WhatsAppError with a friendly, secret-free message on any failure.
@@ -123,7 +123,7 @@ def send_template(to_e164, template_name, lang, components, *, phone_number_id, 
     }
     data = json.dumps(payload).encode("utf-8")
     req = urllib.request.Request(
-        _graph_url(phone_number_id),
+        _graph_url(phone_number_id, api_version),
         data=data,
         method="POST",
         headers={
@@ -220,7 +220,8 @@ def send_invitation(guest, *, sender=None, template_name=None, force=False):
         message_id = send_template(
             to, tpl, config.template_lang, components,
             phone_number_id=config.phone_number_id,
-            token=getattr(settings, "WHATSAPP_TOKEN", ""),
+            token=config.api_token,
+            api_version=config.api_version,
         )
     except WhatsAppError as exc:
         MessageLog.objects.create(guest=guest, sender=sender, template_name=tpl,
@@ -273,7 +274,8 @@ def send_test_message(recipient_e164):
         mid = send_template(
             to, config.default_template_name, config.template_lang, components,
             phone_number_id=config.phone_number_id,
-            token=getattr(settings, "WHATSAPP_TOKEN", ""),
+            token=config.api_token,
+            api_version=config.api_version,
         )
     except WhatsAppError as exc:
         return SendResult(ok=False, error=str(exc))
