@@ -5,7 +5,9 @@ from django.conf import settings
 from django.contrib import admin
 from django.db.models import Q
 from django.http import HttpResponse
+from django.shortcuts import redirect
 from django.template.defaultfilters import date as date_filter
+from django.urls import path, reverse
 from django.utils import timezone, translation
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
@@ -104,6 +106,16 @@ class WeddingGuestAdmin(admin.ModelAdmin):
                                      "send_count", "last_sent_at")}),
         ("التتبّع", {"fields": ("last_opened_at", "invited_at", "created_at", "updated_at")}),
     )
+
+    def save_model(self, request, obj, form, change):
+        # Keep the normalized phone (dedupe key) in sync with the typed number.
+        from .models import WhatsAppConfig
+        from .whatsapp import normalize_phone
+        if obj.phone_number:
+            obj.phone_e164 = normalize_phone(obj.phone_number, WhatsAppConfig.get().default_country_code) or ""
+        else:
+            obj.phone_e164 = ""
+        super().save_model(request, obj, form, change)
 
     @admin.display(boolean=True, description="فُتحت")
     def opened(self, obj):
@@ -328,11 +340,12 @@ class InviterProfileAdmin(admin.ModelAdmin):
 @admin.register(WhatsAppConfig)
 class WhatsAppConfigAdmin(admin.ModelAdmin):
     list_display = ("__str__", "enabled", "default_template_name", "template_lang")
+    readonly_fields = ("test_send_button",)
     fieldsets = (
         ("التشغيل", {"fields": ("enabled",)}),
         ("Cloud API", {"fields": ("phone_number_id", "waba_id")}),
         ("القالب الافتراضي", {"fields": ("default_template_name", "template_lang", "default_country_code")}),
-        ("الاختبار", {"fields": ("test_recipient",),
+        ("الاختبار", {"fields": ("test_recipient", "test_send_button"),
                       "description": "الأسرار (التوكن/App Secret/Verify Token) تُقرأ من .env فقط — لا تُخزَّن هنا."}),
     )
 
@@ -341,6 +354,42 @@ class WhatsAppConfigAdmin(admin.ModelAdmin):
 
     def has_delete_permission(self, request, obj=None):
         return False
+
+    @admin.display(description="إرسال رسالة اختبار")
+    def test_send_button(self, obj):
+        if not obj or not obj.pk:
+            return "احفظ الإعدادات أولاً."
+        if not obj.test_recipient:
+            return "أضف «رقم اختبار الإرسال» واحفظ لتظهر الزر."
+        url = reverse("admin:core_whatsappconfig_test_send")
+        mode = "إرسال حقيقي" if obj.enabled else "محاكاة (وضع آمن — بلا إرسال فعلي)"
+        return format_html(
+            '<a class="button" href="{}">إرسال اختبار إلى {}</a>'
+            '<div style="margin-top:6px;color:#6e5a4c">الوضع الحالي: {}</div>',
+            url, obj.test_recipient, mode,
+        )
+
+    def get_urls(self):
+        urls = super().get_urls()
+        custom = [
+            path("test-send/", self.admin_site.admin_view(self.test_send_view),
+                 name="core_whatsappconfig_test_send"),
+        ]
+        return custom + urls
+
+    def test_send_view(self, request):
+        from .whatsapp import send_test_message
+
+        config = WhatsAppConfig.get()
+        result = send_test_message(config.test_recipient)
+        if result.simulated:
+            self.message_user(request, "وضع آمن: لم يُرسَل شيء فعلياً (فعّل الإرسال الحيّ للاختبار الحقيقي).",
+                              level="warning")
+        elif result.ok:
+            self.message_user(request, f"تم الإرسال ✓ — معرّف الرسالة: {result.message_id}")
+        else:
+            self.message_user(request, f"فشل الإرسال: {result.error}", level="error")
+        return redirect(reverse("admin:core_whatsappconfig_change", args=[config.pk]))
 
 
 @admin.register(WhatsAppTemplate)
