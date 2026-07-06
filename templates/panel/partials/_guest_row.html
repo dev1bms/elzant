@@ -1,0 +1,14 @@
+{# A guest list row. Context: g (guest), show_inviter (bool) #}
+<a href="{% url 'panel:guest_detail' g.id %}"
+   class="flex items-center justify-between gap-3 rounded-2xl border border-sand/70 bg-porcelain-50 px-4 py-3 transition hover:border-wine-500/40 hover:shadow-sm">
+  <div class="min-w-0">
+    <div class="truncate font-semibold text-ink">{{ g.full_name }}</div>
+    <div class="num text-xs text-cloud" dir="ltr">{{ g.phone_number }}</div>
+    {% if show_inviter and g.invited_by %}
+    <div class="mt-0.5 text-[0.65rem] text-cloud">
+      دعاه: {% if g.invited_by.inviter_profile %}{{ g.invited_by.inviter_profile.display_name }} · {{ g.invited_by.inviter_profile.get_side_display }}{% else %}{{ g.invited_by.username }}{% endif %}
+    </div>
+    {% endif %}
+  </div>
+  {% include "panel/partials/_wa_badge.html" with g=g %}
+</a>

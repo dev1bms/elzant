@@ -1,0 +1,29 @@
+{# Funnel counters. Context vars: c (counter dict), title #}
+<div class="panel p-5">
+  <div class="flex items-center justify-between">
+    <h2 class="text-lg font-bold text-ink">{{ title }}</h2>
+    <span class="num text-sm text-cloud">{{ c.total }} مدعو</span>
+  </div>
+  <div class="mt-4 grid grid-cols-5 gap-1.5 text-center">
+    <div class="rounded-xl border border-sand/70 bg-porcelain-50 px-1 py-3">
+      <div class="num text-xl font-bold text-wine-600">{{ c.sent }}</div>
+      <div class="mt-1 text-[0.62rem] leading-tight text-cloud">أُرسلت</div>
+    </div>
+    <div class="rounded-xl border border-sand/70 bg-porcelain-50 px-1 py-3">
+      <div class="num text-xl font-bold text-wine-600">{{ c.delivered }}</div>
+      <div class="mt-1 text-[0.62rem] leading-tight text-cloud">سُلّمت</div>
+    </div>
+    <div class="rounded-xl border border-sand/70 bg-porcelain-50 px-1 py-3">
+      <div class="num text-xl font-bold text-gold">{{ c.read }}</div>
+      <div class="mt-1 text-[0.62rem] leading-tight text-cloud">قُرئت</div>
+    </div>
+    <div class="rounded-xl border border-sand/70 bg-porcelain-50 px-1 py-3">
+      <div class="num text-xl font-bold text-rose-500">{{ c.opened }}</div>
+      <div class="mt-1 text-[0.62rem] leading-tight text-cloud">فُتح الرابط</div>
+    </div>
+    <div class="rounded-xl border border-sand/70 bg-porcelain-50 px-1 py-3">
+      <div class="num text-xl font-bold text-olive">{{ c.greeted }}</div>
+      <div class="mt-1 text-[0.62rem] leading-tight text-cloud">هنّأ</div>
+    </div>
+  </div>
+</div>

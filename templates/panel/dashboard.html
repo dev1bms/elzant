@@ -1,0 +1,35 @@
+{% extends "panel/base_panel.html" %}
+
+{% block title %}اللوحة · الدعوات{% endblock %}
+
+{% block content %}
+<div class="mb-5 flex items-center justify-between">
+  <h1 class="text-2xl font-bold text-ink">دعواتي</h1>
+  <a href="{% url 'panel:guest_add' %}" class="btn btn-primary px-5 py-2.5 text-sm">+ دعوة جديدة</a>
+</div>
+
+<div class="space-y-4">
+  {% include "panel/partials/_funnel.html" with c=mine title="ملخّص دعواتي" %}
+
+  {% if view_all %}
+  {% include "panel/partials/_funnel.html" with c=all title="كل المدعوين" %}
+  {% endif %}
+</div>
+
+<div class="mt-8">
+  <div class="mb-3 flex items-center justify-between">
+    <h2 class="text-lg font-bold text-ink">آخر الدعوات</h2>
+    <a href="{% url 'panel:guests' %}" class="text-sm text-wine-600 hover:underline">عرض الكل</a>
+  </div>
+  {% if recent %}
+  <div class="space-y-2">
+    {% for g in recent %}{% include "panel/partials/_guest_row.html" with g=g show_inviter=False %}{% endfor %}
+  </div>
+  {% else %}
+  <div class="panel p-8 text-center text-ink-soft">
+    <p>لم ترسل أي دعوة بعد.</p>
+    <a href="{% url 'panel:guest_add' %}" class="btn btn-primary mt-4 px-6 py-2.5 text-sm">أرسل أول دعوة</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

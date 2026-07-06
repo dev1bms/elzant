@@ -1,0 +1,23 @@
+{% extends "panel/base_panel.html" %}
+
+{% block title %}إعادة إرسال — {{ guest.full_name }}{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-md">
+  <h1 class="mb-4 text-2xl font-bold text-ink">إعادة إرسال الدعوة</h1>
+  <div class="panel p-6">
+    <p class="text-ink">
+      سيُعاد إرسال نفس الدعوة (نفس الرابط) إلى
+      <span class="font-semibold text-wine-700">{{ guest.full_name }}</span>
+      على الرقم <span class="num" dir="ltr">{{ guest.phone_number }}</span>.
+    </p>
+    {% if guest.send_count %}<p class="mt-2 text-sm text-cloud">عدد مرات الإرسال السابقة: <span class="num">{{ guest.send_count }}</span>.</p>{% endif %}
+
+    <form method="post" class="mt-5 space-y-3">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-primary w-full">تأكيد إعادة الإرسال</button>
+      <a href="{% url 'panel:guest_detail' guest.id %}" class="block py-2 text-center text-sm text-ink-soft hover:text-wine-600">إلغاء</a>
+    </form>
+  </div>
+</div>
+{% endblock %}

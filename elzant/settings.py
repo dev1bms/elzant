@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     # Local apps
     "core",
+    "panel",
 ]
 
 MIDDLEWARE = [
@@ -86,6 +87,11 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "elzant.wsgi.application"
+
+# Family panel auth (django.contrib.auth). The panel is the only login surface.
+LOGIN_URL = "panel:login"
+LOGIN_REDIRECT_URL = "panel:dashboard"
+LOGOUT_REDIRECT_URL = "panel:login"
 
 # ---------------------------------------------------------------------------
 # Database — SQLite for the MVP (no external DB server needed).

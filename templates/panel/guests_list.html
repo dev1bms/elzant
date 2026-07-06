@@ -1,0 +1,27 @@
+{% extends "panel/base_panel.html" %}
+
+{% block title %}المدعوون{% endblock %}
+
+{% block content %}
+<div class="mb-4 flex items-center justify-between">
+  <h1 class="text-2xl font-bold text-ink">المدعوون</h1>
+  <a href="{% url 'panel:guest_add' %}" class="btn btn-primary px-5 py-2.5 text-sm">+ دعوة</a>
+</div>
+
+{% if view_all %}
+<div class="mb-4 inline-flex rounded-full border border-sand bg-porcelain-50 p-1 text-sm">
+  <a href="?scope=mine" class="rounded-full px-4 py-1.5 {% if scope == 'mine' %}bg-wine-500 text-porcelain-50{% else %}text-ink-soft{% endif %}">دعواتي</a>
+  <a href="?scope=all" class="rounded-full px-4 py-1.5 {% if scope == 'all' %}bg-wine-500 text-porcelain-50{% else %}text-ink-soft{% endif %}">الكل</a>
+</div>
+{% endif %}
+
+<div class="mb-4">{% include "panel/partials/_funnel.html" with c=counters title="ملخّص القائمة" %}</div>
+
+{% if guests %}
+<div class="space-y-2">
+  {% for g in guests %}{% include "panel/partials/_guest_row.html" with g=g show_inviter=view_all %}{% endfor %}
+</div>
+{% else %}
+<div class="panel p-8 text-center text-ink-soft">لا يوجد مدعوون في هذه القائمة بعد.</div>
+{% endif %}
+{% endblock %}
