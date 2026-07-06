@@ -1,0 +1,33 @@
+{% extends "panel/base_panel.html" %}
+
+{% block title %}دخول لوحة الدعوات{% endblock %}
+
+{% block content %}
+<div class="mx-auto mt-10 max-w-sm">
+  <div class="sec-head mb-8 text-center">
+    <p class="eyebrow">لوحة العائلة</p>
+    <h1 class="names text-4xl text-wine-700">{{ config.groom_name }} <span class="amp text-2xl">&amp;</span> {{ config.bride_name }}</h1>
+    <div class="rule mt-2"></div>
+    <p class="text-sm text-ink-soft">سجّل الدخول لإرسال الدعوات ومتابعتها.</p>
+  </div>
+
+  <form method="post" class="panel space-y-4 p-6">
+    {% csrf_token %}
+    {% if form.errors %}
+    <div class="rounded-2xl border border-wine-500/40 bg-blush px-4 py-3 text-sm text-wine-700">
+      اسم المستخدم أو كلمة المرور غير صحيحة.
+    </div>
+    {% endif %}
+    <div>
+      <label class="mb-1 block text-sm text-ink-soft" for="{{ form.username.id_for_label }}">اسم المستخدم</label>
+      <input type="text" name="username" id="{{ form.username.id_for_label }}" class="field" autocomplete="username" autofocus required>
+    </div>
+    <div>
+      <label class="mb-1 block text-sm text-ink-soft" for="{{ form.password.id_for_label }}">كلمة المرور</label>
+      <input type="password" name="password" id="{{ form.password.id_for_label }}" class="field" autocomplete="current-password" required>
+    </div>
+    <input type="hidden" name="next" value="{{ next }}">
+    <button type="submit" class="btn btn-primary w-full">دخول</button>
+  </form>
+</div>
+{% endblock %}

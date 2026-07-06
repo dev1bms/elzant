@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     # Local apps
     "core",
+    "panel",
 ]
 
 MIDDLEWARE = [
@@ -86,6 +87,11 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "elzant.wsgi.application"
+
+# Family panel auth (django.contrib.auth). The panel is the only login surface.
+LOGIN_URL = "panel:login"
+LOGIN_REDIRECT_URL = "panel:dashboard"
+LOGOUT_REDIRECT_URL = "panel:login"
 
 # ---------------------------------------------------------------------------
 # Database — SQLite for the MVP (no external DB server needed).
@@ -200,6 +206,18 @@ SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 # ---------------------------------------------------------------------------
 GEOIP_ENABLED = env.bool("GEOIP_ENABLED", default=False)
 GEOIP_PATH = env("GEOIP_PATH", default="")  # dir or path to the .mmdb file
+
+# ---------------------------------------------------------------------------
+# WhatsApp Cloud API (invitations). SECRETS live in .env ONLY — never in the DB,
+# never logged, never committed. Operational settings (phone_number_id, template
+# name, enabled flag) live in the admin (core.models.WhatsAppConfig). The webhook
+# verifies Meta's HMAC signature with WHATSAPP_APP_SECRET; GET subscription check
+# uses WHATSAPP_VERIFY_TOKEN. See core/whatsapp.py and deploy/DEPLOY.md.
+# ---------------------------------------------------------------------------
+WHATSAPP_TOKEN = env("WHATSAPP_TOKEN", default="")
+WHATSAPP_APP_SECRET = env("WHATSAPP_APP_SECRET", default="")
+WHATSAPP_VERIFY_TOKEN = env("WHATSAPP_VERIFY_TOKEN", default="")
+WHATSAPP_API_VERSION = env("WHATSAPP_API_VERSION", default="v21.0")
 
 # ---------------------------------------------------------------------------
 # Email (optional). Defaults to the console backend (prints to logs); configure

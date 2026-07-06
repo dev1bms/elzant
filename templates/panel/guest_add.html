@@ -1,0 +1,26 @@
+{% extends "panel/base_panel.html" %}
+
+{% block title %}دعوة جديدة{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-md">
+  <h1 class="mb-1 text-2xl font-bold text-ink">دعوة جديدة</h1>
+  <p class="mb-6 text-sm text-ink-soft">اكتب اسم المدعو ورقمه، وسنرسل له دعوته الخاصة عبر واتساب.</p>
+
+  <form method="post" class="panel space-y-5 p-6">
+    {% csrf_token %}
+    <div>
+      <label class="mb-1 block text-sm text-ink-soft" for="{{ form.full_name.id_for_label }}">{{ form.full_name.label }}</label>
+      {{ form.full_name }}
+      {% for e in form.full_name.errors %}<p class="mt-1 text-xs text-wine-700">{{ e }}</p>{% endfor %}
+    </div>
+    <div>
+      <label class="mb-1 block text-sm text-ink-soft" for="{{ form.phone.id_for_label }}">{{ form.phone.label }}</label>
+      {{ form.phone }}
+      {% for e in form.phone.errors %}<p class="mt-1 text-xs text-wine-700">{{ e }}</p>{% endfor %}
+      <p class="mt-1 text-xs text-cloud">الرمز الدولي الافتراضي: +{{ config.default_country_code }} (يمكن كتابة الرقم المحلي مباشرة).</p>
+    </div>
+    <button type="submit" class="btn btn-primary w-full">إرسال الدعوة</button>
+  </form>
+</div>
+{% endblock %}

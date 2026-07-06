@@ -12,3 +12,7 @@ gunicorn==26.0.0
 
 # Image handling for photo greeting cards (ImageField + resize/EXIF-strip/thumbnail)
 Pillow==12.2.0
+
+# Inline SVG QR codes for invitation links in the family panel (core/qr.py).
+# Pure-Python; the panel degrades gracefully if it is ever missing.
+qrcode==8.0

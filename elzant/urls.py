@@ -10,6 +10,7 @@ from django.views.static import serve
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path("panel/", include("panel.urls")),
     path("", include("core.urls")),
 ]
 
