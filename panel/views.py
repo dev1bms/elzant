@@ -12,6 +12,7 @@ from django.db.models import Count, Q
 from django.shortcuts import redirect, render
 
 from core.models import WeddingGuest, WhatsAppConfig, WhatsAppStatus
+from core.qr import qr_svg
 from core.whatsapp import normalize_phone, send_invitation
 
 from .access import can_view_all, guest_or_403, inviter_required, visible_guests
@@ -126,10 +127,12 @@ def guest_add(request):
 @inviter_required
 def guest_detail(request, guest_id):
     guest = guest_or_403(request.user, guest_id)
+    invitation_url = _invitation_url(guest)
     return render(request, "panel/guest_detail.html", {
         "guest": guest,
         "timeline": _timeline(guest),
-        "invitation_url": _invitation_url(guest),
+        "invitation_url": invitation_url,
+        "qr_svg": qr_svg(invitation_url),
         "can_edit": can_view_all(request.user) or guest.invited_by_id == request.user.id,
     })
 

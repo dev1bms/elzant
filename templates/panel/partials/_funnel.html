@@ -1,29 +1,42 @@
-{# Funnel counters. Context vars: c (counter dict), title #}
+{# Funnel counters + a read-rate progress ring. Context vars: c (counter dict), title #}
+{% widthratio c.read c.total 100 as read_pct %}
 <div class="panel p-5">
   <div class="flex items-center justify-between">
     <h2 class="text-lg font-bold text-ink">{{ title }}</h2>
     <span class="num text-sm text-cloud">{{ c.total }} مدعو</span>
   </div>
-  <div class="mt-4 grid grid-cols-5 gap-1.5 text-center">
-    <div class="rounded-xl border border-sand/70 bg-porcelain-50 px-1 py-3">
-      <div class="num text-xl font-bold text-wine-600">{{ c.sent }}</div>
-      <div class="mt-1 text-[0.62rem] leading-tight text-cloud">أُرسلت</div>
+
+  <div class="mt-4 flex items-center gap-4">
+    {# read-rate ring — "قُرئت الدعوة" is the headline engagement signal #}
+    <div class="relative h-20 w-20 shrink-0 rounded-full"
+         style="background: conic-gradient(var(--color-gold) calc({{ read_pct }} * 1%), color-mix(in srgb, var(--color-sand) 80%, transparent) 0);">
+      <div class="absolute inset-1.5 flex flex-col items-center justify-center rounded-full bg-porcelain-50">
+        <span class="num text-lg font-bold text-wine-600">{{ read_pct }}%</span>
+        <span class="text-[0.55rem] text-cloud">قُرئت</span>
+      </div>
     </div>
-    <div class="rounded-xl border border-sand/70 bg-porcelain-50 px-1 py-3">
-      <div class="num text-xl font-bold text-wine-600">{{ c.delivered }}</div>
-      <div class="mt-1 text-[0.62rem] leading-tight text-cloud">سُلّمت</div>
-    </div>
-    <div class="rounded-xl border border-sand/70 bg-porcelain-50 px-1 py-3">
-      <div class="num text-xl font-bold text-gold">{{ c.read }}</div>
-      <div class="mt-1 text-[0.62rem] leading-tight text-cloud">قُرئت</div>
-    </div>
-    <div class="rounded-xl border border-sand/70 bg-porcelain-50 px-1 py-3">
-      <div class="num text-xl font-bold text-rose-500">{{ c.opened }}</div>
-      <div class="mt-1 text-[0.62rem] leading-tight text-cloud">فُتح الرابط</div>
-    </div>
-    <div class="rounded-xl border border-sand/70 bg-porcelain-50 px-1 py-3">
-      <div class="num text-xl font-bold text-olive">{{ c.greeted }}</div>
-      <div class="mt-1 text-[0.62rem] leading-tight text-cloud">هنّأ</div>
+
+    <div class="grid flex-1 grid-cols-5 gap-1.5 text-center">
+      <div class="rounded-xl border border-sand/70 bg-porcelain-50 px-1 py-2.5">
+        <div class="num text-lg font-bold text-wine-600">{{ c.sent }}</div>
+        <div class="mt-0.5 text-[0.6rem] leading-tight text-cloud">أُرسلت</div>
+      </div>
+      <div class="rounded-xl border border-sand/70 bg-porcelain-50 px-1 py-2.5">
+        <div class="num text-lg font-bold text-ink-soft">{{ c.delivered }}</div>
+        <div class="mt-0.5 text-[0.6rem] leading-tight text-cloud">سُلّمت</div>
+      </div>
+      <div class="rounded-xl border border-sand/70 bg-porcelain-50 px-1 py-2.5">
+        <div class="num text-lg font-bold text-gold">{{ c.read }}</div>
+        <div class="mt-0.5 text-[0.6rem] leading-tight text-cloud">قُرئت</div>
+      </div>
+      <div class="rounded-xl border border-sand/70 bg-porcelain-50 px-1 py-2.5">
+        <div class="num text-lg font-bold text-rose-500">{{ c.opened }}</div>
+        <div class="mt-0.5 text-[0.6rem] leading-tight text-cloud">فُتح</div>
+      </div>
+      <div class="rounded-xl border border-sand/70 bg-porcelain-50 px-1 py-2.5">
+        <div class="num text-lg font-bold text-olive">{{ c.greeted }}</div>
+        <div class="mt-0.5 text-[0.6rem] leading-tight text-cloud">هنّأ</div>
+      </div>
     </div>
   </div>
 </div>
