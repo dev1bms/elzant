@@ -359,9 +359,10 @@ class InviterProfile(models.Model):
 
 
 class WhatsAppConfig(models.Model):
-    """Operational WhatsApp settings — a singleton like WeddingConfig, editable
-    from the admin. SECRETS ARE NOT STORED HERE: the API token, app secret and
-    verify token are read from the environment (.env) only."""
+    """Operational WhatsApp settings AND secrets — a singleton like WeddingConfig,
+    fully managed from the admin (no .env needed). The API token, app secret and
+    verify token are stored here; the admin masks them and restricts this screen
+    to superusers. Protect the SQLite file and its backups accordingly."""
 
     enabled = models.BooleanField(
         "تفعيل الإرسال الحيّ", default=False,
@@ -376,6 +377,12 @@ class WhatsAppConfig(models.Model):
         help_text="لتطبيع الأرقام المحلية (مصر=20).",
     )
     test_recipient = models.CharField("رقم اختبار الإرسال", max_length=30, blank=True)
+
+    # --- Secrets (managed here, not in .env). Masked + superuser-only in admin. ---
+    api_token = models.TextField("توكن الوصول (Access Token)", blank=True)
+    app_secret = models.CharField("App Secret", max_length=100, blank=True)
+    verify_token = models.CharField("Verify Token (Webhook)", max_length=100, blank=True)
+    api_version = models.CharField("إصدار Graph API", max_length=10, default="v21.0")
 
     class Meta:
         verbose_name = "إعدادات واتساب"

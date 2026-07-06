@@ -11,7 +11,6 @@ import json
 import logging
 from datetime import datetime, timezone as dt_timezone
 
-from django.conf import settings
 from django.http import HttpResponse, HttpResponseForbidden
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
@@ -60,7 +59,8 @@ def _verify_subscription(request):
     mode = request.GET.get("hub.mode")
     token = request.GET.get("hub.verify_token")
     challenge = request.GET.get("hub.challenge", "")
-    expected = getattr(settings, "WHATSAPP_VERIFY_TOKEN", "")
+    from .models import WhatsAppConfig
+    expected = WhatsAppConfig.get().verify_token
     if mode == "subscribe" and expected and token == expected:
         return HttpResponse(challenge)
     return HttpResponseForbidden("verification failed")

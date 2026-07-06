@@ -196,19 +196,15 @@ sudo systemctl restart elzant
 
 طبقة الدعوات تعمل **خادم-لخادم** مع Meta. تبدأ في **الوضع الآمن** (`enabled=False`) فلا يُرسَل شيء فعلياً حتى تُفعّلها.
 
-**1) الأسرار في `.env` فقط** (لا تُخزَّن في قاعدة البيانات ولا تُرفَع لـ Git):
-```
-WHATSAPP_TOKEN=            # توكن نظام واتساب للأعمال (طويل الأمد)
-WHATSAPP_APP_SECRET=       # App Secret — للتحقق من توقيع الـ webhook
-WHATSAPP_VERIFY_TOKEN=     # سلسلة عشوائية من عندك، تُطابِق ما تضعه في واجهة Meta
-# WHATSAPP_API_VERSION=v21.0
-```
+> **دليل بصري كامل خطوة بخطوة** (من إنشاء تطبيق Meta حتى الإرسال): `docs/whatsapp-setup-guide.html`.
+
+**1) كل الإعدادات والأسرار من الأدمن** (لا حاجة لأي `.env`): افتح `/admin/ → إعدادات واتساب` وأدخِل التوكن (Access Token)، وApp Secret، وVerify Token، وإصدار Graph API. الحقول **مقنّعة** ومحصورة بـ **superuser**، وتبقى قيمتها إن تركتها فارغة عند الحفظ. ⚠️ الأسرار صارت داخل قاعدة البيانات — احمِ ملف SQLite ونسخه الاحتياطية.
 
 **2) الإعدادات التشغيلية من الأدمن** (`/admin/` → «إعدادات واتساب»): `phone_number_id`، اسم القالب الافتراضي، لغته، رمز الدولة الافتراضي (مصر=`20`)، ورقم اختبار. أبقِ **«تفعيل الإرسال الحيّ» متوقّفاً** حتى تجهيز القالب المعتمد.
 
 **3) الـ webhook في Meta:**
 - الرابط: `https://elzant.com/webhooks/whatsapp/`
-- Verify Token: نفس قيمة `WHATSAPP_VERIFY_TOKEN`.
+- Verify Token: نفس القيمة التي أدخلتها في «إعدادات واتساب» بالأدمن.
 - اشترك في حقل **messages** (يغطّي أحداث الحالة `sent/delivered/read/failed`).
 - تأكّد أن `elzant.com` ضمن `CSRF_TRUSTED_ORIGINS` (الـ webhook مُعفى من CSRF لكن يتحقّق من توقيع HMAC-SHA256؛ يرفض غير الموقّع بـ 403).
 

@@ -208,16 +208,11 @@ GEOIP_ENABLED = env.bool("GEOIP_ENABLED", default=False)
 GEOIP_PATH = env("GEOIP_PATH", default="")  # dir or path to the .mmdb file
 
 # ---------------------------------------------------------------------------
-# WhatsApp Cloud API (invitations). SECRETS live in .env ONLY — never in the DB,
-# never logged, never committed. Operational settings (phone_number_id, template
-# name, enabled flag) live in the admin (core.models.WhatsAppConfig). The webhook
-# verifies Meta's HMAC signature with WHATSAPP_APP_SECRET; GET subscription check
-# uses WHATSAPP_VERIFY_TOKEN. See core/whatsapp.py and deploy/DEPLOY.md.
+# WhatsApp Cloud API (invitations). ALL settings AND secrets (token, app secret,
+# verify token, api version) are managed from the admin (core.models.WhatsAppConfig)
+# — no .env vars needed. That screen is masked and superuser-only. See
+# core/whatsapp.py, core/webhooks.py and deploy/DEPLOY.md.
 # ---------------------------------------------------------------------------
-WHATSAPP_TOKEN = env("WHATSAPP_TOKEN", default="")
-WHATSAPP_APP_SECRET = env("WHATSAPP_APP_SECRET", default="")
-WHATSAPP_VERIFY_TOKEN = env("WHATSAPP_VERIFY_TOKEN", default="")
-WHATSAPP_API_VERSION = env("WHATSAPP_API_VERSION", default="v21.0")
 
 # ---------------------------------------------------------------------------
 # Email (optional). Defaults to the console backend (prints to logs); configure
