@@ -10,7 +10,10 @@ from django.utils import timezone, translation
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 
-from .models import Greeting, GreetingSuggestion, WeddingConfig, WeddingGuest
+from .models import (
+    Greeting, GreetingSuggestion, InviterProfile, MessageLog,
+    WeddingConfig, WeddingGuest, WhatsAppConfig, WhatsAppTemplate,
+)
 from .utils import render_message
 
 admin.site.site_header = "إدارة موقع زفاف محمود ورينان"
@@ -80,19 +83,25 @@ class WeddingConfigAdmin(admin.ModelAdmin):
 # --------------------------------------------------------------------------- #
 @admin.register(WeddingGuest)
 class WeddingGuestAdmin(admin.ModelAdmin):
-    list_display = ("full_name", "phone_number", "email", "group", "invitation_status",
-                    "opened", "greeted", "guest_count")
-    list_filter = ("invitation_status", "group")
-    search_fields = ("full_name", "phone_number", "email")
+    list_display = ("full_name", "phone_number", "group", "invitation_status",
+                    "wa_status", "invited_by", "opened", "greeted", "guest_count")
+    list_filter = ("invitation_status", "wa_status", "group", "invited_by")
+    search_fields = ("full_name", "phone_number", "phone_e164", "email")
     readonly_fields = ("invitation_token", "invitation_link", "whatsapp_link", "email_preview",
-                       "last_opened_at", "invited_at", "created_at", "updated_at")
+                       "phone_e164", "wa_status", "wa_message_id", "delivered_at", "read_at",
+                       "send_count", "last_sent_at", "last_opened_at", "invited_at",
+                       "created_at", "updated_at")
     list_per_page = 50
+    autocomplete_fields = ("invited_by",)
     actions = ("mark_ready", "mark_sent_whatsapp", "mark_sent_email",
                "send_email_invites", "export_csv", "export_links_csv")
     fieldsets = (
-        ("المدعو", {"fields": ("full_name", "phone_number", "email", "group", "guest_count", "notes")}),
+        ("المدعو", {"fields": ("full_name", "phone_number", "phone_e164", "email", "group",
+                               "guest_count", "invited_by", "notes")}),
         ("الدعوة", {"fields": ("invitation_status", "invitation_link", "whatsapp_link", "email_preview",
                                "invitation_token")}),
+        ("تتبّع واتساب", {"fields": ("wa_status", "wa_message_id", "delivered_at", "read_at",
+                                     "send_count", "last_sent_at")}),
         ("التتبّع", {"fields": ("last_opened_at", "invited_at", "created_at", "updated_at")}),
     )
 
@@ -299,3 +308,61 @@ class GreetingAdmin(admin.ModelAdmin):
     def show_selected(self, request, queryset):
         n = queryset.update(status=Greeting.Status.APPROVED, approved_at=timezone.now())
         self.message_user(request, f"تم إظهار {n} تهنئة على الجدار.")
+
+
+# --------------------------------------------------------------------------- #
+# Invitation layer — InviterProfile / WhatsAppConfig / WhatsAppTemplate / logs
+# --------------------------------------------------------------------------- #
+@admin.register(InviterProfile)
+class InviterProfileAdmin(admin.ModelAdmin):
+    list_display = ("display_name", "user", "side", "can_view_all", "invited_total")
+    list_filter = ("side", "can_view_all")
+    search_fields = ("display_name", "user__username", "phone")
+    autocomplete_fields = ("user",)
+
+    @admin.display(description="عدد دعواته")
+    def invited_total(self, obj):
+        return obj.user.invited_guests.count()
+
+
+@admin.register(WhatsAppConfig)
+class WhatsAppConfigAdmin(admin.ModelAdmin):
+    list_display = ("__str__", "enabled", "default_template_name", "template_lang")
+    fieldsets = (
+        ("التشغيل", {"fields": ("enabled",)}),
+        ("Cloud API", {"fields": ("phone_number_id", "waba_id")}),
+        ("القالب الافتراضي", {"fields": ("default_template_name", "template_lang", "default_country_code")}),
+        ("الاختبار", {"fields": ("test_recipient",),
+                      "description": "الأسرار (التوكن/App Secret/Verify Token) تُقرأ من .env فقط — لا تُخزَّن هنا."}),
+    )
+
+    def has_add_permission(self, request):
+        return not WhatsAppConfig.objects.exists()
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+
+@admin.register(WhatsAppTemplate)
+class WhatsAppTemplateAdmin(admin.ModelAdmin):
+    list_display = ("name", "language", "category", "is_approved", "active")
+    list_filter = ("category", "is_approved", "active", "language")
+    list_editable = ("is_approved", "active")
+    search_fields = ("name", "body_preview_ar")
+
+
+@admin.register(MessageLog)
+class MessageLogAdmin(admin.ModelAdmin):
+    list_display = ("created_at", "guest", "sender", "template_name", "status", "short_error")
+    list_filter = ("status", "template_name", "created_at")
+    search_fields = ("guest__full_name", "wa_message_id", "error")
+    readonly_fields = ("guest", "sender", "template_name", "wa_message_id", "status",
+                       "error", "payload", "created_at")
+    list_per_page = 100
+
+    @admin.display(description="الخطأ")
+    def short_error(self, obj):
+        return (obj.error[:60] + "…") if obj.error and len(obj.error) > 60 else (obj.error or "—")
+
+    def has_add_permission(self, request):
+        return False

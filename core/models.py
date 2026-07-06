@@ -2,6 +2,7 @@ import secrets
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
+from django.conf import settings
 from django.db import models
 from django.db.models.signals import post_delete
 from django.dispatch import receiver
@@ -102,6 +103,19 @@ def generate_invitation_token():
     return secrets.token_urlsafe(16)
 
 
+class WhatsAppStatus(models.TextChoices):
+    """WhatsApp delivery signal — complements (does not replace) invitation_status.
+
+    Mirrors the Cloud API message-status lifecycle reported over the webhook.
+    """
+    NONE = "none", "—"
+    QUEUED = "queued", "بالانتظار"        # accepted locally / safe-mode
+    SENT = "sent", "أُرسلت"
+    DELIVERED = "delivered", "سُلّمت"
+    READ = "read", "قُرئت"
+    FAILED = "failed", "فشلت"
+
+
 class WeddingGuest(models.Model):
     """An invited guest with a private, unguessable invitation link."""
 
@@ -122,12 +136,32 @@ class WeddingGuest(models.Model):
 
     full_name = models.CharField("الاسم الكامل", max_length=120)
     phone_number = models.CharField("رقم الهاتف", max_length=30, blank=True)
+    # Normalized E.164 (no leading "+") — the basis for duplicate detection.
+    # Kept alongside the human-entered phone_number, which is preserved as typed.
+    phone_e164 = models.CharField("الرقم المُطبَّع", max_length=20, blank=True, db_index=True)
     email = models.EmailField("البريد الإلكتروني", blank=True)
     group = models.CharField("المجموعة", max_length=20, choices=Group.choices, default=Group.GENERAL, db_index=True)
     guest_count = models.PositiveSmallIntegerField("عدد الأفراد", default=1)
     notes = models.TextField("ملاحظات", blank=True)
+    # Who sent this invitation (family panel attribution). SET_NULL keeps the
+    # guest if the inviter account is removed.
+    invited_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL,
+        related_name="invited_guests", verbose_name="دعاه",
+    )
     invitation_token = models.CharField(max_length=32, unique=True, default=generate_invitation_token, editable=False)
     invitation_status = models.CharField("الحالة", max_length=15, choices=Status.choices, default=Status.DRAFT, db_index=True)
+    # WhatsApp delivery signal (from the Cloud API webhook) — complements the
+    # display funnel above; the two are updated in step.
+    wa_message_id = models.CharField("معرّف رسالة واتساب", max_length=128, blank=True)
+    wa_status = models.CharField(
+        "حالة واتساب", max_length=10, choices=WhatsAppStatus.choices,
+        default=WhatsAppStatus.NONE, db_index=True,
+    )
+    delivered_at = models.DateTimeField("سُلّمت في", null=True, blank=True)
+    read_at = models.DateTimeField("قُرئت في", null=True, blank=True)
+    send_count = models.PositiveSmallIntegerField("عدد مرات الإرسال", default=0)
+    last_sent_at = models.DateTimeField("آخر إرسال", null=True, blank=True)
     last_opened_at = models.DateTimeField("آخر فتح", null=True, blank=True)
     invited_at = models.DateTimeField("تاريخ الإرسال", null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -291,3 +325,127 @@ class Greeting(models.Model):
 @receiver(post_delete, sender=Greeting)
 def _greeting_files_cleanup(sender, instance, **kwargs):
     instance._delete_photo_files()
+
+
+# =========================================================================== #
+# Invitation layer — family panel + WhatsApp Cloud API
+# =========================================================================== #
+class InviterProfile(models.Model):
+    """A family sender who uses the panel. One-to-one with a Django user so the
+    panel reuses Django auth; membership here (or in the `inviters` group) is what
+    grants panel access. `can_view_all` unlocks the "all guests" view."""
+
+    class Side(models.TextChoices):
+        GROOM = "groom", "أهل العريس"
+        BRIDE = "bride", "أهل العروس"
+        BOTH = "both", "الطرفان"
+
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="inviter_profile"
+    )
+    display_name = models.CharField("الاسم الظاهر", max_length=80)
+    side = models.CharField("الجهة", max_length=10, choices=Side.choices, default=Side.BOTH)
+    can_view_all = models.BooleanField("يرى كل المدعوين", default=False)
+    phone = models.CharField("هاتف (اختياري)", max_length=30, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "مُرسِل (عائلة)"
+        verbose_name_plural = "المُرسِلون (العائلة)"
+
+    def __str__(self):
+        return self.display_name or self.user.get_username()
+
+
+class WhatsAppConfig(models.Model):
+    """Operational WhatsApp settings — a singleton like WeddingConfig, editable
+    from the admin. SECRETS ARE NOT STORED HERE: the API token, app secret and
+    verify token are read from the environment (.env) only."""
+
+    enabled = models.BooleanField(
+        "تفعيل الإرسال الحيّ", default=False,
+        help_text="عند الإيقاف: وضع آمن — لا يُرسَل شيء فعلياً، يُسجَّل «سيُرسَل» فقط.",
+    )
+    phone_number_id = models.CharField("Phone Number ID", max_length=40, blank=True)
+    waba_id = models.CharField("WhatsApp Business Account ID", max_length=40, blank=True)
+    default_template_name = models.CharField("اسم القالب الافتراضي", max_length=100, blank=True)
+    template_lang = models.CharField("لغة القالب", max_length=10, default="ar")
+    default_country_code = models.CharField(
+        "رمز الدولة الافتراضي", max_length=4, default="20",
+        help_text="لتطبيع الأرقام المحلية (مصر=20).",
+    )
+    test_recipient = models.CharField("رقم اختبار الإرسال", max_length=30, blank=True)
+
+    class Meta:
+        verbose_name = "إعدادات واتساب"
+        verbose_name_plural = "إعدادات واتساب"
+
+    def __str__(self):
+        return "إعدادات واتساب" + ("" if self.enabled else " (متوقّفة)")
+
+    def save(self, *args, **kwargs):
+        self.pk = 1  # enforce a single row
+        super().save(*args, **kwargs)
+
+    @classmethod
+    def get(cls):
+        obj, _ = cls.objects.get_or_create(pk=1)
+        return obj
+
+
+class WhatsAppTemplate(models.Model):
+    """A Meta-approved Arabic template the admin can pick from. The body preview
+    is for display in the panel; the real content lives in Meta's template."""
+
+    class Category(models.TextChoices):
+        UTILITY = "utility", "Utility (أرخص)"
+        MARKETING = "marketing", "Marketing"
+
+    name = models.CharField("اسم القالب في Meta", max_length=100)
+    language = models.CharField("اللغة", max_length=10, default="ar")
+    category = models.CharField("الفئة", max_length=12, choices=Category.choices, default=Category.UTILITY)
+    body_preview_ar = models.TextField("نص المعاينة (عربي)", blank=True)
+    # Ordered names of the {{1}}, {{2}}… variables → context keys, e.g.
+    # ["guest_name"] means body {{1}} is the guest's name. Button URL var is the token.
+    variables_map = models.JSONField("خريطة المتغيّرات", default=list, blank=True)
+    is_approved = models.BooleanField("معتمد من Meta", default=False)
+    active = models.BooleanField("مفعّل", default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["name"]
+        verbose_name = "قالب واتساب"
+        verbose_name_plural = "قوالب واتساب"
+        constraints = [
+            models.UniqueConstraint(fields=["name", "language"], name="uniq_watemplate_name_lang"),
+        ]
+
+    def __str__(self):
+        return f"{self.name} ({self.language})"
+
+
+class MessageLog(models.Model):
+    """Audit trail of every send attempt — success or failure. Never stores secrets."""
+
+    guest = models.ForeignKey(
+        WeddingGuest, null=True, blank=True, on_delete=models.SET_NULL, related_name="message_logs"
+    )
+    sender = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="sent_messages"
+    )
+    template_name = models.CharField(max_length=100, blank=True)
+    wa_message_id = models.CharField(max_length=128, blank=True, db_index=True)
+    status = models.CharField(max_length=12, choices=WhatsAppStatus.choices, default=WhatsAppStatus.QUEUED)
+    error = models.TextField(blank=True)
+    # Optional raw request/response snapshot for debugging (no secrets stored).
+    payload = models.JSONField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = "سجل رسالة"
+        verbose_name_plural = "سجل الرسائل"
+
+    def __str__(self):
+        who = self.guest.full_name if self.guest else "—"
+        return f"{who}: {self.get_status_display()}"
