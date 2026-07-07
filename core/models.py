@@ -216,6 +216,15 @@ class WeddingGuest(models.Model):
     def save(self, *args, **kwargs):
         if not self.invitation_token:
             self.invitation_token = generate_invitation_token()
+        # Keep the normalized E.164 in sync so the inbound WhatsApp webhook can
+        # match this guest by phone (the webhook matches phone_e164 only).
+        from .whatsapp import normalize_phone
+        self.phone_e164 = normalize_phone(self.phone_number) or ""
+        if "update_fields" in kwargs and kwargs["update_fields"] is not None:
+            uf = set(kwargs["update_fields"])
+            if "phone_number" in uf:
+                uf.add("phone_e164")
+                kwargs["update_fields"] = uf
         super().save(*args, **kwargs)
 
     def get_absolute_url(self):
