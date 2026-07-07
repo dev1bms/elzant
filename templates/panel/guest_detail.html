@@ -20,22 +20,45 @@
       {% include "panel/partials/_wa_badge.html" with g=guest %}
     </div>
 
+    {% if not wa_live %}
+    <div class="mt-5 flex items-start gap-2 rounded-xl border border-gold/40 bg-gold/10 px-3 py-2.5 text-xs leading-relaxed text-gold">
+      <span class="mt-px">⚑</span>
+      <span>الإرسال في <b>الوضع الآمن</b>: الدعوات تُسجَّل ولا تُرسَل فعلياً. لتفعيل الإرسال الحقيقي، فعّل «الإرسال الحيّ» من إعدادات واتساب في لوحة الأدمن.</span>
+    </div>
+    {% endif %}
+
     {# ---- status timeline ---- #}
     <ol class="mt-6 space-y-0">
       {% for step in timeline %}
       <li class="flex items-start gap-3">
         <div class="flex flex-col items-center">
-          <span class="flex h-6 w-6 items-center justify-center rounded-full text-xs
-            {% if step.failed %}bg-wine-500 text-porcelain-50
-            {% elif step.done %}bg-olive text-porcelain-50
+          <span class="flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold
+            {% if step.state == 'failed' %}bg-wine-500 text-porcelain-50
+            {% elif step.state == 'done' %}bg-olive text-porcelain-50
+            {% elif step.state == 'simulated' %}bg-gold/20 text-gold ring-1 ring-gold/50
+            {% elif step.state == 'active' %}bg-porcelain-50 text-wine-500 ring-1 ring-wine-500/30
             {% else %}border border-sand bg-porcelain-50 text-cloud{% endif %}">
-            {% if step.done and not step.failed %}✓{% elif step.failed %}✕{% else %}·{% endif %}
+            {% if step.state == 'done' %}✓
+            {% elif step.state == 'failed' %}✕
+            {% elif step.state == 'simulated' %}⚑
+            {% elif step.state == 'active' %}<span class="wa-spin"></span>
+            {% else %}·{% endif %}
           </span>
-          {% if not forloop.last %}<span class="my-0.5 h-6 w-px {% if step.done %}bg-olive/50{% else %}bg-sand{% endif %}"></span>{% endif %}
+          {% if not forloop.last %}<span class="my-0.5 h-6 w-px {% if step.state == 'done' %}bg-olive/50{% else %}bg-sand{% endif %}"></span>{% endif %}
         </div>
         <div class="pb-4">
-          <div class="text-sm font-semibold {% if step.done %}text-ink{% else %}text-cloud{% endif %}">{{ step.label }}</div>
-          {% if step.when %}<div class="text-xs text-cloud">{{ step.when|date:"Y/m/d H:i" }}</div>{% endif %}
+          <div class="text-sm font-semibold
+            {% if step.state == 'idle' %}text-cloud
+            {% elif step.state == 'failed' %}text-wine-700
+            {% elif step.state == 'simulated' %}text-gold
+            {% elif step.state == 'active' %}text-wine-600
+            {% else %}text-ink{% endif %}">{{ step.label }}</div>
+          {% if step.when %}<div class="num text-xs text-cloud" dir="ltr">{{ step.when|date:"Y/m/d H:i" }}</div>{% endif %}
+          {% if step.detail %}
+          <div class="mt-1.5 rounded-lg px-2.5 py-1.5 text-xs leading-relaxed
+            {% if step.state == 'failed' %}bg-blush text-wine-700
+            {% else %}bg-gold/10 text-gold{% endif %}">{{ step.detail }}</div>
+          {% endif %}
         </div>
       </li>
       {% endfor %}

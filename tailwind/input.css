@@ -466,6 +466,13 @@
     border: 2px solid currentColor; border-top-color: transparent;
     animation: btn-spin 0.7s linear infinite;
   }
+
+  /* Live status spinner in the panel timeline (awaiting a Twilio callback). */
+  .wa-spin {
+    display: inline-block; width: 0.9rem; height: 0.9rem; border-radius: 50%;
+    border: 2px solid currentColor; border-top-color: transparent;
+    animation: btn-spin 0.7s linear infinite;
+  }
 }
 @keyframes btn-spin { to { transform: rotate(360deg); } }
 
@@ -474,5 +481,5 @@
   .reveal, .up, .intro-inner, .hero-art, .hero-breathe img, .art-fade::after, .cd-num.is-flip {
     opacity: 1 !important; transform: none !important; animation: none !important; transition: none !important;
   }
-  .btn-spinner { animation: none !important; }
+  .btn-spinner, .wa-spin { animation: none !important; }
 }

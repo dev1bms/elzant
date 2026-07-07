@@ -90,8 +90,25 @@ def invitation_url(guest):
 
 def build_invitation_variables(guest):
     """Content variables for the invitation template:
-    ``{{1}}`` = guest name, ``{{2}}`` = the guest's personal invitation link."""
-    return {"1": guest.full_name or "", "2": invitation_url(guest)}
+    ``{{1}}`` = guest name, ``{{2}}`` = venue/map link, ``{{3}}`` = the guest's
+    personal invitation link.
+
+    WhatsApp/Twilio REJECT an approved Content Template when any variable
+    resolves to an empty string (errors 21656 / 92007 / 63013), which would fail
+    every live send. So each slot falls back to a non-empty value: the venue
+    slot degrades map → address → hall name → the invitation link, and the link
+    itself degrades to the site origin.
+    """
+    from .models import WeddingConfig
+
+    config = WeddingConfig.get()
+    link = invitation_url(guest) or _site_base() or "elzant.com"
+    location = config.map_url or config.venue_address or config.venue_name or link
+    return {
+        "1": guest.full_name or "ضيفنا الكريم",
+        "2": location,
+        "3": link,
+    }
 
 
 # --------------------------------------------------------------------------- #
@@ -254,7 +271,11 @@ def send_test_message(recipient_e164):
         return SendResult(ok=True, simulated=True)
     if not config.content_sid:
         return SendResult(ok=False, error="لا يوجد Content Template SID مُعرَّف.")
-    variables = {"1": "اختبار", "2": _site_base() or "https://elzant.com"}
+    variables = {
+        "1": "اختبار",
+        "2": "https://maps.google.com/",
+        "3": _site_base() or "https://elzant.com",
+    }
     try:
         sid = send_content_message(to, config.content_sid, variables, config=config)
     except WhatsAppError as exc:
