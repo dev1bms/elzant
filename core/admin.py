@@ -72,6 +72,10 @@ class WeddingConfigAdmin(admin.ModelAdmin):
         ("قوالب الرسائل (placeholders: {{ guest_name }} {{ invitation_link }} {{ groom_name }} "
          "{{ bride_name }} {{ wedding_date }} {{ venue_name }})",
          {"fields": ("default_whatsapp_message_template", "default_email_subject", "default_email_body_template")}),
+        ("تأكيد الحضور والتهنئة (أزرار صفحة الدعوة — صياغة لبقة)",
+         {"fields": ("rsvp_enabled", "rsvp_prompt", "rsvp_attend_label", "rsvp_decline_label",
+                     "rsvp_thanks_attending", "rsvp_thanks_declined", "greeting_cta_label"),
+          "description": "تظهر هذه الأزرار للمدعو في صفحة دعوته الخاصة. النصوص كلها قابلة للتحرير هنا."}),
     )
 
     def has_add_permission(self, request):
@@ -87,13 +91,13 @@ class WeddingConfigAdmin(admin.ModelAdmin):
 @admin.register(WeddingGuest)
 class WeddingGuestAdmin(admin.ModelAdmin):
     list_display = ("full_name", "phone_number", "group", "invitation_status",
-                    "wa_status", "invited_by", "opened", "greeted", "guest_count")
-    list_filter = ("invitation_status", "wa_status", "group", "invited_by")
+                    "rsvp", "wa_status", "invited_by", "opened", "greeted", "guest_count")
+    list_filter = ("rsvp", "invitation_status", "wa_status", "group", "invited_by")
     search_fields = ("full_name", "phone_number", "phone_e164", "email")
     readonly_fields = ("invitation_token", "invitation_link", "whatsapp_link", "email_preview",
-                       "phone_e164", "wa_status", "wa_message_id", "delivered_at", "read_at",
-                       "send_count", "last_sent_at", "last_opened_at", "invited_at",
-                       "created_at", "updated_at")
+                       "phone_e164", "rsvp", "rsvp_at", "wa_status", "wa_message_id",
+                       "delivered_at", "read_at", "send_count", "last_sent_at",
+                       "last_opened_at", "invited_at", "created_at", "updated_at")
     list_per_page = 50
     autocomplete_fields = ("invited_by",)
     actions = ("mark_ready", "mark_sent_whatsapp", "mark_sent_email",
@@ -103,6 +107,7 @@ class WeddingGuestAdmin(admin.ModelAdmin):
                                "guest_count", "invited_by", "notes")}),
         ("الدعوة", {"fields": ("invitation_status", "invitation_link", "whatsapp_link", "email_preview",
                                "invitation_token")}),
+        ("الحضور (RSVP)", {"fields": ("rsvp", "rsvp_at")}),
         ("تتبّع واتساب", {"fields": ("wa_status", "wa_message_id", "delivered_at", "read_at",
                                      "send_count", "last_sent_at")}),
         ("التتبّع", {"fields": ("last_opened_at", "invited_at", "created_at", "updated_at")}),

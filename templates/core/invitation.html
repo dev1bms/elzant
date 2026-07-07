@@ -50,8 +50,46 @@
       </div>
       <p data-countdown-done class="mt-5 hidden text-base text-wine-600">تمّ الزفاف بحمد الله</p>
 
-      <div class="mt-9 flex flex-col items-center gap-3 sm:flex-row sm:justify-center lg:justify-end">
-        <a href="{% url 'home' %}#greeting" class="btn btn-primary">اكتب تهنئتك</a>
+      {# RSVP — تأكيد الحضور / اعتذار (بصياغة يحرّرها الأدمن) #}
+      {% if config.rsvp_enabled %}
+      <div class="mt-9">
+        {% if guest.rsvp == 'attending' %}
+          <div class="rounded-xl bg-white/70 px-5 py-4 text-wine-700 ring-1 ring-champagne/50">
+            <p class="text-base font-semibold">{{ config.rsvp_thanks_attending }}</p>
+          </div>
+        {% elif guest.rsvp == 'declined' %}
+          <div class="rounded-xl bg-white/70 px-5 py-4 text-ink-soft ring-1 ring-champagne/50">
+            <p class="text-base font-semibold">{{ config.rsvp_thanks_declined }}</p>
+          </div>
+        {% else %}
+          {% if config.rsvp_prompt %}<p class="text-sm text-ink-soft">{{ config.rsvp_prompt }}</p>{% endif %}
+          <div class="mt-3 flex flex-col items-center gap-3 sm:flex-row sm:justify-center lg:justify-end">
+            <form method="post" action="{% url 'rsvp' guest.invitation_token %}">
+              {% csrf_token %}
+              <input type="hidden" name="choice" value="attending">
+              <button type="submit" class="btn btn-primary w-full sm:w-auto">{{ config.rsvp_attend_label }}</button>
+            </form>
+            <form method="post" action="{% url 'rsvp' guest.invitation_token %}">
+              {% csrf_token %}
+              <input type="hidden" name="choice" value="declined">
+              <button type="submit" class="btn btn-ghost w-full sm:w-auto">{{ config.rsvp_decline_label }}</button>
+            </form>
+          </div>
+        {% endif %}
+        {% if guest.rsvp != 'none' %}
+          <form method="post" action="{% url 'rsvp' guest.invitation_token %}" class="mt-2">
+            {% csrf_token %}
+            <input type="hidden" name="choice" value="{% if guest.rsvp == 'attending' %}declined{% else %}attending{% endif %}">
+            <button type="submit" class="text-xs text-ink-soft underline underline-offset-4 hover:text-wine-600">
+              {% if guest.rsvp == 'attending' %}تغيير إلى الاعتذار{% else %}بل سأحضر بإذن الله{% endif %}
+            </button>
+          </form>
+        {% endif %}
+      </div>
+      {% endif %}
+
+      <div class="mt-6 flex flex-col items-center gap-3 sm:flex-row sm:justify-center lg:justify-end">
+        <a href="{% url 'home' %}#greeting" class="btn btn-primary">{{ config.greeting_cta_label|default:"اكتب تهنئتك" }}</a>
         <a href="{% url 'home' %}" class="btn btn-ghost">افتح الدعوة العامة</a>
       </div>
     </div>

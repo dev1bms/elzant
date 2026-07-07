@@ -10,7 +10,9 @@ from django.core.management import call_command
 from django.test import Client, SimpleTestCase, TestCase, override_settings
 from django.urls import reverse
 
-from core.models import Greeting, MessageLog, WeddingGuest, WhatsAppConfig, WhatsAppStatus
+from core.models import (
+    Greeting, MessageLog, WeddingConfig, WeddingGuest, WhatsAppConfig, WhatsAppStatus,
+)
 from core.utils import contains_link, has_arabic, looks_like_spam, render_message
 from core.whatsapp import WhatsAppError, normalize_phone, send_invitation
 
@@ -106,6 +108,89 @@ class TwilioWebhookTests(TestCase):
     def test_invalid_signature_rejected(self):
         # No Auth Token configured → validate_twilio_request returns False → 403.
         self.assertEqual(self._post("read").status_code, 403)
+
+
+@override_settings(**WA_SETTINGS)
+class RsvpPageTests(TestCase):
+    """The web RSVP buttons on the private invitation page."""
+
+    def setUp(self):
+        self.guest = WeddingGuest.objects.create(
+            full_name="سميّة", phone_number="01008887777", phone_e164="201008887777",
+        )
+        self.url = reverse("rsvp", args=[self.guest.invitation_token])
+
+    def test_attending_recorded_and_redirects(self):
+        resp = self.client.post(self.url, {"choice": "attending"})
+        self.assertRedirects(resp, reverse("invitation", args=[self.guest.invitation_token]))
+        self.guest.refresh_from_db()
+        self.assertEqual(self.guest.rsvp, WeddingGuest.Rsvp.ATTENDING)
+        self.assertIsNotNone(self.guest.rsvp_at)
+
+    def test_declined_recorded(self):
+        self.client.post(self.url, {"choice": "declined"})
+        self.guest.refresh_from_db()
+        self.assertEqual(self.guest.rsvp, WeddingGuest.Rsvp.DECLINED)
+
+    def test_bogus_choice_ignored(self):
+        self.client.post(self.url, {"choice": "maybe"})
+        self.guest.refresh_from_db()
+        self.assertEqual(self.guest.rsvp, WeddingGuest.Rsvp.NONE)
+
+    def test_disabled_rsvp_is_noop(self):
+        cfg = WeddingConfig.get()
+        cfg.rsvp_enabled = False
+        cfg.save()
+        self.client.post(self.url, {"choice": "attending"})
+        self.guest.refresh_from_db()
+        self.assertEqual(self.guest.rsvp, WeddingGuest.Rsvp.NONE)
+
+    def test_invitation_page_shows_buttons_then_thanks(self):
+        inv = reverse("invitation", args=[self.guest.invitation_token])
+        self.assertContains(self.client.get(inv), "سأحضر بإذن الله")
+        self.client.post(self.url, {"choice": "attending"})
+        self.assertContains(self.client.get(inv), "بانتظار طلّتكم")
+
+
+@override_settings(**WA_SETTINGS)
+class TwilioInboundRsvpTests(TestCase):
+    """Inbound WhatsApp quick-reply buttons → RSVP (signature-verified)."""
+
+    def setUp(self):
+        self.url = reverse("twilio_inbound")
+        self.guest = WeddingGuest.objects.create(
+            full_name="ماجد", phone_number="01005554444", phone_e164="201005554444",
+        )
+
+    @patch("core.webhooks.validate_twilio_request", return_value=True)
+    def test_button_payload_maps_to_attending(self, _v):
+        resp = self.client.post(self.url, {
+            "From": "whatsapp:+201005554444", "ButtonPayload": "rsvp_yes",
+            "ButtonText": "سأحضر بإذن الله",
+        })
+        self.assertEqual(resp.status_code, 200)
+        self.guest.refresh_from_db()
+        self.assertEqual(self.guest.rsvp, WeddingGuest.Rsvp.ATTENDING)
+        self.assertIn("بانتظار", resp.content.decode())  # TwiML thank-you
+
+    @patch("core.webhooks.validate_twilio_request", return_value=True)
+    def test_button_text_decline_without_payload(self, _v):
+        self.client.post(self.url, {
+            "From": "whatsapp:+201005554444", "ButtonText": "أعتذر مع خالص المحبّة",
+        })
+        self.guest.refresh_from_db()
+        self.assertEqual(self.guest.rsvp, WeddingGuest.Rsvp.DECLINED)
+
+    @patch("core.webhooks.validate_twilio_request", return_value=True)
+    def test_unknown_sender_is_noop_200(self, _v):
+        resp = self.client.post(self.url, {"From": "whatsapp:+201000000000",
+                                           "ButtonPayload": "rsvp_yes"})
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.content, b"")
+
+    def test_invalid_signature_rejected(self):
+        self.assertEqual(
+            self.client.post(self.url, {"From": "whatsapp:+201005554444"}).status_code, 403)
 
 
 @override_settings(**WA_SETTINGS)

@@ -7,6 +7,7 @@ Twilio does not retry. An unsigned/forged request is rejected with 403.
 """
 
 import logging
+import re
 
 from django.http import HttpResponse, HttpResponseForbidden
 from django.utils import timezone
@@ -78,3 +79,107 @@ def _apply_status(message_sid, state, error_code):
         guest=guest, template_name="", wa_message_id=message_sid,
         status=new_status, error=err,
     )
+
+
+# --------------------------------------------------------------------------- #
+# Inbound WhatsApp — quick-reply RSVP buttons (تأكيد الحضور / اعتذار)
+# --------------------------------------------------------------------------- #
+# Stable payload ids to set on the quick-reply buttons in Twilio's Content
+# Template Builder. If the operator uses these ids, the reply is matched
+# regardless of the (freely worded) button text.
+_RSVP_PAYLOADS = {
+    "rsvp_yes": WeddingGuest.Rsvp.ATTENDING,
+    "rsvp_attend": WeddingGuest.Rsvp.ATTENDING,
+    "rsvp_no": WeddingGuest.Rsvp.DECLINED,
+    "rsvp_decline": WeddingGuest.Rsvp.DECLINED,
+}
+
+
+def _rsvp_choice_from_text(text, config):
+    """Best-effort map of a tapped button's text / free reply to an RSVP choice.
+
+    Prefers an exact match against the admin-configured labels, then falls back
+    to unambiguous Arabic keywords so a slightly different reply still counts.
+    """
+    t = (text or "").strip()
+    if not t:
+        return ""
+    if t == (config.rsvp_attend_label or "").strip():
+        return WeddingGuest.Rsvp.ATTENDING
+    if t == (config.rsvp_decline_label or "").strip():
+        return WeddingGuest.Rsvp.DECLINED
+    if any(k in t for k in ("سأحضر", "أحضر", "حاضر", "نعم", "بإذن الله")):
+        return WeddingGuest.Rsvp.ATTENDING
+    if any(k in t for k in ("أعتذر", "اعتذر", "معتذر", "لن أحضر", "لا أستطيع")):
+        return WeddingGuest.Rsvp.DECLINED
+    return ""
+
+
+@csrf_exempt
+@require_POST
+def twilio_inbound_webhook(request):
+    """Record an RSVP from a WhatsApp quick-reply button (or a free-text reply).
+
+    Twilio POSTs inbound messages with ``From=whatsapp:+E164`` and, for a tapped
+    quick reply, ``ButtonText`` (+ ``ButtonPayload`` for Content templates). We
+    verify the signature, match the guest by phone, store the reply, and answer
+    with a TwiML thank-you (allowed inside the 24-hour session an inbound message
+    opens). Unknown senders / replies get an empty 200 — never a 500 (retries).
+    """
+    if not validate_twilio_request(request):
+        return HttpResponseForbidden("invalid signature")
+
+    reply_text = ""
+    try:
+        reply_text = _handle_inbound_rsvp(request)
+    except Exception:  # noqa: BLE001 — never 500 on Twilio; that triggers retries
+        log.exception("twilio inbound webhook processing error")
+
+    return _twiml_reply(reply_text)
+
+
+def _handle_inbound_rsvp(request):
+    """Apply the inbound reply to the matching guest; return a thank-you string
+    (or "" when nothing was recorded)."""
+    from .models import WeddingConfig, WhatsAppConfig
+    from .whatsapp import normalize_phone
+
+    config = WeddingConfig.get()
+    if not config.rsvp_enabled:
+        return ""
+
+    sender = request.POST.get("From", "") or request.POST.get("WaId", "")
+    digits = re.sub(r"\D", "", sender)
+    e164 = normalize_phone(digits, WhatsAppConfig.get().default_country_code)
+    guest = WeddingGuest.objects.filter(phone_e164=e164).first() if e164 else None
+    if not guest:
+        return ""
+
+    payload = (request.POST.get("ButtonPayload", "") or "").strip().lower()
+    choice = _RSVP_PAYLOADS.get(payload) or _rsvp_choice_from_text(
+        request.POST.get("ButtonText") or request.POST.get("Body"), config
+    )
+    if not guest.set_rsvp(choice):
+        return ""
+
+    MessageLog.objects.create(
+        guest=guest, template_name="rsvp_inbound",
+        status=WhatsAppStatus.READ, error="",
+        payload={"rsvp": choice, "button": request.POST.get("ButtonText", "")},
+    )
+    return (config.rsvp_thanks_attending if choice == WeddingGuest.Rsvp.ATTENDING
+            else config.rsvp_thanks_declined)
+
+
+def _twiml_reply(text):
+    """A TwiML MessagingResponse (thank-you) or an empty 200 when there's nothing
+    to say. Falls back to an empty 200 if the twilio SDK isn't importable."""
+    if not text:
+        return HttpResponse("")
+    try:
+        from twilio.twiml.messaging_response import MessagingResponse
+    except Exception:  # noqa: BLE001 — SDK missing shouldn't break the webhook
+        return HttpResponse("")
+    resp = MessagingResponse()
+    resp.message(text)
+    return HttpResponse(str(resp), content_type="text/xml")

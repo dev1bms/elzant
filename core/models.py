@@ -83,6 +83,33 @@ class WeddingConfig(models.Model):
     default_email_subject = models.CharField("عنوان بريد الدعوة", max_length=200, blank=True, default=DEFAULT_EMAIL_SUBJECT)
     default_email_body_template = models.TextField("قالب بريد الدعوة", blank=True, default=DEFAULT_EMAIL_BODY)
 
+    # RSVP + التهنئة — أزرار صفحة الدعوة بصياغة لبقة يحرّرها الأدمن بلا إعادة نشر.
+    rsvp_enabled = models.BooleanField(
+        "تفعيل تأكيد الحضور", default=True,
+        help_text="إظهار زرَّي «تأكيد الحضور / الاعتذار» على صفحة الدعوة الخاصة.",
+    )
+    rsvp_prompt = models.CharField(
+        "سؤال الحضور", max_length=160, blank=True,
+        default="هل تتشرّفون بمشاركتنا فرحتنا؟",
+    )
+    rsvp_attend_label = models.CharField(
+        "زرّ التأكيد", max_length=60, blank=True, default="سأحضر بإذن الله",
+    )
+    rsvp_decline_label = models.CharField(
+        "زرّ الاعتذار", max_length=60, blank=True, default="أعتذر مع خالص المحبّة",
+    )
+    rsvp_thanks_attending = models.CharField(
+        "ردّ بعد التأكيد", max_length=200, blank=True,
+        default="سعِدنا بتأكيدكم 🤍 بانتظار طلّتكم البهيّة.",
+    )
+    rsvp_thanks_declined = models.CharField(
+        "ردّ بعد الاعتذار", max_length=200, blank=True,
+        default="نتفهّم ظروفكم الكريمة، وتبقون في القلب 🤍",
+    )
+    greeting_cta_label = models.CharField(
+        "زرّ كتابة التهنئة", max_length=60, blank=True, default="اكتب تهنئتك",
+    )
+
     class Meta:
         verbose_name = "إعدادات الزفاف"
         verbose_name_plural = "إعدادات الزفاف"
@@ -135,6 +162,11 @@ class WeddingGuest(models.Model):
         OPENED = "opened", "فُتحت"
         GREETED = "greeted", "كتب تهنئة"
 
+    class Rsvp(models.TextChoices):
+        NONE = "none", "بلا ردّ"
+        ATTENDING = "attending", "سيحضر"
+        DECLINED = "declined", "اعتذر"
+
     full_name = models.CharField("الاسم الكامل", max_length=120)
     phone_number = models.CharField("رقم الهاتف", max_length=30, blank=True)
     # Normalized E.164 (no leading "+") — the basis for duplicate detection.
@@ -165,6 +197,11 @@ class WeddingGuest(models.Model):
     last_sent_at = models.DateTimeField("آخر إرسال", null=True, blank=True)
     last_opened_at = models.DateTimeField("آخر فتح", null=True, blank=True)
     invited_at = models.DateTimeField("تاريخ الإرسال", null=True, blank=True)
+    # RSVP — ردّ الحضور من صفحة الدعوة (أو من زرّ واتساب عبر webhook الوارد).
+    rsvp = models.CharField(
+        "الحضور", max_length=10, choices=Rsvp.choices, default=Rsvp.NONE, db_index=True,
+    )
+    rsvp_at = models.DateTimeField("ردّ الحضور في", null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -183,6 +220,20 @@ class WeddingGuest(models.Model):
 
     def get_absolute_url(self):
         return reverse("invitation", args=[self.invitation_token])
+
+    def set_rsvp(self, choice):
+        """Record an attendance reply (attending/declined). Returns True if a
+        valid, changed reply was stored. Shared by the web page and the inbound
+        WhatsApp button webhook; ignores unknown values so a stray reply is a
+        no-op rather than an error."""
+        from django.utils import timezone
+
+        if choice not in (self.Rsvp.ATTENDING, self.Rsvp.DECLINED):
+            return False
+        self.rsvp = choice
+        self.rsvp_at = timezone.now()
+        self.save(update_fields=["rsvp", "rsvp_at", "updated_at"])
+        return True
 
 
 class GreetingSuggestion(models.Model):

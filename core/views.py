@@ -3,7 +3,7 @@ from django.utils import timezone
 
 from .forms import GreetingForm
 from .imaging import ImageError, process_image
-from .models import Greeting, GreetingSuggestion, WeddingGuest
+from .models import Greeting, GreetingSuggestion, WeddingConfig, WeddingGuest
 from .utils import country_from_request, flag_from_code, get_client_ip, has_arabic
 
 
@@ -102,6 +102,18 @@ def invitation(request, token):
         "core/invitation.html",
         {"guest": guest, "suggestions": GreetingSuggestion.active_suggestions()},
     )
+
+
+def rsvp(request, token):
+    """Record a guest's attendance reply (تأكيد الحضور / اعتذار) from their
+    private invitation page. POST-only + CSRF; idempotent (a second reply just
+    updates the choice). Redirects back to the invitation, which then reflects
+    the stored state and the tactful thank-you configured in the admin."""
+    guest = get_object_or_404(WeddingGuest, invitation_token=token)
+    if request.method == "POST" and WeddingConfig.get().rsvp_enabled:
+        choice = request.POST.get("choice", "")
+        guest.set_rsvp(choice)  # silently ignores anything but attending/declined
+    return redirect("invitation", token=token)
 
 
 def privacy(request):
