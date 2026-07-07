@@ -37,19 +37,75 @@ def _counters(qs):
     )
 
 
-def _timeline(guest):
-    """Ordered status steps shown on the guest detail card."""
+_SENT_PLUS = (WhatsAppStatus.SENT, WhatsAppStatus.DELIVERED, WhatsAppStatus.READ)
+
+
+def _last_log(guest):
+    """Most recent send attempt (or None) — carries the safe-mode flag + errors."""
+    return guest.message_logs.order_by("-created_at").first()
+
+
+def _timeline(guest, log=None):
+    """Ordered, honest status steps for the guest card.
+
+    Each step carries a ``state``: ``done`` (✓), ``active`` (a live spinner while
+    awaiting Twilio's next callback), ``failed`` (✕ + reason), ``simulated``
+    (safe-mode: recorded, NOT actually sent), or ``idle`` (not reached yet).
+    Crucially, a safe-mode "send" never shows as done — it was never sent.
+    """
     wa = guest.wa_status
-    return [
-        {"label": "أُرسلت", "done": guest.send_count > 0 or wa != WhatsAppStatus.NONE,
-         "when": guest.last_sent_at, "failed": wa == WhatsAppStatus.FAILED},
-        {"label": "سُلّمت", "done": wa in _DELIVERED_PLUS, "when": guest.delivered_at, "failed": False},
-        {"label": "قُرئت", "done": wa == WhatsAppStatus.READ, "when": guest.read_at, "failed": False},
-        {"label": "فُتح الرابط", "done": guest.last_opened_at is not None,
-         "when": guest.last_opened_at, "failed": False},
-        {"label": "كتب تهنئة", "done": guest.invitation_status == WeddingGuest.Status.GREETED,
-         "when": None, "failed": False},
-    ]
+    simulated = bool(log and (log.payload or {}).get("simulated"))
+    # A failed *attempt* doesn't always flip wa_status — send_invitation's
+    # invalid-phone early return only writes a FAILED log — so trust the log too.
+    last_failed = bool(log and log.status == WhatsAppStatus.FAILED)
+    failed = wa == WhatsAppStatus.FAILED or last_failed
+    sent = wa in _SENT_PLUS                 # truly handed off to Twilio
+    delivered = wa in _DELIVERED_PLUS
+    read = wa == WhatsAppStatus.READ
+
+    error = ""
+    if failed:
+        fl = guest.message_logs.filter(status=WhatsAppStatus.FAILED).order_by("-created_at").first()
+        error = (fl.error if fl else "") or "تعذّر الإرسال. تحقّق من إعدادات واتساب ورقم الهاتف."
+
+    def step(label, state, when=None, detail=""):
+        return {"label": label, "state": state, "when": when, "detail": detail}
+
+    # 1) Sent — the step the safe-mode bug used to fake with a ✓.
+    if failed:
+        s_send = step("تعذّر الإرسال", "failed", guest.last_sent_at, error)
+    elif simulated:
+        s_send = step("وضع تجريبي — لم تُرسل فعلياً", "simulated", guest.last_sent_at,
+                      "فعّل «الإرسال الحيّ» من إعدادات واتساب لإرسالها حقيقةً.")
+    elif sent:
+        s_send = step("أُرسلت", "done", guest.last_sent_at)
+    else:
+        s_send = step("لم تُرسل بعد", "idle")
+
+    # 2) Delivered — spins until Twilio's delivery callback lands.
+    if delivered:
+        s_deliv = step("سُلّمت", "done", guest.delivered_at)
+    elif sent:
+        s_deliv = step("بانتظار التسليم…", "active")
+    else:
+        s_deliv = step("سُلّمت", "idle")
+
+    # 3) Read — a bonus signal only. Recipients can turn read receipts off, so
+    # never spin forever waiting on it: it's either read or simply not-yet.
+    if read:
+        s_read = step("قُرئت", "done", guest.read_at)
+    else:
+        s_read = step("قُرئت", "idle")
+
+    # 4) Opened the link
+    opened = guest.last_opened_at is not None
+    s_open = step("فتح الرابط", "done" if opened else "idle", guest.last_opened_at)
+
+    # 5) Wrote a greeting
+    greeted = guest.invitation_status == WeddingGuest.Status.GREETED
+    s_greet = step("كتب تهنئة", "done" if greeted else "idle")
+
+    return [s_send, s_deliv, s_read, s_open, s_greet]
 
 
 def _notify_result(request, guest, result):
@@ -128,12 +184,14 @@ def guest_add(request):
 def guest_detail(request, guest_id):
     guest = guest_or_403(request.user, guest_id)
     invitation_url = _invitation_url(guest)
+    log = _last_log(guest)
     return render(request, "panel/guest_detail.html", {
         "guest": guest,
-        "timeline": _timeline(guest),
+        "timeline": _timeline(guest, log),
         "invitation_url": invitation_url,
         "qr_svg": qr_svg(invitation_url),
         "can_edit": can_view_all(request.user) or guest.invited_by_id == request.user.id,
+        "wa_live": WhatsAppConfig.get().enabled,
     })
 
 

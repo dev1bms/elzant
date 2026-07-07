@@ -9,8 +9,10 @@
   <span class="whitespace-nowrap rounded-full bg-sand/60 px-3 py-1 text-xs font-semibold text-ink-soft">سُلّمت</span>
 {% elif g.wa_status == 'failed' %}
   <span class="whitespace-nowrap rounded-full bg-blush px-3 py-1 text-xs font-semibold text-wine-700">فشلت</span>
-{% elif g.wa_status == 'sent' or g.wa_status == 'queued' %}
-  <span class="whitespace-nowrap rounded-full bg-sand/50 px-3 py-1 text-xs font-semibold text-ink-soft">أُرسلت</span>
+{% elif g.wa_status == 'sent' %}
+  <span class="whitespace-nowrap rounded-full bg-sand/50 px-3 py-1 text-xs font-semibold text-ink-soft">قيد الإرسال</span>
+{% elif g.wa_status == 'queued' %}
+  <span class="whitespace-nowrap rounded-full bg-gold/15 px-3 py-1 text-xs font-semibold text-gold">تجريبي</span>
 {% else %}
   <span class="whitespace-nowrap rounded-full bg-porcelain-200 px-3 py-1 text-xs text-cloud">لم تُرسل</span>
 {% endif %}
