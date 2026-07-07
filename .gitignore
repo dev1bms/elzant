@@ -38,3 +38,6 @@ Thumbs.db
 # built copy never blocks `git pull`. (hero-bg.jpg is the SOURCE, kept tracked.)
 /static/img/og-image.png
 /static/img/og-image.jpg
+
+# Stray FUSE temp files
+.fuse_hidden*
