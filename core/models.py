@@ -221,6 +221,7 @@ class Greeting(models.Model):
         PENDING = "pending", "بانتظار"   # legacy; treated as visible
         APPROVED = "approved", "ظاهرة"   # published / live
         REJECTED = "rejected", "محظورة"  # hidden by the admin
+        HELD = "held", "محجوزة للمراجعة"  # non-Arabic/suspicious — hidden until approved
 
     class CardTemplate(models.TextChoices):
         NO_PHOTO_MINIMAL = "no_photo_minimal", "بدون صورة — راقٍ"
@@ -285,6 +286,11 @@ class Greeting(models.Model):
         """True when the admin has banned/hidden this greeting."""
         return self.status == self.Status.REJECTED
 
+    @property
+    def is_held(self):
+        """True when held for review (non-Arabic/suspicious) — off the wall."""
+        return self.status == self.Status.HELD
+
     def effective_template(self):
         """The template actually used to render the card.
 
@@ -299,8 +305,10 @@ class Greeting(models.Model):
 
     @classmethod
     def visible(cls):
-        """Greetings shown publicly on the wall — everything except banned ones."""
-        return cls.objects.exclude(status=cls.Status.REJECTED).order_by("-created_at")
+        """Greetings shown publicly — excludes banned (REJECTED) and held (HELD)."""
+        return cls.objects.exclude(
+            status__in=[cls.Status.REJECTED, cls.Status.HELD]
+        ).order_by("-created_at")
 
     def _delete_photo_files(self):
         """Remove the uploaded photo + thumbnail from storage (best-effort)."""
@@ -359,30 +367,35 @@ class InviterProfile(models.Model):
 
 
 class WhatsAppConfig(models.Model):
-    """Operational WhatsApp settings AND secrets — a singleton like WeddingConfig,
-    fully managed from the admin (no .env needed). The API token, app secret and
-    verify token are stored here; the admin masks them and restricts this screen
-    to superusers. Protect the SQLite file and its backups accordingly."""
+    """WhatsApp settings AND Twilio credentials — a singleton like WeddingConfig,
+    fully managed from the admin (no .env needed). The Twilio Auth Token is stored
+    here; the admin masks it and restricts this screen to superusers. Protect the
+    SQLite file and its backups accordingly."""
 
     enabled = models.BooleanField(
         "تفعيل الإرسال الحيّ", default=False,
         help_text="عند الإيقاف: وضع آمن — لا يُرسَل شيء فعلياً، يُسجَّل «سيُرسَل» فقط.",
     )
-    phone_number_id = models.CharField("Phone Number ID", max_length=40, blank=True)
-    waba_id = models.CharField("WhatsApp Business Account ID", max_length=40, blank=True)
-    default_template_name = models.CharField("اسم القالب الافتراضي", max_length=100, blank=True)
-    template_lang = models.CharField("لغة القالب", max_length=10, default="ar")
+    # Twilio credentials + WhatsApp sender
+    twilio_account_sid = models.CharField("Twilio Account SID", max_length=64, blank=True)
+    twilio_auth_token = models.CharField("Twilio Auth Token", max_length=100, blank=True)
+    twilio_from = models.CharField(
+        "رقم واتساب المُرسِل (E.164)", max_length=25, blank=True,
+        help_text="مثل +14155238886 (رقم Twilio/الـSandbox). يُضاف whatsapp: تلقائياً.",
+    )
+    messaging_service_sid = models.CharField(
+        "Messaging Service SID (اختياري)", max_length=64, blank=True,
+        help_text="بديل عن رقم المُرسِل — إن ضُبط يُستخدم بدله.",
+    )
+    content_sid = models.CharField(
+        "Content Template SID (HX...)", max_length=64, blank=True,
+        help_text="قالب المحتوى المعتمد في Twilio لرسالة الدعوة.",
+    )
     default_country_code = models.CharField(
         "رمز الدولة الافتراضي", max_length=4, default="20",
         help_text="لتطبيع الأرقام المحلية (مصر=20).",
     )
     test_recipient = models.CharField("رقم اختبار الإرسال", max_length=30, blank=True)
-
-    # --- Secrets (managed here, not in .env). Masked + superuser-only in admin. ---
-    api_token = models.TextField("توكن الوصول (Access Token)", blank=True)
-    app_secret = models.CharField("App Secret", max_length=100, blank=True)
-    verify_token = models.CharField("Verify Token (Webhook)", max_length=100, blank=True)
-    api_version = models.CharField("إصدار Graph API", max_length=10, default="v21.0")
 
     class Meta:
         verbose_name = "إعدادات واتساب"
@@ -416,7 +429,8 @@ class WhatsAppTemplate(models.Model):
     # Ordered names of the {{1}}, {{2}}… variables → context keys, e.g.
     # ["guest_name"] means body {{1}} is the guest's name. Button URL var is the token.
     variables_map = models.JSONField("خريطة المتغيّرات", default=list, blank=True)
-    is_approved = models.BooleanField("معتمد من Meta", default=False)
+    content_sid = models.CharField("Content Template SID (Twilio)", max_length=64, blank=True)
+    is_approved = models.BooleanField("معتمد", default=False)
     active = models.BooleanField("مفعّل", default=True)
     created_at = models.DateTimeField(auto_now_add=True)
 

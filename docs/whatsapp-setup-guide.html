@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>دليل ربط الواتساب وإرسال الدعوات — elzant.com</title>
+<title>دليل ربط واتساب عبر Twilio وإرسال الدعوات — elzant.com</title>
 <style>
   :root{
     --porcelain:#fbf4e8; --porcelain-50:#fdf8f0; --cream:#f6ead6; --sand:#ecdcc2;
@@ -30,47 +30,29 @@
   }
   header.hero .eyebrow{font-style:italic; letter-spacing:.18em; color:var(--gold); font-size:.95rem}
   header.hero h1{margin:.3rem 0 .4rem; font-size:2rem; color:var(--wine-700); line-height:1.25}
-  header.hero p{margin:.2rem auto 0; max-width:44ch; color:var(--ink-soft)}
+  header.hero p{margin:.2rem auto 0; max-width:46ch; color:var(--ink-soft)}
   .safe-badge{
     display:inline-block; margin-top:16px; padding:.5rem 1.1rem; border-radius:999px;
     background:color-mix(in srgb,var(--ok) 14%,transparent); color:var(--ok);
     border:1px solid color-mix(in srgb,var(--ok) 35%,transparent); font-weight:600; font-size:.9rem;
   }
-  h2.sec{
-    margin:38px 0 4px; font-size:1.05rem; color:var(--wine-600);
-    display:flex; align-items:center; gap:.5rem;
-  }
-  .toc{
-    background:var(--porcelain-50); border:1px solid var(--sand); border-radius:16px;
-    padding:18px 22px; margin:22px 0;
-  }
+  h2.sec{margin:38px 0 4px; font-size:1.05rem; color:var(--wine-600); display:flex; align-items:center; gap:.5rem}
+  .toc{background:var(--porcelain-50); border:1px solid var(--sand); border-radius:16px; padding:18px 22px; margin:22px 0}
   .toc h3{margin:0 0 8px; font-size:.95rem; color:var(--ink-soft)}
   .toc ol{margin:0; padding-inline-start:1.3rem; columns:2; column-gap:28px}
   .toc a{color:var(--wine-600); text-decoration:none}
   .toc a:hover{text-decoration:underline}
-
-  .step{
-    position:relative; background:var(--porcelain-50);
-    border:1px solid color-mix(in srgb,var(--gold) 24%,var(--sand));
-    border-radius:16px; padding:22px 24px 20px; margin:16px 0;
-    box-shadow:0 30px 60px -50px rgba(58,42,34,.55);
-  }
-  .step > .n{
-    position:absolute; inset-inline-start:-14px; top:-14px;
-    width:40px; height:40px; border-radius:50%;
-    background:var(--wine); color:#fff; display:flex; align-items:center; justify-content:center;
-    font-weight:700; box-shadow:0 10px 22px -10px var(--wine);
-  }
+  .step{position:relative; background:var(--porcelain-50); border:1px solid color-mix(in srgb,var(--gold) 24%,var(--sand));
+    border-radius:16px; padding:22px 24px 20px; margin:16px 0; box-shadow:0 30px 60px -50px rgba(58,42,34,.55)}
+  .step > .n{position:absolute; inset-inline-start:-14px; top:-14px; width:40px; height:40px; border-radius:50%;
+    background:var(--wine); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700;
+    box-shadow:0 10px 22px -10px var(--wine)}
   .step h3{margin:.1rem 0 .5rem; color:var(--wine-700); font-size:1.15rem}
   .step ul,.step ol{margin:.3rem 0; padding-inline-start:1.4rem}
   .step li{margin:.28rem 0}
-  code,kbd{
-    background:color-mix(in srgb,var(--gold) 14%,#fff); color:var(--wine-700);
-    padding:.08em .42em; border-radius:6px; font-family:"SF Mono",Consolas,monospace;
-    font-size:.9em; direction:ltr; unicode-bidi:isolate; display:inline-block;
-  }
+  code,kbd{background:color-mix(in srgb,var(--gold) 14%,#fff); color:var(--wine-700); padding:.08em .42em;
+    border-radius:6px; font-family:"SF Mono",Consolas,monospace; font-size:.9em; direction:ltr; unicode-bidi:isolate; display:inline-block}
   kbd{background:var(--ink); color:var(--porcelain-50); box-shadow:0 2px 0 rgba(0,0,0,.25)}
-
   .callout{border-radius:12px; padding:12px 16px; margin:14px 0; font-size:.96rem}
   .tip{background:color-mix(in srgb,var(--ok) 10%,transparent); border:1px solid color-mix(in srgb,var(--ok) 30%,transparent)}
   .tip b{color:var(--ok)}
@@ -78,32 +60,21 @@
   .warn b{color:var(--warn)}
   .danger{background:color-mix(in srgb,var(--danger) 10%,transparent); border:1px solid color-mix(in srgb,var(--danger) 32%,transparent)}
   .danger b{color:var(--danger)}
-
   table.vals{width:100%; border-collapse:collapse; margin:12px 0; font-size:.94rem; background:#fff; border-radius:12px; overflow:hidden}
   table.vals th,table.vals td{border:1px solid var(--sand); padding:9px 12px; text-align:right; vertical-align:top}
   table.vals th{background:var(--cream); color:var(--wine-700); font-weight:700}
   table.vals td:first-child{white-space:nowrap; color:var(--wine-600); font-weight:600}
-
-  .tpl{
-    background:#fff; border:1px solid var(--sand); border-inline-start:4px solid var(--gold);
-    border-radius:12px; padding:14px 16px; margin:12px 0;
-  }
+  .tpl{background:#fff; border:1px solid var(--sand); border-inline-start:4px solid var(--gold); border-radius:12px; padding:14px 16px; margin:12px 0}
   .tpl .tpl-head{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:8px}
   .tpl .tpl-name{font-weight:700; color:var(--wine-700)}
   .tpl .tag{font-size:.75rem; background:var(--cream); color:var(--ink-soft); padding:.15rem .6rem; border-radius:999px}
-  .tpl pre{
-    margin:0; white-space:pre-wrap; font-family:inherit; color:var(--ink);
-    background:var(--porcelain); border-radius:8px; padding:12px 14px; line-height:2;
-  }
-  .copy{cursor:pointer; border:1px solid var(--wine); color:var(--wine); background:transparent;
-    border-radius:999px; padding:.25rem .8rem; font-size:.8rem; font-family:inherit}
+  .tpl pre{margin:0; white-space:pre-wrap; font-family:inherit; color:var(--ink); background:var(--porcelain); border-radius:8px; padding:12px 14px; line-height:2}
+  .copy{cursor:pointer; border:1px solid var(--wine); color:var(--wine); background:transparent; border-radius:999px; padding:.25rem .8rem; font-size:.8rem; font-family:inherit}
   .copy:hover{background:var(--wine); color:#fff}
-
   .flow{display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:14px 0; font-size:.9rem}
   .flow .pill{background:var(--porcelain-50); border:1px solid var(--sand); border-radius:999px; padding:.4rem .9rem}
   .flow .arw{color:var(--gold); font-weight:700}
   .flow .done{background:color-mix(in srgb,var(--ok) 14%,transparent); border-color:color-mix(in srgb,var(--ok) 30%,transparent); color:var(--ok)}
-
   footer{margin-top:40px; text-align:center; color:var(--cloud); font-size:.85rem}
   @media(max-width:640px){ .toc ol{columns:1} header.hero h1{font-size:1.6rem} }
   @media print{ body{background:#fff} .step{break-inside:avoid} .copy{display:none} }
@@ -114,80 +85,71 @@
 
   <header class="hero">
     <div class="eyebrow">elzant.com — دليل التشغيل</div>
-    <h1>ربط واتساب وإرسال الدعوات</h1>
-    <p>دليل بصري خطوة بخطوة: من إنشاء حساب Meta حتى إرسال الدعوة الأولى من اللوحة العائلية.</p>
+    <h1>ربط واتساب عبر Twilio وإرسال الدعوات</h1>
+    <p>دليل بصري خطوة بخطوة: من إنشاء حساب Twilio حتى إرسال الدعوة الأولى من اللوحة العائلية.</p>
     <div class="safe-badge">✓ يبدأ النظام في «الوضع الآمن» — لا يُرسَل شيء فعلياً حتى تفعّله بنفسك</div>
   </header>
 
   <div class="toc">
     <h3>المسار الكامل</h3>
     <ol>
-      <li><a href="#s1">تجهيز حساب Meta وتطبيق واتساب</a></li>
-      <li><a href="#s2">جمع القيم الستّ المطلوبة</a></li>
-      <li><a href="#s3">إنشاء قالب الدعوة (Utility)</a></li>
+      <li><a href="#s1">إنشاء حساب Twilio + الاعتماد</a></li>
+      <li><a href="#s2">تفعيل واتساب (Sandbox أو مُرسِل)</a></li>
+      <li><a href="#s3">إنشاء Content Template</a></li>
       <li><a href="#s4">إدخال القيم في لوحة الأدمن</a></li>
-      <li><a href="#s5">ضبط الـ Webhook في Meta</a></li>
-      <li><a href="#s6">رسالة اختبار (وضع آمن ثم حقيقي)</a></li>
+      <li><a href="#s5">Status Callback (تلقائي)</a></li>
+      <li><a href="#s6">رسالة اختبار</a></li>
       <li><a href="#s7">تفعيل الإرسال الحيّ</a></li>
-      <li><a href="#s8">حسابات المُرسِلين (العائلة)</a></li>
-      <li><a href="#s9">الإرسال من اللوحة العائلية</a></li>
+      <li><a href="#s8">حسابات المُرسِلين</a></li>
+      <li><a href="#s9">الإرسال من اللوحة</a></li>
       <li><a href="#tpls">نماذج دعوات جاهزة</a></li>
     </ol>
   </div>
 
   <div class="flow">
     <span class="pill done">الوضع الآمن</span><span class="arw">←</span>
-    <span class="pill">إعداد Meta</span><span class="arw">←</span>
+    <span class="pill">حساب Twilio</span><span class="arw">←</span>
+    <span class="pill">تفعيل واتساب</span><span class="arw">←</span>
+    <span class="pill">Content Template</span><span class="arw">←</span>
     <span class="pill">إدخال بالأدمن</span><span class="arw">←</span>
-    <span class="pill">Webhook</span><span class="arw">←</span>
     <span class="pill">اختبار</span><span class="arw">←</span>
-    <span class="pill">تفعيل حيّ</span><span class="arw">←</span>
-    <span class="pill">إرسال من اللوحة</span>
+    <span class="pill">تفعيل حيّ</span>
   </div>
 
   <h2 class="sec">🧩 التجهيز</h2>
 
   <section class="step" id="s1">
     <div class="n">1</div>
-    <h3>تجهيز حساب Meta وتطبيق واتساب</h3>
+    <h3>أنشئ حساب Twilio واحصل على الاعتماد</h3>
     <ol>
-      <li>ادخل إلى <code>developers.facebook.com</code> وسجّل الدخول بحساب فيسبوك.</li>
-      <li>أنشئ <b>Business Portfolio</b> (حساب أعمال) إن لم يكن لديك، من <code>business.facebook.com</code>.</li>
-      <li>أنشئ تطبيقاً جديداً: <b>Create App</b> ← اختر نوع <b>Business</b>.</li>
-      <li>داخل التطبيق: <b>Add Product</b> ← أضِف <b>WhatsApp</b>.</li>
-      <li>سيُنشئ لك واتساب <b>رقم اختبار</b> (Test number) و<b>WhatsApp Business Account</b> تلقائياً — كافٍ للتجربة قبل ربط رقمك الحقيقي.</li>
+      <li>سجّل في <code>twilio.com</code> وادخل إلى <b>Console</b>.</li>
+      <li>من الصفحة الرئيسية للـConsole انسخ: <b>Account SID</b> (يبدأ بـ <code>AC…</code>) و <b>Auth Token</b>.</li>
     </ol>
-    <div class="callout tip"><b>نصيحة:</b> اضبط <b>اسم العرض للنشاط</b> (Display name) باسم مناسب مثل «زفاف محمود ورينان» أو اسم العائلة — هذا ما يراه المدعو كمُرسِل.</div>
+    <div class="callout warn"><b>سرّية:</b> الـ Auth Token مثل كلمة مرور حسابك — لا تنشره ولا ترفعه لـ Git. سنُدخِله في الأدمن حيث يُخزَّن مقنّعاً ومحصوراً بـ superuser.</div>
   </section>
 
   <section class="step" id="s2">
     <div class="n">2</div>
-    <h3>اجمع القيم الستّ المطلوبة</h3>
-    <p>كل هذه القيم تُدخَل لاحقاً في لوحة الأدمن (لا حاجة لأي ملف <code>.env</code>):</p>
+    <h3>فعّل واتساب — Sandbox للتجربة أو مُرسِل للإنتاج</h3>
     <table class="vals">
-      <tr><th>القيمة</th><th>من أين تجدها في Meta</th></tr>
-      <tr><td>Phone Number ID</td><td>WhatsApp ← <b>API Setup</b>: تحت الرقم المُختار.</td></tr>
-      <tr><td>WhatsApp Business Account ID</td><td>نفس صفحة API Setup (WABA ID).</td></tr>
-      <tr><td>Access Token (التوكن)</td><td>توكن مؤقت في API Setup للتجربة؛ للإنتاج أنشئ <b>System User</b> بتوكن <b>دائم</b> من إعدادات الأعمال.</td></tr>
-      <tr><td>App Secret</td><td>App ← <b>Settings → Basic → App Secret</b> (اضغط Show).</td></tr>
-      <tr><td>Verify Token</td><td>سلسلة عشوائية <b>من عندك</b> (اختَرها الآن) — ستُدخِلها في مكانين متطابقين: الأدمن وMeta.</td></tr>
-      <tr><td>Graph API Version</td><td>اختياري — الافتراضي <code>v21.0</code>.</td></tr>
+      <tr><th>الخيار</th><th>متى؟</th><th>المُرسِل (twilio_from)</th></tr>
+      <tr><td>WhatsApp Sandbox</td><td>تجربة فورية بلا اعتماد رقم</td><td><code>+14155238886</code> (رقم Twilio التجريبي)</td></tr>
+      <tr><td>مُرسِل WhatsApp حقيقي</td><td>الإنتاج (رقمك/اسم نشاطك)</td><td>رقمك المُسجَّل في Twilio</td></tr>
     </table>
-    <div class="callout warn"><b>التوكن الدائم:</b> التوكن المؤقت ينتهي خلال ساعات. للإنتاج استخدم توكن <b>System User</b> دائم الصلاحية حتى لا يتوقّف الإرسال فجأة.</div>
+    <div class="callout warn"><b>Sandbox = موافقة إجبارية:</b> كل مُستقبِل يجب أن يرسل أولاً <kbd>join &lt;code&gt;</kbd> إلى الرقم التجريبي (تجده في Console → Messaging → Try it out → WhatsApp). بدون ذلك لن تصله الرسالة. للإنتاج سجّل مُرسِلاً واعتمِد القالب (يستغرق وقتاً).</div>
   </section>
 
   <section class="step" id="s3">
     <div class="n">3</div>
-    <h3>أنشئ قالب الدعوة (Utility)</h3>
-    <p>الرسائل التي يبدؤها العمل تتطلّب <b>قالباً معتمداً</b> من Meta. من <b>WhatsApp Manager → Message Templates → Create Template</b>:</p>
+    <h3>أنشئ Content Template واحصل على Content SID</h3>
+    <p>رسائل واتساب المُبتدأة من العمل تحتاج <b>قالب محتوى</b>. من Console → <b>Messaging → Content Template Builder → Create</b>:</p>
     <ul>
-      <li><b>الفئة (Category):</b> اختر <b>Utility</b> — أرخص بكثير وغالباً مجاني داخل نافذة 24 ساعة (تجنّب Marketing).</li>
-      <li><b>اللغة:</b> العربية <code>ar</code>.</li>
-      <li><b>Body:</b> الصق أحد <a href="#tpls">النماذج الجاهزة</a> أدناه؛ المتغيّر <code>{{1}}</code> = اسم المدعو.</li>
-      <li><b>زر (Button) نوع URL ديناميكي:</b> الأساس <code>https://elzant.com/i/</code> والمتغيّر <code>{{1}}</code> = توكن الدعوة. الرابط النهائي يصبح <code>https://elzant.com/i/&lt;token&gt;/</code>.</li>
-      <li>احفظ واسم القالب (مثل <code>invite_formal_ar</code>) وانتظر <b>الاعتماد</b> (قد يستغرق دقائق إلى أيام).</li>
+      <li><b>النوع:</b> نص (Text) — والفئة <b>Utility</b> إن أمكن (أرخص).</li>
+      <li><b>اللغة:</b> العربية.</li>
+      <li><b>المتغيّرات (positional):</b> <code>{{1}}</code> = اسم المدعو، <code>{{2}}</code> = رابط الدعوة الخاص. الصق أحد <a href="#tpls">النماذج الجاهزة</a> أدناه كما هي.</li>
+      <li>احفظ، ثم أرسِل القالب لاعتماد واتساب، وانسخ الـ <b>Content SID</b> (يبدأ بـ <code>HX…</code>).</li>
     </ul>
-    <div class="callout tip"><b>جاهزة لك:</b> النماذج مزروعة مسبقاً في الأدمن ضمن «قوالب واتساب» — انسخ نصّها من قسم <a href="#tpls">النماذج الجاهزة</a> والصقه في Meta كما هو.</div>
+    <div class="callout tip"><b>الربط التلقائي:</b> يمرّر النظام المتغيّرات تلقائياً هكذا: <code>{"1": اسم المدعو, "2": رابط /i/&lt;token&gt;/}</code> — فقط اجعل ترتيب المتغيّرات في قالبك مطابقاً (1 ثم 2).</div>
   </section>
 
   <h2 class="sec">⚙️ الإعداد داخل الموقع</h2>
@@ -197,24 +159,23 @@
     <h3>أدخِل القيم في لوحة الأدمن</h3>
     <p>افتح <code>/admin/</code> ← <b>«إعدادات واتساب»</b> واملأ:</p>
     <ul>
-      <li><b>Cloud API:</b> Phone Number ID · WhatsApp Business Account ID · إصدار Graph API.</li>
-      <li><b>القالب الافتراضي:</b> اسم القالب المعتمد · لغته (<code>ar</code>) · رمز الدولة الافتراضي (مصر=<code>20</code>).</li>
-      <li><b>الأسرار (مقنّعة، superuser فقط):</b> Access Token · App Secret · Verify Token.</li>
+      <li><b>Twilio — الاعتماد والمُرسِل:</b> Account SID · Auth Token (مقنّع) · رقم واتساب المُرسِل (مثل <code>+14155238886</code>) — أو Messaging Service SID بدلاً منه.</li>
+      <li><b>قالب الدعوة والأرقام:</b> Content SID (<code>HX…</code>) · رمز الدولة الافتراضي (مصر=<code>20</code>).</li>
     </ul>
-    <div class="callout tip"><b>الحقول المقنّعة:</b> تظهر فارغة لأسباب أمنية. أدخِل القيمة مرة واحدة واحفظ. عند أي تعديل لاحق، <b>اترك حقل السرّ فارغاً للإبقاء على قيمته</b> — لن يُمحى.</div>
-    <div class="callout danger"><b>أمان:</b> بما أن الأسرار صارت داخل قاعدة البيانات، احمِ ملف <code>db.sqlite3</code> ونسخه الاحتياطية (صلاحيات ملف صارمة، ونسخ مشفّرة/بعيدة). شاشة الإعدادات محصورة بمستخدم <b>superuser</b>.</div>
+    <div class="callout tip"><b>الحقل المقنّع:</b> Auth Token يظهر فارغاً لأسباب أمنية. أدخِله مرة واحدة واحفظ؛ عند أي تعديل لاحق <b>اتركه فارغاً للإبقاء على قيمته</b>.</div>
+    <div class="callout danger"><b>أمان:</b> الـ Auth Token يُخزَّن في قاعدة البيانات — احمِ ملف <code>db.sqlite3</code> ونسخه الاحتياطية، والشاشة محصورة بـ <b>superuser</b>.</div>
   </section>
 
   <section class="step" id="s5">
     <div class="n">5</div>
-    <h3>اضبط الـ Webhook في Meta</h3>
-    <p>الـ Webhook هو ما يعيد إليك حالات <b>التسليم والقراءة</b>. من App ← <b>WhatsApp → Configuration → Webhook</b>:</p>
+    <h3>Status Callback — تلقائي</h3>
+    <p>لا حاجة لضبط أي شيء في Twilio: يُرفِق النظام مع كل رسالة عنوان الحالة تلقائياً:</p>
     <table class="vals">
-      <tr><td>Callback URL</td><td><code>https://elzant.com/webhooks/whatsapp/</code></td></tr>
-      <tr><td>Verify Token</td><td>نفس القيمة التي أدخلتها في «إعدادات واتساب» بالأدمن (متطابقة تماماً).</td></tr>
-      <tr><td>Subscribe</td><td>فعّل الاشتراك في حقل <b>messages</b> (يغطّي <code>sent / delivered / read / failed</code>).</td></tr>
+      <tr><td>Status Callback URL</td><td><code>https://elzant.com/webhooks/twilio/</code></td></tr>
+      <tr><td>الحماية</td><td>يتحقّق من توقيع <code>X-Twilio-Signature</code> بالـ Auth Token؛ يرفض غير الموقّع بـ 403.</td></tr>
+      <tr><td>الحالات</td><td><code>queued → sent → delivered → read → failed</code> تُحدِّث حالة المدعو في اللوحة.</td></tr>
     </table>
-    <div class="callout warn"><b>شرط:</b> يجب أن يكون <code>elzant.com</code> عبر HTTPS (نفق Cloudflare) وضمن <code>CSRF_TRUSTED_ORIGINS</code>. الـ Webhook يتحقّق من توقيع HMAC-SHA256، ويرفض أي طلب غير موقّع بـ 403.</div>
+    <div class="callout warn"><b>شرط:</b> تأكّد أن <code>SITE_URL</code> في الإعدادات يساوي <code>https://elzant.com</code> بالضبط (يُبنى منه رابط الـcallback وعليه يعتمد التحقق من التوقيع)، وأن الموقع خلف HTTPS (نفق Cloudflare).</div>
   </section>
 
   <h2 class="sec">✅ الاختبار والتفعيل</h2>
@@ -223,21 +184,20 @@
     <div class="n">6</div>
     <h3>أرسل رسالة اختبار</h3>
     <ol>
-      <li>في «إعدادات واتساب» أضِف <b>«رقم اختبار الإرسال»</b> (رقمك أنت) واحفظ.</li>
-      <li>اضغط زر <b>«إرسال رسالة اختبار»</b>.</li>
-      <li>وأنت في <b>الوضع الآمن</b> (الإرسال الحيّ متوقّف): يُحاكي فقط دون إرسال فعلي أو تكلفة — للتأكّد من التدفّق.</li>
+      <li>لو تستخدم Sandbox: أرسل <kbd>join &lt;code&gt;</kbd> من رقمك إلى الرقم التجريبي أولاً.</li>
+      <li>في «إعدادات واتساب» أضِف <b>«رقم اختبار الإرسال»</b> (رقمك) واحفظ.</li>
+      <li>اضغط زر <b>«إرسال رسالة اختبار»</b>. في <b>الوضع الآمن</b> يُحاكي فقط (بلا إرسال/تكلفة).</li>
     </ol>
-    <div class="callout tip"><b>ملاحظة:</b> قبل التوثيق الكامل تسمح Meta بالإرسال إلى <b>أرقام اختبار مُضافة</b> فقط — أضِف رقمك في API Setup ← Recipients.</div>
   </section>
 
   <section class="step" id="s7">
     <div class="n">7</div>
     <h3>فعّل الإرسال الحيّ</h3>
     <ol>
-      <li>تأكّد أن القالب <b>معتمد</b> في Meta، وأن كل القيم مُدخلة.</li>
-      <li>في «إعدادات واتساب» فعّل <b>«تفعيل الإرسال الحيّ»</b> واحفظ.</li>
+      <li>تأكّد أن القالب معتمد وأن كل القيم مُدخلة.</li>
+      <li>فعّل <b>«تفعيل الإرسال الحيّ»</b> واحفظ.</li>
       <li>أعِد زر <b>«إرسال رسالة اختبار»</b> — هذه المرة يصلك فعلياً على واتساب.</li>
-      <li>افتح رابط الدعوة من الرسالة، وتأكّد من انتقال الحالة في اللوحة إلى <b>«سُلّمت» ← «قُرئت» ← «فُتح الرابط»</b>.</li>
+      <li>افتح رابط الدعوة، وتابِع انتقال الحالة في اللوحة: <b>سُلّمت ← قُرئت ← فُتح الرابط ← كتب تهنئة</b>.</li>
     </ol>
     <div class="flow">
       <span class="pill">أُرسلت</span><span class="arw">←</span>
@@ -254,45 +214,44 @@
     <div class="n">8</div>
     <h3>أنشئ حسابات المُرسِلين (العائلة)</h3>
     <ol>
-      <li>في <code>/admin/</code> ← <b>Users</b>: أنشئ مستخدماً لكل فرد من العائلة (اسم مستخدم + كلمة مرور). فعّل <b>Staff status</b>.</li>
-      <li>في <b>«المُرسِلون (العائلة)»</b> (<code>InviterProfile</code>): اربط المستخدم، واكتب <b>الاسم الظاهر</b> واختر <b>الجهة</b> (عريس/عروس).</li>
-      <li>فعّل <b>«يرى كل المدعوين»</b> لمن يحتاج عرض «الكل + من دعا كلاً» (غالباً منظّم واحد لكل عائلة).</li>
+      <li><code>/admin/ → Users</code>: أنشئ مستخدماً لكل فرد (اسم مستخدم + كلمة مرور)، وفعّل <b>Staff status</b>.</li>
+      <li><b>«المُرسِلون (العائلة)»</b>: اربط المستخدم، واكتب الاسم الظاهر واختر الجهة (عريس/عروس).</li>
+      <li>فعّل <b>«يرى كل المدعوين»</b> لمن يحتاج عرض «الكل + من دعا كلاً».</li>
     </ol>
-    <div class="callout warn"><b>الوصول:</b> من لا يملك <code>InviterProfile</code> (ولا صلاحية superuser) لا يستطيع دخول اللوحة <code>/panel/</code>.</div>
   </section>
 
   <section class="step" id="s9">
     <div class="n">9</div>
     <h3>الإرسال من اللوحة العائلية</h3>
     <ol>
-      <li>يفتح الفرد <code>/panel/</code> ويسجّل الدخول باسمه وكلمة مروره.</li>
-      <li><b>«دعوة جديدة»</b>: يُدخل الاسم + رقم الهاتف، ثم <b>إرسال</b> — تُرسَل الدعوة آلياً برابطها الخاص.</li>
-      <li>إن كان الرقم <b>مدعوّاً مسبقاً</b>: تظهر رسالة «مدعو بواسطة فلان»، ولا يُرسَل تكرار إلا بعد <b>تأكيد</b>.</li>
-      <li>يرى كلٌّ <b>دعواته وحالاتها</b>؛ والمصرّح له يبدّل إلى <b>«كل المدعوين»</b> لرؤية من دعا كلاً.</li>
+      <li>يفتح الفرد <code>/panel/</code> ويسجّل الدخول.</li>
+      <li><b>«دعوة جديدة»</b>: يُدخل الاسم + الهاتف، ثم <b>إرسال</b> — تُرسَل الدعوة آلياً برابطها الخاص عبر Twilio.</li>
+      <li>رقم <b>مدعوّ مسبقاً</b>؟ تظهر «مدعو بواسطة فلان»، ولا تكرار إلا بـ<b>تأكيد</b>.</li>
+      <li>يرى كلٌّ دعواته وحالاتها؛ والمصرّح له يبدّل إلى «كل المدعوين».</li>
     </ol>
   </section>
 
   <h2 class="sec" id="tpls">✉️ نماذج دعوات جاهزة</h2>
-  <p style="color:var(--ink-soft)">انسخ نصّ أي نموذج والصقه في <b>Body</b> عند إنشاء القالب في Meta. <code>{{1}}</code> = اسم المدعو، والزر رابط ديناميكي (لا تكتب الرابط داخل النص).</p>
+  <p style="color:var(--ink-soft)">الصقها في <b>Body</b> داخل Content Template Builder. <code>{{1}}</code> = اسم المدعو، <code>{{2}}</code> = رابط الدعوة (يمرّرهما النظام تلقائياً بهذا الترتيب).</p>
 
   <div class="tpl">
     <div class="tpl-head"><span class="tpl-name">رسمي — invite_formal_ar</span><span class="tag">Utility</span><button class="copy" data-t="t1">نسخ</button></div>
     <pre id="t1">السلام عليكم {{1}} 🌿
 يتشرّف أهل العروسين بدعوتكم لحضور حفل زفاف محمود ورينان.
-تفضّلوا بفتح دعوتكم الخاصة من الزر أدناه — بانتظار تشريفكم.</pre>
+تفضّلوا بفتح دعوتكم الخاصة: {{2}}</pre>
   </div>
 
   <div class="tpl">
     <div class="tpl-head"><span class="tpl-name">دافئ عائلي — invite_warm_ar</span><span class="tag">Utility</span><button class="copy" data-t="t2">نسخ</button></div>
     <pre id="t2">أهلاً {{1}} 🤍
 فرحتنا ما تكتمل إلا بوجودكم! ندعوكم لمشاركتنا حفل زفاف محمود ورينان.
-دعوتكم الخاصة بالزر أدناه 👇</pre>
+دعوتكم الخاصة: {{2}}</pre>
   </div>
 
   <div class="tpl">
     <div class="tpl-head"><span class="tpl-name">مختصر — invite_short_ar</span><span class="tag">Utility</span><button class="copy" data-t="t3">نسخ</button></div>
     <pre id="t3">{{1}}، يسعدنا دعوتكم لحضور حفل زفاف محمود ورينان 🌿
-دعوتكم الخاصة بالزر أدناه.</pre>
+دعوتكم الخاصة: {{2}}</pre>
   </div>
 
   <div class="tpl">
@@ -300,7 +259,7 @@
     <pre id="t4">بسم الله الرحمن الرحيم
 السلام عليكم {{1}} ورحمة الله 🤍
 «وَمِنْ آيَاتِهِ أَنْ خَلَقَ لَكُم مِّنْ أَنفُسِكُمْ أَزْوَاجًا لِّتَسْكُنُوا إِلَيْهَا».
-ندعوكم لحضور حفل زفاف محمود ورينان — دعوتكم الخاصة بالزر أدناه.</pre>
+ندعوكم لحضور حفل زفاف محمود ورينان — دعوتكم الخاصة: {{2}}</pre>
   </div>
 
   <h2 class="sec">⚠️ تحذيرات مهمّة</h2>
@@ -308,15 +267,16 @@
     <div class="n">!</div>
     <h3>قبل الإرسال الواسع</h3>
     <ul>
-      <li><b>التكلفة:</b> الفوترة لكل رسالة (منذ 1 يوليو 2025) ويحدّدها رمز دولة المُستقبِل. قوالب <b>Utility</b> أرخص و<b>غالباً مجانية</b> داخل نافذة 24 ساعة.</li>
-      <li><b>الموافقة (Opt-in):</b> سياسة واتساب تتطلّب أن يكون المستقبِل موافقاً على التلقّي. أرسل لمدعوّين <b>معروفين للعائلة</b> فقط.</li>
-      <li><b>جودة الرقم (Quality Rating):</b> ابدأ تدريجياً وراقب التقييم في WhatsApp Manager — البلاغات المتكرّرة قد تُقيّد الرقم أو تحظره.</li>
-      <li><b>الرقم المُرسِل رقم أعمال</b> لا رقم شخصي — لذلك اضبط اسم العرض بوضوح ليعرفه المدعو.</li>
+      <li><b>Sandbox = موافقة:</b> كل مُستقبِل يرسل <kbd>join &lt;code&gt;</kbd> أولاً. للإنتاج استخدم مُرسِلاً معتمداً.</li>
+      <li><b>التكلفة:</b> رسوم Twilio لكل رسالة + رسوم واتساب حسب فئة القالب ودولة المُستقبِل. قوالب Utility أرخص.</li>
+      <li><b>اعتماد القالب</b> قد يستغرق وقتاً وقد يُرفَض — جهّزه مبكراً.</li>
+      <li><b>الموافقة وجودة الرقم:</b> أرسل لمدعوّين معروفين فقط وراقب التقييم لتفادي الحظر.</li>
+      <li><b>SITE_URL صحيح + HTTPS</b> شرط لعمل الروابط والتحقق من توقيع الـwebhook.</li>
     </ul>
   </section>
 
   <footer>
-    elzant.com — دليل ربط الواتساب · كل الإعدادات والأسرار تُدار من لوحة الأدمن (بلا ملفات بيئة).
+    elzant.com — دليل ربط واتساب عبر Twilio · كل الإعدادات والأسرار تُدار من لوحة الأدمن (بلا ملفات بيئة).
   </footer>
 </div>
 

@@ -4,7 +4,7 @@ from django.utils import timezone
 from .forms import GreetingForm
 from .imaging import ImageError, process_image
 from .models import Greeting, GreetingSuggestion, WeddingGuest
-from .utils import country_from_request, flag_from_code, get_client_ip
+from .utils import country_from_request, flag_from_code, get_client_ip, has_arabic
 
 
 # Spam defenses are: CSRF, the hidden honeypot, model/form length limits, and
@@ -30,9 +30,12 @@ def home(request):
                     form.add_error("photo", str(exc))
             if not form.errors:
                 greeting = form.save(commit=False)
-                # Post-moderation: publish immediately; the admin can hide later.
-                greeting.status = Greeting.Status.APPROVED
-                greeting.approved_at = timezone.now()
+                # Post-moderation for Arabic greetings (publish immediately); hold
+                # entirely non-Arabic ones for review — spam here is almost always
+                # non-Arabic. Links are already rejected by the form.
+                is_ar = has_arabic(greeting.message)
+                greeting.status = Greeting.Status.APPROVED if is_ar else Greeting.Status.HELD
+                greeting.approved_at = timezone.now() if is_ar else None
                 greeting.ip_address = get_client_ip(request)
                 # Visitor country → flag on the wall (best-effort; never blocks the save).
                 if vcode:

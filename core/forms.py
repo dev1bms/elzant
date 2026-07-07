@@ -2,6 +2,7 @@ from django import forms
 
 from .imaging import ImageError, validate_upload
 from .models import Greeting
+from .utils import contains_link
 
 _FIELD_CLASS = "field"  # styled by the design system (tailwind/input.css)
 
@@ -61,3 +62,16 @@ class GreetingForm(forms.ModelForm):
             except ImageError as exc:
                 raise forms.ValidationError(str(exc))
         return f
+
+    # ---- Anti-spam: no links (a wedding greeting never needs a URL) ----
+    def clean_name(self):
+        name = (self.cleaned_data.get("name") or "").strip()
+        if contains_link(name):
+            raise forms.ValidationError("لا يُسمح بإضافة روابط في الاسم.")
+        return name
+
+    def clean_message(self):
+        msg = (self.cleaned_data.get("message") or "").strip()
+        if contains_link(msg):
+            raise forms.ValidationError("لا يُسمح بإضافة روابط في التهنئة — اكتب كلمة طيّبة للعروسين 🌿")
+        return msg

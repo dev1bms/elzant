@@ -16,3 +16,6 @@ Pillow==12.2.0
 # Inline SVG QR codes for invitation links in the family panel (core/qr.py).
 # Pure-Python; the panel degrades gracefully if it is ever missing.
 qrcode==8.0
+
+# WhatsApp notifications via Twilio (Content Templates + signed status callbacks).
+twilio>=9.0

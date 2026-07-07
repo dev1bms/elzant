@@ -279,6 +279,8 @@ class GreetingAdmin(admin.ModelAdmin):
     def photo_review_note(self, obj):
         if obj and obj.is_hidden:
             return mark_safe('<b style="color:#b45309">هذه التهنئة محظورة — لا تظهر على الجدار.</b>')
+        if obj and obj.is_held:
+            return mark_safe('<b style="color:#b45309">محجوزة للمراجعة (غير عربية) — لا تظهر على الجدار. استخدم «إظهار / إلغاء الحظر» لاعتمادها إن كانت سليمة.</b>')
         if obj and obj.has_photo:
             return mark_safe(
                 'التهنئة وصورتها ظاهرتان للعامة فور الإرسال. '
@@ -339,47 +341,39 @@ class InviterProfileAdmin(admin.ModelAdmin):
 
 
 class WhatsAppConfigForm(forms.ModelForm):
-    """Secrets are masked (never rendered back to the browser) and preserved when
-    left blank — so re-saving the page never wipes a stored secret."""
+    """The Twilio Auth Token is masked (never rendered back to the browser) and
+    preserved when left blank — re-saving the page never wipes a stored secret."""
 
     class Meta:
         model = WhatsAppConfig
         fields = "__all__"
-        _mask = {"autocomplete": "new-password",
-                 "placeholder": "••••••• (اتركه فارغاً للإبقاء على القيمة الحالية)"}
         widgets = {
-            "api_token": forms.PasswordInput(render_value=False, attrs=_mask),
-            "app_secret": forms.PasswordInput(render_value=False, attrs=_mask),
-            "verify_token": forms.PasswordInput(render_value=False, attrs=_mask),
+            "twilio_auth_token": forms.PasswordInput(
+                render_value=False,
+                attrs={"autocomplete": "new-password",
+                       "placeholder": "••••••• (اتركه فارغاً للإبقاء على القيمة الحالية)"},
+            ),
         }
 
-    def _keep_if_blank(self, field):
+    def clean_twilio_auth_token(self):
         # Blank submission means "unchanged" — keep whatever is already stored.
-        return self.cleaned_data.get(field) or getattr(self.instance, field, "")
-
-    def clean_api_token(self):
-        return self._keep_if_blank("api_token")
-
-    def clean_app_secret(self):
-        return self._keep_if_blank("app_secret")
-
-    def clean_verify_token(self):
-        return self._keep_if_blank("verify_token")
+        return self.cleaned_data.get("twilio_auth_token") or getattr(self.instance, "twilio_auth_token", "")
 
 
 @admin.register(WhatsAppConfig)
 class WhatsAppConfigAdmin(admin.ModelAdmin):
     form = WhatsAppConfigForm
-    list_display = ("__str__", "enabled", "default_template_name", "template_lang")
+    list_display = ("__str__", "enabled", "content_sid")
     readonly_fields = ("secrets_state", "test_send_button")
     fieldsets = (
         ("التشغيل", {"fields": ("enabled",)}),
-        ("Cloud API", {"fields": ("phone_number_id", "waba_id", "api_version")}),
-        ("القالب الافتراضي", {"fields": ("default_template_name", "template_lang", "default_country_code")}),
-        ("الأسرار (تُدار من هنا — مقنّعة، superuser فقط)",
-         {"fields": ("api_token", "app_secret", "verify_token", "secrets_state"),
-          "description": "تُخزَّن في قاعدة البيانات وتُعرَض مقنّعة. اترك الحقل فارغاً للإبقاء على قيمته الحالية. "
-                         "احمِ ملف قاعدة البيانات ونسخه الاحتياطية."}),
+        ("Twilio — الاعتماد والمُرسِل (مقنّع، superuser فقط)",
+         {"fields": ("twilio_account_sid", "twilio_auth_token", "twilio_from",
+                     "messaging_service_sid", "secrets_state"),
+          "description": "Account SID و Auth Token من لوحة Twilio. المُرسِل: رقم واتساب (مثل +14155238886) "
+                         "أو Messaging Service SID. الـAuth Token مقنّع — اتركه فارغاً للإبقاء على قيمته. "
+                         "احمِ قاعدة البيانات ونسخها الاحتياطية."}),
+        ("قالب الدعوة والأرقام", {"fields": ("content_sid", "default_country_code")}),
         ("الاختبار", {"fields": ("test_recipient", "test_send_button")}),
     )
 
@@ -395,15 +389,15 @@ class WhatsAppConfigAdmin(admin.ModelAdmin):
     def has_change_permission(self, request, obj=None):
         return request.user.is_superuser
 
-    @admin.display(description="حالة الأسرار")
+    @admin.display(description="حالة الاعتماد")
     def secrets_state(self, obj):
         if not obj or not obj.pk:
             return "—"
         def mark(v):
             return "مضبوط ✓" if v else "غير مضبوط ✗"
         return format_html(
-            "التوكن: {} · App Secret: {} · Verify Token: {}",
-            mark(obj.api_token), mark(obj.app_secret), mark(obj.verify_token),
+            "Account SID: {} · Auth Token: {} · Content SID: {}",
+            mark(obj.twilio_account_sid), mark(obj.twilio_auth_token), mark(obj.content_sid),
         )
 
     @admin.display(description="إرسال رسالة اختبار")

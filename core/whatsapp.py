@@ -1,31 +1,23 @@
-"""WhatsApp Cloud API integration — server-to-server, dependency-free.
+"""WhatsApp notifications via Twilio.
 
-Sends Meta-approved template messages via the Graph API and verifies inbound
-webhook signatures. Uses the standard-library ``urllib`` (no ``requests``
-dependency) with explicit timeouts and friendly error handling.
+Sends WhatsApp "Content Template" messages through Twilio and validates Twilio's
+status-callback signature. Credentials live in the admin (WhatsAppConfig) — the
+Auth Token is masked + superuser-only, never in .env, never logged, never
+returned to clients.
 
-SECURITY:
-- Secrets (token, app secret, verify token) are managed in the admin
-  (WhatsAppConfig) — masked and superuser-only — never returned to clients and
-  never logged verbatim. Protect the SQLite file and its backups accordingly.
-- ``verify_webhook_signature`` enforces HMAC-SHA256 over the raw body; unsigned
-  or mismatched requests are rejected.
-- ``send_invitation`` honours WhatsAppConfig.enabled: when off (safe mode) it
-  logs a simulated "would send" and performs NO network call — zero cost.
+``send_invitation`` honours ``WhatsAppConfig.enabled``: when off (safe mode) it
+logs a simulated "would send" and performs NO network call — zero cost. The
+``twilio`` package is imported lazily inside the send/validate helpers so importing
+this module (and running unrelated tests) never requires the dependency.
 """
 
-import hashlib
-import hmac
 import json
 import re
-import urllib.error
-import urllib.request
 from dataclasses import dataclass
 
+from django.conf import settings
+from django.urls import reverse
 from django.utils import timezone
-
-GRAPH_BASE = "https://graph.facebook.com"
-REQUEST_TIMEOUT = 15  # seconds — every network call is bounded
 
 
 class WhatsAppError(Exception):
@@ -36,12 +28,12 @@ class WhatsAppError(Exception):
 class SendResult:
     ok: bool
     message_id: str = ""
-    simulated: bool = False   # True when safe-mode (enabled=False) — no real send
+    simulated: bool = False   # True in safe-mode (enabled=False) — no real send
     error: str = ""
 
 
 # --------------------------------------------------------------------------- #
-# Phone normalization → E.164 without the leading "+"
+# Phone helpers
 # --------------------------------------------------------------------------- #
 def normalize_phone(raw, default_cc="20"):
     """Return an E.164 number (digits only, no ``+``) or ``None`` if invalid.
@@ -75,117 +67,121 @@ def normalize_phone(raw, default_cc="20"):
     return digits
 
 
+def to_whatsapp_address(e164):
+    """Twilio WhatsApp address: ``whatsapp:+<digits>`` (or "" for empty input)."""
+    digits = re.sub(r"\D", "", str(e164 or ""))
+    return f"whatsapp:+{digits}" if digits else ""
+
+
+def _site_base():
+    return (getattr(settings, "SITE_URL", "") or "").rstrip("/")
+
+
+def status_callback_url():
+    """Absolute URL Twilio posts delivery/read status to (must match SITE_URL)."""
+    base = _site_base()
+    return base + reverse("twilio_status") if base else ""
+
+
+def invitation_url(guest):
+    base = _site_base()
+    return base + reverse("invitation", args=[guest.invitation_token]) if base else ""
+
+
+def build_invitation_variables(guest):
+    """Content variables for the invitation template:
+    ``{{1}}`` = guest name, ``{{2}}`` = the guest's personal invitation link."""
+    return {"1": guest.full_name or "", "2": invitation_url(guest)}
+
+
 # --------------------------------------------------------------------------- #
-# Webhook signature verification (HMAC-SHA256 over the raw body)
+# Low-level Twilio send
 # --------------------------------------------------------------------------- #
-def verify_webhook_signature(request):
-    """True iff X-Hub-Signature-256 matches HMAC-SHA256(app_secret, raw_body).
+def _twilio_client(config):
+    from twilio.rest import Client  # lazy import — only needed for a real send
 
-    Rejects (False) when the app secret is unset or the header is missing/malformed
-    so an unsigned request can never be treated as authentic.
-    """
-    from .models import WhatsAppConfig
-    secret = (WhatsAppConfig.get().app_secret or "").encode()
-    if not secret:
-        return False
-    header = request.META.get("HTTP_X_HUB_SIGNATURE_256", "")
-    if not header.startswith("sha256="):
-        return False
-    sent = header.split("=", 1)[1].strip()
-    expected = hmac.new(secret, request.body, hashlib.sha256).hexdigest()
-    return hmac.compare_digest(sent, expected)
+    if not (config.twilio_account_sid and config.twilio_auth_token):
+        raise WhatsAppError("إعدادات Twilio ناقصة (Account SID أو Auth Token).")
+    return Client(config.twilio_account_sid, config.twilio_auth_token)
 
 
-# --------------------------------------------------------------------------- #
-# Low-level Graph API template send
-# --------------------------------------------------------------------------- #
-def _graph_url(phone_number_id, version="v21.0"):
-    return f"{GRAPH_BASE}/{version or 'v21.0'}/{phone_number_id}/messages"
-
-
-def send_template(to_e164, template_name, lang, components, *, phone_number_id, token, api_version="v21.0"):
-    """POST a template message to the Cloud API. Returns the wa_message_id.
+def send_content_message(to_e164, content_sid, variables, *, config):
+    """Send a Twilio WhatsApp Content Template message. Returns the message SID.
 
     Raises WhatsAppError with a friendly, secret-free message on any failure.
     """
-    if not (token and phone_number_id):
-        raise WhatsAppError("إعدادات واتساب ناقصة (التوكن أو Phone Number ID).")
-    payload = {
-        "messaging_product": "whatsapp",
-        "recipient_type": "individual",
-        "to": to_e164,
-        "type": "template",
-        "template": {
-            "name": template_name,
-            "language": {"code": lang or "ar"},
-            "components": components or [],
-        },
+    from twilio.base.exceptions import TwilioRestException
+
+    if not content_sid:
+        raise WhatsAppError("لا يوجد Content Template SID مُعرَّف في الإعدادات.")
+    to = to_whatsapp_address(to_e164)
+    if not to:
+        raise WhatsAppError("رقم المُستقبِل غير صالح.")
+
+    kwargs = {
+        "to": to,
+        "content_sid": content_sid,
+        "content_variables": json.dumps(variables or {}),
     }
-    data = json.dumps(payload).encode("utf-8")
-    req = urllib.request.Request(
-        _graph_url(phone_number_id, api_version),
-        data=data,
-        method="POST",
-        headers={
-            "Authorization": f"Bearer {token}",
-            "Content-Type": "application/json",
-        },
-    )
+    if config.messaging_service_sid:
+        kwargs["messaging_service_sid"] = config.messaging_service_sid
+    elif config.twilio_from:
+        kwargs["from_"] = to_whatsapp_address(config.twilio_from)
+    else:
+        raise WhatsAppError("لا يوجد مُرسِل (رقم واتساب أو Messaging Service) في الإعدادات.")
+
+    callback = status_callback_url()
+    if callback:
+        kwargs["status_callback"] = callback
+
+    client = _twilio_client(config)
     try:
-        with urllib.request.urlopen(req, timeout=REQUEST_TIMEOUT) as resp:
-            body = json.loads(resp.read().decode("utf-8") or "{}")
-    except urllib.error.HTTPError as exc:
-        raise WhatsAppError(_graph_error_message(exc)) from exc
-    except urllib.error.URLError as exc:
-        raise WhatsAppError(f"تعذّر الاتصال بخدمة واتساب: {exc.reason}") from exc
-    except (ValueError, TimeoutError) as exc:  # bad JSON / socket timeout
-        raise WhatsAppError(f"استجابة غير متوقّعة من واتساب: {exc}") from exc
+        message = client.messages.create(**kwargs)
+    except TwilioRestException as exc:
+        raise WhatsAppError(f"خطأ من Twilio ({exc.code}): {exc.msg}") from exc
+    except Exception as exc:  # noqa: BLE001 — network/other, keep it friendly
+        raise WhatsAppError(f"تعذّر الاتصال بـ Twilio: {exc}") from exc
 
-    messages = body.get("messages") or []
-    if not messages or not messages[0].get("id"):
-        raise WhatsAppError("لم تُعد خدمة واتساب معرّف رسالة.")
-    return messages[0]["id"]
-
-
-def _graph_error_message(http_error):
-    """Extract Meta's error text from an HTTPError body (no secrets involved)."""
-    try:
-        body = json.loads(http_error.read().decode("utf-8") or "{}")
-        err = body.get("error") or {}
-        msg = err.get("message") or ""
-        code = err.get("code")
-        return f"خطأ من واتساب ({code}): {msg}" if msg else f"خطأ HTTP {http_error.code} من واتساب."
-    except Exception:  # noqa: BLE001 — never let error parsing raise
-        return f"خطأ HTTP {http_error.code} من واتساب."
+    if not getattr(message, "sid", ""):
+        raise WhatsAppError("لم تُعد Twilio معرّف رسالة.")
+    return message.sid
 
 
 # --------------------------------------------------------------------------- #
-# Orchestration — build components, honour safe mode, log, update the guest
+# Status webhook signature validation
 # --------------------------------------------------------------------------- #
-def build_invitation_components(guest_name, token):
-    """Body {{1}} = guest name; dynamic URL button {{1}} = invitation token.
-
-    Matches the Utility template in GOAL §6.3 (base URL https://elzant.com/i/ +
-    the token). The button param must be the token only, not the full URL.
+def validate_twilio_request(request):
+    """True iff X-Twilio-Signature matches (RequestValidator over the configured
+    callback URL + POST params). Uses SITE_URL + path — not build_absolute_uri —
+    so an SSL-terminating proxy (Cloudflare) doesn't break validation.
     """
-    return [
-        {"type": "body", "parameters": [{"type": "text", "text": guest_name or ""}]},
-        {
-            "type": "button",
-            "sub_type": "url",
-            "index": "0",
-            "parameters": [{"type": "text", "text": token}],
-        },
-    ]
+    from .models import WhatsAppConfig
+
+    token = WhatsAppConfig.get().twilio_auth_token
+    if not token:
+        return False
+    from twilio.request_validator import RequestValidator
+
+    signature = request.META.get("HTTP_X_TWILIO_SIGNATURE", "")
+    base = _site_base()
+    url = (base + request.path) if base else request.build_absolute_uri()
+    params = request.POST.dict()
+    try:
+        return RequestValidator(token).validate(url, params, signature)
+    except Exception:  # noqa: BLE001 — never let validation raise
+        return False
 
 
-def send_invitation(guest, *, sender=None, template_name=None, force=False):
-    """Send (or safe-mode simulate) the invitation template to a guest.
+# --------------------------------------------------------------------------- #
+# Orchestration — honour safe mode, log, update the guest
+# --------------------------------------------------------------------------- #
+def send_invitation(guest, *, sender=None, force=False):
+    """Send (or safe-mode simulate) the invitation Content Template to a guest.
 
-    Reads WhatsAppConfig for the phone_number_id / default template / enabled
-    flag, builds the components from the guest, writes a MessageLog, and updates
-    the guest's WhatsApp tracking fields. Returns a SendResult (never raises for
-    an ordinary send failure — the failure is captured in the result + log).
+    Reads WhatsAppConfig for the content SID / sender / enabled flag, writes a
+    MessageLog, and updates the guest's WhatsApp tracking fields. Returns a
+    SendResult (never raises for an ordinary send failure — captured in the
+    result + log).
     """
     from .models import MessageLog, WeddingGuest, WhatsAppConfig, WhatsAppStatus
 
@@ -197,43 +193,32 @@ def send_invitation(guest, *, sender=None, template_name=None, force=False):
                                   error=result.error)
         return result
 
-    tpl = template_name or config.default_template_name
-    if not tpl:
-        result = SendResult(ok=False, error="لا يوجد قالب واتساب مُعرَّف في الإعدادات.")
-        MessageLog.objects.create(guest=guest, sender=sender, status=WhatsAppStatus.FAILED,
-                                  error=result.error, template_name="")
-        return result
-
-    components = build_invitation_components(guest.full_name, guest.invitation_token)
     now = timezone.now()
+    variables = build_invitation_variables(guest)
 
     # Safe mode: log the intent, no network call, no cost.
     if not config.enabled:
         MessageLog.objects.create(
-            guest=guest, sender=sender, template_name=tpl,
-            status=WhatsAppStatus.QUEUED, error="", payload={"simulated": True, "to": to},
+            guest=guest, sender=sender, template_name=config.content_sid,
+            status=WhatsAppStatus.QUEUED, error="",
+            payload={"simulated": True, "to": to, "vars": variables},
         )
         _touch_sent(guest, WhatsAppStatus.QUEUED, message_id="", now=now)
         return SendResult(ok=True, simulated=True)
 
     try:
-        message_id = send_template(
-            to, tpl, config.template_lang, components,
-            phone_number_id=config.phone_number_id,
-            token=config.api_token,
-            api_version=config.api_version,
-        )
+        sid = send_content_message(to, config.content_sid, variables, config=config)
     except WhatsAppError as exc:
-        MessageLog.objects.create(guest=guest, sender=sender, template_name=tpl,
+        MessageLog.objects.create(guest=guest, sender=sender, template_name=config.content_sid,
                                   status=WhatsAppStatus.FAILED, error=str(exc))
         guest.wa_status = WhatsAppStatus.FAILED
         guest.save(update_fields=["wa_status", "updated_at"])
         return SendResult(ok=False, error=str(exc))
 
-    MessageLog.objects.create(guest=guest, sender=sender, template_name=tpl,
-                              wa_message_id=message_id, status=WhatsAppStatus.SENT)
-    _touch_sent(guest, WhatsAppStatus.SENT, message_id=message_id, now=now)
-    return SendResult(ok=True, message_id=message_id)
+    MessageLog.objects.create(guest=guest, sender=sender, template_name=config.content_sid,
+                              wa_message_id=sid, status=WhatsAppStatus.SENT)
+    _touch_sent(guest, WhatsAppStatus.SENT, message_id=sid, now=now)
+    return SendResult(ok=True, message_id=sid)
 
 
 def _touch_sent(guest, wa_status, *, message_id, now):
@@ -255,7 +240,7 @@ def _touch_sent(guest, wa_status, *, message_id, now):
 
 
 def send_test_message(recipient_e164):
-    """Send a one-off test of the default template to an arbitrary recipient.
+    """Send a one-off test of the invitation Content Template to any recipient.
 
     Used by the admin "test send" button. Honours safe mode. Returns SendResult.
     """
@@ -265,18 +250,13 @@ def send_test_message(recipient_e164):
     to = normalize_phone(recipient_e164, config.default_country_code)
     if not to:
         return SendResult(ok=False, error="رقم الاختبار غير صالح.")
-    if not config.default_template_name:
-        return SendResult(ok=False, error="لا يوجد قالب افتراضي مُعرَّف.")
     if not config.enabled:
         return SendResult(ok=True, simulated=True)
-    components = build_invitation_components("اختبار", "test-token")
+    if not config.content_sid:
+        return SendResult(ok=False, error="لا يوجد Content Template SID مُعرَّف.")
+    variables = {"1": "اختبار", "2": _site_base() or "https://elzant.com"}
     try:
-        mid = send_template(
-            to, config.default_template_name, config.template_lang, components,
-            phone_number_id=config.phone_number_id,
-            token=config.api_token,
-            api_version=config.api_version,
-        )
+        sid = send_content_message(to, config.content_sid, variables, config=config)
     except WhatsAppError as exc:
         return SendResult(ok=False, error=str(exc))
-    return SendResult(ok=True, message_id=mid)
+    return SendResult(ok=True, message_id=sid)

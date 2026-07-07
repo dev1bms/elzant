@@ -25,7 +25,7 @@ class AccessControlTests(TestCase):
     def setUp(self):
         cfg = WhatsAppConfig.get()
         cfg.enabled = False
-        cfg.default_template_name = "invite_ar"
+        cfg.content_sid = "HXtest"
         cfg.save()
         self.groom = _make_inviter("groom_side", "أبو العريس", "groom")
         self.bride = _make_inviter("bride_side", "أبو العروس", "bride")
@@ -81,7 +81,7 @@ class AddAndDedupeTests(TestCase):
     def setUp(self):
         cfg = WhatsAppConfig.get()
         cfg.enabled = False
-        cfg.default_template_name = "invite_ar"
+        cfg.content_sid = "HXtest"
         cfg.default_country_code = "20"
         cfg.save()
         self.groom = _make_inviter("groom_side", "أبو العريس", "groom")

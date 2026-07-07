@@ -16,6 +16,44 @@ def render_message(template, mapping):
     )
 
 
+# --------------------------------------------------------------------------- #
+# Greeting spam heuristics — this is an Arabic wedding wall, so links and
+# entirely non-Arabic messages are strong spam signals. Used by GreetingForm
+# (reject links), the home view (hold non-Arabic for review) and the
+# purge_spam_greetings management command (clean up existing spam).
+# --------------------------------------------------------------------------- #
+_ARABIC_RE = re.compile(r"[؀-ۿݐ-ݿࢠ-ࣿﭐ-﷿ﹰ-﻿]")
+_LINK_RE = re.compile(
+    r"(https?://|www\.|t\.me/|bit\.ly|"
+    r"\b[a-z0-9][a-z0-9-]*\.(?:com|net|org|io|ru|info|xyz|biz|co|me|link|shop|"
+    r"online|site|club|top|store|app|dev|tech|live)\b)",
+    re.IGNORECASE,
+)
+SPAM_KEYWORDS = (
+    "googlesearchindex", "search index", "seo", "backlink", "ranking",
+    "boost your", "double your", "web design", "website leads", " leads",
+    "crypto", "bitcoin", "forex", "casino", "viagra", "loan",
+)
+
+
+def has_arabic(text):
+    """True if the text contains at least one Arabic letter."""
+    return bool(_ARABIC_RE.search(text or ""))
+
+
+def contains_link(text):
+    """True if the text looks like it contains a URL / domain / messenger link."""
+    return bool(_LINK_RE.search(text or ""))
+
+
+def looks_like_spam(*texts):
+    """High-precision spam signal (for cleanup): a link or a known spam keyword."""
+    blob = " ".join(t for t in texts if t).lower()
+    if contains_link(blob):
+        return True
+    return any(kw in blob for kw in SPAM_KEYWORDS)
+
+
 # Cloudflare returns these for anonymous proxies / Tor / unknown — not real countries.
 _NON_COUNTRY = {"XX", "T1", "AP", "A1", "A2", "O1"}
 
