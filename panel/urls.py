@@ -14,7 +14,9 @@ urlpatterns = [
     path("", views.dashboard, name="dashboard"),
     path("guests/", views.guests_list, name="guests"),
     path("guests/add/", views.guest_add, name="guest_add"),
+    path("guests/suggest/", views.guest_suggest, name="guest_suggest"),
     path("guests/<int:guest_id>/", views.guest_detail, name="guest_detail"),
     path("guests/<int:guest_id>/resend/", views.guest_resend, name="guest_resend"),
+    path("activity/", views.activity, name="activity"),
     path("templates/", views.templates_list, name="templates"),
 ]

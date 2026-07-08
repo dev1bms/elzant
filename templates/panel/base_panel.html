@@ -41,14 +41,27 @@
   </main>
 
   {% if user.is_authenticated %}
-  <nav class="fixed inset-x-0 bottom-0 z-30 border-t border-sand/70 bg-porcelain-50/95 backdrop-blur">
+  {% with u=request.resolver_match.url_name %}
+  {% if u != 'guest_add' and u != 'guest_resend' %}
+  <a href="{% url 'panel:guest_add' %}" class="fab">＋ دعوة</a>
+  {% endif %}
+  <nav class="fixed inset-x-0 bottom-0 z-30 border-t border-sand/70 bg-porcelain-50/95 backdrop-blur" style="padding-bottom:env(safe-area-inset-bottom)">
     <div class="mx-auto flex max-w-3xl items-stretch justify-around">
-      <a href="{% url 'panel:dashboard' %}" class="flex-1 py-3 text-center text-sm text-ink-soft hover:text-wine-600">اللوحة</a>
-      <a href="{% url 'panel:guests' %}" class="flex-1 py-3 text-center text-sm text-ink-soft hover:text-wine-600">المدعوون</a>
-      <a href="{% url 'panel:templates' %}" class="flex-1 py-3 text-center text-sm text-ink-soft hover:text-wine-600">القوالب</a>
-      <a href="{% url 'panel:guest_add' %}" class="flex-1 py-3 text-center text-sm font-semibold text-wine-600">+ دعوة</a>
+      <a href="{% url 'panel:dashboard' %}" class="flex flex-1 flex-col items-center gap-1 py-2.5 text-[0.68rem] {% if u == 'dashboard' %}font-bold text-wine-600{% else %}text-ink-soft{% endif %}">
+        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v10h14V10"/></svg>اللوحة
+      </a>
+      <a href="{% url 'panel:guests' %}" class="flex flex-1 flex-col items-center gap-1 py-2.5 text-[0.68rem] {% if u == 'guests' or u == 'guest_detail' %}font-bold text-wine-600{% else %}text-ink-soft{% endif %}">
+        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 20v-1.5A3.5 3.5 0 0 0 12.5 15h-5A3.5 3.5 0 0 0 4 18.5V20"/><circle cx="10" cy="8" r="3.2"/><path d="M18.5 20v-1.5a3.5 3.5 0 0 0-2.5-3.35M15.5 5.2a3.2 3.2 0 0 1 0 5.6"/></svg>المدعوون
+      </a>
+      <a href="{% url 'panel:activity' %}" class="flex flex-1 flex-col items-center gap-1 py-2.5 text-[0.68rem] {% if u == 'activity' %}font-bold text-wine-600{% else %}text-ink-soft{% endif %}">
+        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 4 3 11l6 2.5L11.5 20 21 4z"/><path d="M9 13.5 21 4"/></svg>الرسائل
+      </a>
+      <a href="{% url 'panel:templates' %}" class="flex flex-1 flex-col items-center gap-1 py-2.5 text-[0.68rem] {% if u == 'templates' %}font-bold text-wine-600{% else %}text-ink-soft{% endif %}">
+        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M8 13h8M8 17h5"/></svg>القوالب
+      </a>
     </div>
   </nav>
+  {% endwith %}
   {% endif %}
 
   {% block extra_js %}{% endblock %}

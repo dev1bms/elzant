@@ -1,0 +1,89 @@
+{% extends "panel/base_panel.html" %}
+
+{% block title %}الرسائل · سجل الإرسال{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-md pb-4">
+  <div class="mb-1 flex items-end justify-between">
+    <h1 class="text-2xl font-bold text-ink">سجل الرسائل</h1>
+    <span class="text-sm text-cloud"><span id="act-count" class="num">{{ count }}</span> رسالة</span>
+  </div>
+  <p class="mb-3 text-sm text-ink-soft">كل محاولات إرسال الدعوات — الأحدث أولاً.</p>
+
+  <div class="sticky top-14 z-20 -mx-4 mb-3 border-b border-sand/50 bg-porcelain/95 px-4 pb-2 pt-2 backdrop-blur">
+    <div class="scroll-x flex gap-1.5">
+      <button type="button" class="fchip" data-filter="all" aria-pressed="true">الكل</button>
+      <button type="button" class="fchip" data-filter="sent" aria-pressed="false">أُرسلت</button>
+      <button type="button" class="fchip" data-filter="simulated" aria-pressed="false">تجريبي</button>
+      <button type="button" class="fchip" data-filter="failed" aria-pressed="false">فشل</button>
+    </div>
+  </div>
+
+  {% if logs %}
+  <div id="act-list" class="space-y-2">
+    {% for log in logs %}
+    <div class="act-row rounded-2xl border border-sand/70 bg-porcelain-50 px-4 py-3" data-kind="{{ log.kind }}">
+      <div class="flex items-start justify-between gap-3">
+        <div class="min-w-0">
+          {% if log.guest %}
+            {% if view_all or log.guest.invited_by_id == request.user.id %}
+            <a href="{% url 'panel:guest_detail' log.guest.id %}" class="block truncate font-semibold text-ink hover:text-wine-600">{{ log.guest.full_name }}</a>
+            {% else %}
+            <div class="truncate font-semibold text-ink">{{ log.guest.full_name }}</div>
+            {% endif %}
+          {% else %}
+          <div class="truncate font-semibold text-cloud">— مدعوّ محذوف</div>
+          {% endif %}
+          <div class="num mt-0.5 text-xs text-cloud" dir="ltr">{{ log.created_at|date:"Y/m/d · H:i" }}</div>
+        </div>
+        <span class="whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-semibold
+          {% if log.kind == 'sent' %}bg-olive/12 text-olive
+          {% elif log.kind == 'simulated' %}bg-gold/15 text-gold
+          {% elif log.kind == 'failed' %}bg-blush text-wine-700
+          {% else %}bg-sand/60 text-ink-soft{% endif %}">
+          {% if log.kind == 'sent' %}أُرسلت{% elif log.kind == 'simulated' %}تجريبي{% elif log.kind == 'failed' %}فشل{% else %}بالانتظار{% endif %}
+        </span>
+      </div>
+      {% if view_all and log.sender %}
+      <div class="mt-1 text-[0.65rem] text-cloud">أرسلها: {% if log.sender.inviter_profile %}{{ log.sender.inviter_profile.display_name }}{% else %}{{ log.sender.username }}{% endif %}</div>
+      {% endif %}
+      {% if log.kind == 'failed' and log.error %}
+      <div class="mt-2 rounded-lg bg-blush px-2.5 py-1.5 text-xs leading-relaxed text-wine-700">{{ log.error }}</div>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  <div id="act-empty" class="panel p-8 text-center text-ink-soft" style="display:none">لا رسائل بهذه الحالة.</div>
+  {% else %}
+  <div class="panel p-8 text-center text-ink-soft">لا توجد رسائل بعد — ستظهر هنا بمجرّد إرسال أول دعوة.</div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Instant status filtering over the send-activity feed (already newest-first).
+(function () {
+  var list = document.getElementById("act-list");
+  if (!list) return;
+  var rows = Array.prototype.slice.call(list.querySelectorAll(".act-row"));
+  var cnt = document.getElementById("act-count");
+  var empty = document.getElementById("act-empty");
+  document.querySelectorAll(".fchip").forEach(function (b) {
+    b.addEventListener("click", function () {
+      var f = b.dataset.filter, shown = 0;
+      document.querySelectorAll(".fchip").forEach(function (x) {
+        x.setAttribute("aria-pressed", x === b ? "true" : "false");
+      });
+      rows.forEach(function (r) {
+        var s = f === "all" || r.dataset.kind === f;
+        r.style.display = s ? "" : "none";
+        if (s) shown++;
+      });
+      if (cnt) cnt.textContent = shown;
+      if (empty) empty.style.display = shown ? "none" : "";
+    });
+  });
+})();
+</script>
+{% endblock %}

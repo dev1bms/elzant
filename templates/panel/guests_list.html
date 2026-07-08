@@ -3,25 +3,138 @@
 {% block title %}المدعوون{% endblock %}
 
 {% block content %}
-<div class="mb-4 flex items-center justify-between">
-  <h1 class="text-2xl font-bold text-ink">المدعوون</h1>
-  <a href="{% url 'panel:guest_add' %}" class="btn btn-primary px-5 py-2.5 text-sm">+ دعوة</a>
-</div>
+<div class="mx-auto max-w-md pb-4">
+  <div class="mb-3 flex items-end justify-between">
+    <h1 class="text-2xl font-bold text-ink">المدعوون</h1>
+    <span class="text-sm text-cloud"><span id="visible-count" class="num">{{ count }}</span> من <span class="num">{{ count }}</span></span>
+  </div>
 
-{% if view_all %}
-<div class="mb-4 inline-flex rounded-full border border-sand bg-porcelain-50 p-1 text-sm">
-  <a href="?scope=mine" class="rounded-full px-4 py-1.5 {% if scope == 'mine' %}bg-wine-500 text-porcelain-50{% else %}text-ink-soft{% endif %}">دعواتي</a>
-  <a href="?scope=all" class="rounded-full px-4 py-1.5 {% if scope == 'all' %}bg-wine-500 text-porcelain-50{% else %}text-ink-soft{% endif %}">الكل</a>
-</div>
-{% endif %}
+  {% if view_all %}
+  <div class="mb-3 inline-flex rounded-full border border-sand bg-porcelain-50 p-1 text-sm">
+    <a href="?scope=mine" class="rounded-full px-4 py-1.5 {% if scope == 'mine' %}bg-wine-500 text-porcelain-50{% else %}text-ink-soft{% endif %}">دعواتي</a>
+    <a href="?scope=all" class="rounded-full px-4 py-1.5 {% if scope == 'all' %}bg-wine-500 text-porcelain-50{% else %}text-ink-soft{% endif %}">الكل</a>
+  </div>
+  {% endif %}
 
-<div class="mb-4">{% include "panel/partials/_funnel.html" with c=counters title="ملخّص القائمة" %}</div>
+  {# ---- sticky search + filters + sort ---- #}
+  <div class="sticky top-14 z-20 -mx-4 mb-3 border-b border-sand/50 bg-porcelain/95 px-4 pb-2 pt-1 backdrop-blur">
+    <div class="relative">
+      <svg class="pointer-events-none absolute top-1/2 h-4 w-4 -translate-y-1/2 text-cloud" style="inset-inline-start:0.9rem" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      <input id="q" type="search" inputmode="search" autocomplete="off" enterkeyhint="search"
+             placeholder="ابحث بالاسم أو الرقم…" class="field !py-2.5" style="padding-inline-start:2.6rem">
+    </div>
+    <div class="scroll-x mt-2 flex gap-1.5">
+      <button type="button" class="fchip" data-filter="all" aria-pressed="true">الكل</button>
+      <button type="button" class="fchip" data-filter="not_sent" aria-pressed="false">لم تُرسل</button>
+      <button type="button" class="fchip" data-filter="sent" aria-pressed="false">أُرسلت</button>
+      <button type="button" class="fchip" data-filter="delivered" aria-pressed="false">سُلّمت</button>
+      <button type="button" class="fchip" data-filter="read" aria-pressed="false">قُرئت</button>
+      <button type="button" class="fchip" data-filter="opened" aria-pressed="false">فُتح الرابط</button>
+      <button type="button" class="fchip" data-filter="greeted" aria-pressed="false">هنّأ</button>
+      <button type="button" class="fchip" data-filter="attending" aria-pressed="false">حاضر</button>
+      <button type="button" class="fchip" data-filter="declined" aria-pressed="false">معتذر</button>
+      <button type="button" class="fchip" data-filter="failed" aria-pressed="false">فشل</button>
+    </div>
+    <div class="mt-2 flex items-center justify-end gap-3 text-xs text-cloud">
+      <span>الترتيب:</span>
+      <button type="button" id="sort-recent" class="font-bold text-wine-600">الأحدث</button>
+      <button type="button" id="sort-name" class="text-cloud">الاسم</button>
+    </div>
+  </div>
 
-{% if guests %}
-<div class="space-y-2">
-  {% for g in guests %}{% include "panel/partials/_guest_row.html" with g=g show_inviter=view_all %}{% endfor %}
+  <div class="mb-3">{% include "panel/partials/_funnel.html" with c=counters title="ملخّص القائمة" %}</div>
+
+  {% if guests %}
+  <div id="guest-list" class="space-y-2">
+    {% for g in guests %}
+    <a href="{% url 'panel:guest_detail' g.id %}"
+       class="g-card flex items-center justify-between gap-3 rounded-2xl border border-sand/70 bg-porcelain-50 px-4 py-3 transition hover:border-wine-500/40 hover:shadow-sm"
+       data-name="{{ g.full_name|lower }}" data-phone="{{ g.digits }}"
+       data-tokens="{{ g.tokens }}" data-ts="{{ g.last_sent_at|default:g.created_at|date:'U' }}">
+      <div class="min-w-0">
+        <div class="truncate font-semibold text-ink">{{ g.full_name }}</div>
+        <div class="num text-xs text-cloud" dir="ltr">{{ g.phone_number }}</div>
+        {% if view_all and g.invited_by %}
+        <div class="mt-0.5 text-[0.65rem] text-cloud">أضافه: {% if g.invited_by.inviter_profile %}{{ g.invited_by.inviter_profile.display_name }}{% else %}{{ g.invited_by.username }}{% endif %}</div>
+        {% endif %}
+      </div>
+      {% include "panel/partials/_wa_badge.html" with g=g %}
+    </a>
+    {% endfor %}
+  </div>
+  <div id="no-results" class="panel p-8 text-center text-ink-soft" style="display:none">لا نتائج مطابقة لبحثك.</div>
+  {% else %}
+  <div class="panel p-8 text-center text-ink-soft">
+    <p>لا يوجد مدعوون بعد.</p>
+    <a href="{% url 'panel:guest_add' %}" class="btn btn-primary mt-4 px-6 py-2.5 text-sm">أضف أول دعوة</a>
+  </div>
+  {% endif %}
 </div>
-{% else %}
-<div class="panel p-8 text-center text-ink-soft">لا يوجد مدعوون في هذه القائمة بعد.</div>
-{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Instant, reload-free search / status-filter / sort over the rendered guest cards.
+(function () {
+  var list = document.getElementById("guest-list");
+  if (!list) return;
+  var cards = Array.prototype.slice.call(list.querySelectorAll(".g-card"));
+  var q = document.getElementById("q");
+  var vcount = document.getElementById("visible-count");
+  var noRes = document.getElementById("no-results");
+  var filter = "all";
+
+  function norm(s) {
+    // Arabic-friendly folding: hamza/alef variants, ta-marbuta, alef-maqsura,
+    // and strip tashkeel/tatweel — so "احمد" matches "أحمد", "فاطمه" ↔ "فاطمة".
+    return String(s || "").replace(/[أإآ]/g, "ا").replace(/ى/g, "ي")
+      .replace(/ة/g, "ه").replace(/[ً-ْـ]/g, "");
+  }
+  function apply() {
+    var raw = (q ? q.value : "").trim().toLowerCase();
+    var term = norm(raw);
+    var digits = raw.replace(/\D/g, "");
+    var shown = 0;
+    cards.forEach(function (c) {
+      var okText = !term
+        || norm(c.dataset.name).indexOf(term) >= 0
+        || (digits && c.dataset.phone.indexOf(digits) >= 0);
+      var okFilter = filter === "all"
+        || (" " + c.dataset.tokens + " ").indexOf(" " + filter + " ") >= 0;
+      var show = okText && okFilter;
+      c.style.display = show ? "" : "none";
+      if (show) shown++;
+    });
+    if (vcount) vcount.textContent = shown;
+    if (noRes) noRes.style.display = shown ? "none" : "";
+  }
+
+  if (q) q.addEventListener("input", apply);
+  document.querySelectorAll(".fchip").forEach(function (b) {
+    b.addEventListener("click", function () {
+      filter = b.dataset.filter;
+      document.querySelectorAll(".fchip").forEach(function (x) {
+        x.setAttribute("aria-pressed", x === b ? "true" : "false");
+      });
+      apply();
+    });
+  });
+
+  function sortBy(mode) {
+    cards.slice().sort(function (a, b) {
+      if (mode === "name") return a.dataset.name.localeCompare(b.dataset.name, "ar");
+      return (parseInt(b.dataset.ts || "0", 10)) - (parseInt(a.dataset.ts || "0", 10));
+    }).forEach(function (c) { list.appendChild(c); });
+  }
+  var sr = document.getElementById("sort-recent"), sn = document.getElementById("sort-name");
+  if (sr) sr.addEventListener("click", function () {
+    sortBy("recent"); sr.className = "font-bold text-wine-600"; sn.className = "text-cloud";
+  });
+  if (sn) sn.addEventListener("click", function () {
+    sortBy("name"); sn.className = "font-bold text-wine-600"; sr.className = "text-cloud";
+  });
+  // Match the default-highlighted "الأحدث" on load so the order never jumps.
+  sortBy("recent");
+})();
+</script>
 {% endblock %}

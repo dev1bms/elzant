@@ -6,12 +6,18 @@ sends after an explicit confirm. Sending is delegated to core.whatsapp, which
 honours safe mode and writes the audit log + guest tracking fields.
 """
 
+import re
+
 from django.conf import settings
 from django.contrib import messages
 from django.db.models import Count, Q
+from django.http import JsonResponse
 from django.shortcuts import redirect, render
+from django.urls import reverse
 
-from core.models import WeddingGuest, WhatsAppConfig, WhatsAppStatus, WhatsAppTemplate
+from core.models import (
+    MessageLog, WeddingGuest, WhatsAppConfig, WhatsAppStatus, WhatsAppTemplate,
+)
 from core.qr import qr_svg
 from core.whatsapp import normalize_phone, send_invitation
 
@@ -130,17 +136,47 @@ def dashboard(request):
     return render(request, "panel/dashboard.html", ctx)
 
 
+def _guest_tokens(g):
+    """Space-separated status tokens for a guest card, so the list can be filtered
+    instantly client-side (no reload) by tapping a status chip."""
+    # "sent" means a real message actually left the system — safe-mode (queued)
+    # and failed attempts are NOT "sent", matching the guest-detail timeline.
+    t = ["sent" if g.wa_status in _SENT_PLUS else "not_sent"]
+    if g.wa_status in _DELIVERED_PLUS:
+        t.append("delivered")
+    if g.wa_status == WhatsAppStatus.READ:
+        t.append("read")
+    if g.last_opened_at:
+        t.append("opened")
+    if g.invitation_status == WeddingGuest.Status.GREETED:
+        t.append("greeted")
+    if g.wa_status == WhatsAppStatus.FAILED:
+        t.append("failed")
+    if g.rsvp == WeddingGuest.Rsvp.ATTENDING:
+        t.append("attending")
+    if g.rsvp == WeddingGuest.Rsvp.DECLINED:
+        t.append("declined")
+    return " ".join(t)
+
+
 @inviter_required
 def guests_list(request):
     scope = request.GET.get("scope", "mine")
     if scope == "all" and not can_view_all(request.user):
         scope = "mine"
-    qs = visible_guests(request.user, scope).order_by("full_name")
+    base = visible_guests(request.user, scope)
+    # Newest activity first (recently-sent, then recently-added). Search / status
+    # filter / re-sort all happen client-side for an instant, reload-free feel.
+    guests = list(base.order_by("-last_sent_at", "-created_at", "full_name"))
+    for g in guests:
+        g.tokens = _guest_tokens(g)
+        g.digits = re.sub(r"\D", "", (g.phone_number or "") + (g.phone_e164 or ""))
     return render(request, "panel/guests_list.html", {
-        "guests": qs,
+        "guests": guests,
         "scope": scope,
         "view_all": can_view_all(request.user),
-        "counters": _counters(qs),
+        "counters": _counters(base),
+        "count": len(guests),
     })
 
 
@@ -220,3 +256,63 @@ def templates_list(request):
         "templates": templates,
         "active_sid": WhatsAppConfig.get().content_sid,
     })
+
+
+@inviter_required
+def activity(request):
+    """Send-activity feed: every WhatsApp attempt, newest first, filterable by
+    status. A non-superuser sees only logs for their own guests / their own sends."""
+    logs = MessageLog.objects.select_related(
+        "guest", "sender", "sender__inviter_profile")
+    # Only genuine SEND attempts (written by send_invitation). Exclude the rows
+    # that _apply_status writes for every Twilio delivery/read callback
+    # (sender=None, no template) and the inbound-RSVP rows — otherwise the feed
+    # shows ~5 rows per message and mislabels delivered/read as "بالانتظار".
+    logs = logs.exclude(template_name="rsvp_inbound").exclude(
+        Q(sender__isnull=True) & Q(template_name=""))
+    if not can_view_all(request.user):
+        logs = logs.filter(Q(sender=request.user) | Q(guest__invited_by=request.user))
+    logs = list(logs.order_by("-created_at")[:200])
+    for lg in logs:
+        if lg.status == WhatsAppStatus.FAILED:
+            lg.kind = "failed"
+        elif lg.payload and lg.payload.get("simulated"):
+            lg.kind = "simulated"
+        elif lg.status == WhatsAppStatus.SENT:
+            lg.kind = "sent"
+        else:
+            lg.kind = "queued"
+    return render(request, "panel/activity.html", {
+        "logs": logs,
+        "count": len(logs),
+        "view_all": can_view_all(request.user),
+    })
+
+
+@inviter_required
+def guest_suggest(request):
+    """JSON autocomplete for the add-guest form: as the operator types a name or
+    number, suggest contacts they've already added (so they don't re-add someone
+    or can jump straight to that guest). Scoped to what the user may see."""
+    term = (request.GET.get("q") or "").strip()
+    if len(term) < 2:
+        return JsonResponse({"results": []})
+    scope = "all" if can_view_all(request.user) else "mine"
+    digits = re.sub(r"\D", "", term)
+    flt = Q(full_name__icontains=term)
+    if digits:
+        flt |= Q(phone_e164__contains=digits) | Q(phone_number__contains=digits)
+    results = []
+    for g in visible_guests(request.user, scope).filter(flt).order_by("full_name")[:6]:
+        by = ""
+        if g.invited_by:
+            prof = getattr(g.invited_by, "inviter_profile", None)
+            by = prof.display_name if prof else g.invited_by.username
+        results.append({
+            "name": g.full_name,
+            "phone": g.phone_number,
+            "by": by,
+            "mine": g.invited_by_id == request.user.id,
+            "url": reverse("panel:guest_detail", args=[g.id]),
+        })
+    return JsonResponse({"results": results})

@@ -7,19 +7,21 @@
   <h1 class="mb-1 text-2xl font-bold text-ink">دعوة جديدة</h1>
   <p class="mb-6 text-sm text-ink-soft">اكتب اسم المدعو ورقمه، وسنرسل له دعوته الخاصة عبر واتساب.</p>
 
-  <form method="post" class="panel space-y-5 p-6">
+  <form method="post" class="panel space-y-5 p-6" autocomplete="off">
     {% csrf_token %}
-    <div>
+    <div class="relative">
       <label class="mb-1 block text-sm text-ink-soft" for="{{ form.full_name.id_for_label }}">{{ form.full_name.label }}</label>
       {{ form.full_name }}
       {% for e in form.full_name.errors %}<p class="mt-1 text-xs text-wine-700">{{ e }}</p>{% endfor %}
+      <div id="ac-name" class="ac-menu" hidden></div>
     </div>
-    <div>
+    <div class="relative">
       <label class="mb-1 block text-sm text-ink-soft" for="{{ form.phone.id_for_label }}">{{ form.phone.label }}</label>
       {{ form.phone }}
       {% for e in form.phone.errors %}<p class="mt-1 text-xs text-wine-700">{{ e }}</p>{% endfor %}
       <p class="mt-1 text-xs text-cloud">الرمز الدولي الافتراضي: +{{ config.default_country_code }} (يمكن كتابة الرقم المحلي مباشرة).</p>
       <p id="phone-preview" class="mt-1.5 text-xs" style="display:none"></p>
+      <div id="ac-phone" class="ac-menu" hidden></div>
     </div>
     <button type="submit" class="btn btn-primary w-full">إرسال الدعوة</button>
   </form>
@@ -28,15 +30,13 @@
 
 {% block extra_js %}
 <script>
-// Live phone preview — mirrors core.whatsapp.normalize_phone so the operator sees
-// the exact E.164 number that will be messaged, before submitting. The server
-// re-validates on POST, so this is UX sugar, never the source of truth.
 (function () {
+  var CC = "{{ config.default_country_code|escapejs }}".replace(/\D/g, "");
+  var SUGGEST = "{% url 'panel:guest_suggest' %}";
+
+  // ---- Live E.164 preview (mirrors core.whatsapp.normalize_phone) ----
   var input = document.getElementById("id_phone");
   var out = document.getElementById("phone-preview");
-  if (!input || !out) return;
-  var CC = "{{ config.default_country_code|escapejs }}".replace(/\D/g, "");
-
   function normalize(raw) {
     var s = (raw || "").trim();
     if (!s) return null;
@@ -49,8 +49,8 @@
     if (!digits || digits.length < 8 || digits.length > 15) return null;
     return digits;
   }
-
-  function render() {
+  function renderPreview() {
+    if (!input || !out) return;
     if (!input.value.trim()) { out.style.display = "none"; return; }
     out.style.display = "";
     var e = normalize(input.value);
@@ -62,8 +62,44 @@
       out.textContent = "⚠ الرقم غير مكتمل أو غير صالح — تأكّد منه.";
     }
   }
-  input.addEventListener("input", render);
-  render();
+  if (input) { input.addEventListener("input", renderPreview); renderPreview(); }
+
+  // ---- Autocomplete: suggest already-added contacts (avoid duplicates) ----
+  function esc(s) {
+    return String(s == null ? "" : s).replace(/[&<>"']/g, function (m) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m];
+    });
+  }
+  function render(menu, results) {
+    if (!results.length) { menu.hidden = true; menu.innerHTML = ""; return; }
+    menu.innerHTML = results.map(function (r) {
+      var by = r.by ? " · أضافه " + esc(r.by) : "";
+      return '<a class="ac-item" href="' + esc(r.url) + '">'
+        + '<div class="font-semibold text-ink">' + esc(r.name) + '</div>'
+        + '<div class="num text-xs text-cloud" dir="ltr">' + esc(r.phone) + '</div>'
+        + '<div class="mt-0.5 text-[0.65rem] text-wine-600">مدعوّ سابقاً' + by + ' — اضغط للفتح</div>'
+        + '</a>';
+    }).join("");
+    menu.hidden = false;
+  }
+  function attach(el, menu) {
+    if (!el || !menu) return;
+    var timer;
+    el.addEventListener("input", function () {
+      clearTimeout(timer);
+      var v = el.value.trim();
+      if (v.length < 2) { menu.hidden = true; return; }
+      timer = setTimeout(function () {
+        fetch(SUGGEST + "?q=" + encodeURIComponent(v), { headers: { "X-Requested-With": "fetch" } })
+          .then(function (r) { return r.json(); })
+          .then(function (d) { render(menu, d.results || []); })
+          .catch(function () { menu.hidden = true; });
+      }, 250);
+    });
+    el.addEventListener("blur", function () { setTimeout(function () { menu.hidden = true; }, 200); });
+  }
+  attach(document.getElementById("id_full_name"), document.getElementById("ac-name"));
+  attach(input, document.getElementById("ac-phone"));
 })();
 </script>
 {% endblock %}
