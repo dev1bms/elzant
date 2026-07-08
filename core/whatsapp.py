@@ -108,7 +108,7 @@ def build_invitation_variables(guest):
         "1": guest.full_name or "ضيفنا الكريم",
         "2": location,
         "3": link,
-        "4": guest.invitation_token,  # one-tap RSVP button URLs: r/y/{{4}}, r/n/{{4}}
+        "4": guest.invitation_token,  # RSVP button URLs: i/confirm/{{4}}, i/decline/{{4}}
     }
 
 
@@ -276,6 +276,7 @@ def send_test_message(recipient_e164):
         "1": "اختبار",
         "2": "https://maps.google.com/",
         "3": _site_base() or "https://elzant.com",
+        "4": "test",  # RSVP button token slot ({{4}}) — must be non-empty
     }
     try:
         sid = send_content_message(to, config.content_sid, variables, config=config)
