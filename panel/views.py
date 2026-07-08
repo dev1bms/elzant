@@ -185,9 +185,13 @@ def guest_detail(request, guest_id):
     guest = guest_or_403(request.user, guest_id)
     invitation_url = _invitation_url(guest)
     log = _last_log(guest)
+    timeline = _timeline(guest, log)
     return render(request, "panel/guest_detail.html", {
         "guest": guest,
-        "timeline": _timeline(guest, log),
+        "timeline": timeline,
+        # Any step still "active" (awaiting a Twilio callback) → let the page
+        # auto-refresh so the status advances without a manual reload.
+        "has_pending": any(s["state"] == "active" for s in timeline),
         "invitation_url": invitation_url,
         "qr_svg": qr_svg(invitation_url),
         "can_edit": can_view_all(request.user) or guest.invited_by_id == request.user.id,
