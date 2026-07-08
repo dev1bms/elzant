@@ -7,6 +7,9 @@ urlpatterns = [
     path("tahnia/shukran/", views.thank_you, name="thank_you"),
     path("i/<str:token>/", views.invitation, name="invitation"),
     path("i/<str:token>/rsvp/", views.rsvp, name="rsvp"),
+    # One-tap RSVP from WhatsApp URL buttons (GET): r/y/<token> = attend, r/n = decline.
+    path("r/y/<str:token>/", views.rsvp_link, {"choice": "attending"}, name="rsvp_attend"),
+    path("r/n/<str:token>/", views.rsvp_link, {"choice": "declined"}, name="rsvp_decline"),
     path("privacy/", views.privacy, name="privacy"),
     # Twilio WhatsApp status callback (signature-verified).
     path("webhooks/twilio/", webhooks.twilio_status_webhook, name="twilio_status"),

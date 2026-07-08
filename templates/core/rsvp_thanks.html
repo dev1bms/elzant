@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}تأكيد الحضور — زفاف {{ config.groom_name }} و{{ config.bride_name }}{% endblock %}
+
+{% block content %}
+<section class="bg-porcelain px-6 py-24">
+  <div class="mx-auto max-w-xl text-center">
+    <p class="up d1 label-lat">RSVP</p>
+    <h1 class="up d1 mt-3 text-3xl text-ink sm:text-4xl">
+      {% if attending %}سعِدنا بتأكيدك 🤍{% elif declined %}شكراً لإعلامنا 🤍{% else %}تأكيد الحضور{% endif %}
+    </h1>
+    {% if thanks %}<p class="up d2 mt-4 text-lg text-ink-soft">{{ thanks }}</p>{% endif %}
+
+    <div class="up d3 panel mx-auto mt-10 max-w-md p-7">
+      <p class="names text-2xl">{{ config.groom_name }} <span class="amp">&amp;</span> {{ config.bride_name }}</p>
+      <p class="mt-3 text-sm text-ink-soft">
+        حالتك الآن:
+        {% if attending %}<b class="text-wine-600">سأحضر بإذن الله</b>
+        {% elif declined %}<b class="text-wine-600">اعتذار</b>
+        {% else %}لم تُسجَّل بعد{% endif %}
+      </p>
+      <div class="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
+        {% if attending %}
+          <a href="{% url 'rsvp_decline' guest.invitation_token %}" class="btn btn-ghost">تغيير إلى اعتذار</a>
+        {% else %}
+          <a href="{% url 'rsvp_attend' guest.invitation_token %}" class="btn btn-primary">سأحضر بإذن الله</a>
+        {% endif %}
+        <a href="{% url 'invitation' guest.invitation_token %}" class="btn btn-ghost">افتح دعوتك الكاملة</a>
+      </div>
+    </div>
+
+    <p class="up d4 mt-6 text-xs text-cloud">يمكنك تعديل ردّك في أي وقت من هذا الرابط.</p>
+  </div>
+</section>
+{% endblock %}

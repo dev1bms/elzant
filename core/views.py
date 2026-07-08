@@ -116,6 +116,28 @@ def rsvp(request, token):
     return redirect("invitation", token=token)
 
 
+def rsvp_link(request, token, choice):
+    """One-tap RSVP from a WhatsApp URL button (GET ``/r/y|n/<token>/``). Records
+    the reply and shows a warm thank-you page. Idempotent — re-tapping (or tapping
+    the other button) just updates the choice. The token is unguessable, so only
+    the guest reaches this."""
+    guest = get_object_or_404(WeddingGuest, invitation_token=token)
+    config = WeddingConfig.get()
+    if config.rsvp_enabled:
+        guest.set_rsvp(choice)  # ignores anything but attending/declined
+    thanks = ""
+    if guest.rsvp == WeddingGuest.Rsvp.ATTENDING:
+        thanks = config.rsvp_thanks_attending
+    elif guest.rsvp == WeddingGuest.Rsvp.DECLINED:
+        thanks = config.rsvp_thanks_declined
+    return render(request, "core/rsvp_thanks.html", {
+        "guest": guest,
+        "thanks": thanks,
+        "attending": guest.rsvp == WeddingGuest.Rsvp.ATTENDING,
+        "declined": guest.rsvp == WeddingGuest.Rsvp.DECLINED,
+    })
+
+
 def privacy(request):
     return render(request, "core/privacy.html")
 

@@ -108,6 +108,7 @@ def build_invitation_variables(guest):
         "1": guest.full_name or "ضيفنا الكريم",
         "2": location,
         "3": link,
+        "4": guest.invitation_token,  # one-tap RSVP button URLs: r/y/{{4}}, r/n/{{4}}
     }
 
 

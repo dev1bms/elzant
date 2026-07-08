@@ -247,6 +247,40 @@ class SendInvitationTests(TestCase):
         self.assertFalse(result.ok)
 
 
+@override_settings(**WA_SETTINGS)
+class RsvpLinkTests(TestCase):
+    """One-tap RSVP via WhatsApp URL buttons (GET /r/y|n/<token>/)."""
+
+    def setUp(self):
+        self.guest = WeddingGuest.objects.create(
+            full_name="نادر", phone_e164="201007776666")
+
+    def test_attend_link_records_and_renders_thanks(self):
+        r = self.client.get(reverse("rsvp_attend", args=[self.guest.invitation_token]))
+        self.assertEqual(r.status_code, 200)
+        self.guest.refresh_from_db()
+        self.assertEqual(self.guest.rsvp, WeddingGuest.Rsvp.ATTENDING)
+
+    def test_decline_link_records(self):
+        self.client.get(reverse("rsvp_decline", args=[self.guest.invitation_token]))
+        self.guest.refresh_from_db()
+        self.assertEqual(self.guest.rsvp, WeddingGuest.Rsvp.DECLINED)
+
+    def test_can_switch_choice(self):
+        self.client.get(reverse("rsvp_attend", args=[self.guest.invitation_token]))
+        self.client.get(reverse("rsvp_decline", args=[self.guest.invitation_token]))
+        self.guest.refresh_from_db()
+        self.assertEqual(self.guest.rsvp, WeddingGuest.Rsvp.DECLINED)
+
+    def test_disabled_rsvp_is_noop(self):
+        cfg = WeddingConfig.get()
+        cfg.rsvp_enabled = False
+        cfg.save()
+        self.client.get(reverse("rsvp_attend", args=[self.guest.invitation_token]))
+        self.guest.refresh_from_db()
+        self.assertEqual(self.guest.rsvp, WeddingGuest.Rsvp.NONE)
+
+
 class SpamHeuristicsTests(SimpleTestCase):
     def test_contains_link_detects_urls_and_domains(self):
         for s in ["visit http://x.com", "www.elzant.com", "check elzant.com now", "t.me/abc"]:
