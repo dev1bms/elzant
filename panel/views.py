@@ -11,7 +11,7 @@ from django.contrib import messages
 from django.db.models import Count, Q
 from django.shortcuts import redirect, render
 
-from core.models import WeddingGuest, WhatsAppConfig, WhatsAppStatus
+from core.models import WeddingGuest, WhatsAppConfig, WhatsAppStatus, WhatsAppTemplate
 from core.qr import qr_svg
 from core.whatsapp import normalize_phone, send_invitation
 
@@ -207,3 +207,16 @@ def guest_resend(request, guest_id):
         _notify_result(request, guest, result)
         return redirect("panel:guest_detail", guest_id=guest.id)
     return render(request, "panel/guest_resend.html", {"guest": guest})
+
+
+@inviter_required
+def templates_list(request):
+    """READ-ONLY view of the WhatsApp message templates. Family members can see
+    which approved template goes out and its Arabic preview, but the panel offers
+    no edit path — templates are edited only by the admin in the Django admin."""
+    templates = WhatsAppTemplate.objects.all().order_by(
+        "-is_approved", "-active", "name")
+    return render(request, "panel/templates_list.html", {
+        "templates": templates,
+        "active_sid": WhatsAppConfig.get().content_sid,
+    })

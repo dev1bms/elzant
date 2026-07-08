@@ -16,4 +16,5 @@ urlpatterns = [
     path("guests/add/", views.guest_add, name="guest_add"),
     path("guests/<int:guest_id>/", views.guest_detail, name="guest_detail"),
     path("guests/<int:guest_id>/resend/", views.guest_resend, name="guest_resend"),
+    path("templates/", views.templates_list, name="templates"),
 ]
