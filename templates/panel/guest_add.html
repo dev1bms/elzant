@@ -19,8 +19,51 @@
       {{ form.phone }}
       {% for e in form.phone.errors %}<p class="mt-1 text-xs text-wine-700">{{ e }}</p>{% endfor %}
       <p class="mt-1 text-xs text-cloud">الرمز الدولي الافتراضي: +{{ config.default_country_code }} (يمكن كتابة الرقم المحلي مباشرة).</p>
+      <p id="phone-preview" class="mt-1.5 text-xs" style="display:none"></p>
     </div>
     <button type="submit" class="btn btn-primary w-full">إرسال الدعوة</button>
   </form>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Live phone preview — mirrors core.whatsapp.normalize_phone so the operator sees
+// the exact E.164 number that will be messaged, before submitting. The server
+// re-validates on POST, so this is UX sugar, never the source of truth.
+(function () {
+  var input = document.getElementById("id_phone");
+  var out = document.getElementById("phone-preview");
+  if (!input || !out) return;
+  var CC = "{{ config.default_country_code|escapejs }}".replace(/\D/g, "");
+
+  function normalize(raw) {
+    var s = (raw || "").trim();
+    if (!s) return null;
+    var digits = s.replace(/\D/g, "");
+    if (s.charAt(0) !== "+") {
+      if (digits.indexOf("00") === 0) digits = digits.slice(2);
+      else if (digits.charAt(0) === "0") digits = CC + digits.replace(/^0+/, "");
+      else if (CC && digits.indexOf(CC) !== 0) digits = CC + digits;
+    }
+    if (!digits || digits.length < 8 || digits.length > 15) return null;
+    return digits;
+  }
+
+  function render() {
+    if (!input.value.trim()) { out.style.display = "none"; return; }
+    out.style.display = "";
+    var e = normalize(input.value);
+    if (e) {
+      out.className = "mt-1.5 text-xs text-olive";
+      out.innerHTML = "✓ سيصل إلى واتساب: <bdi dir=\"ltr\">+" + e + "</bdi>";
+    } else {
+      out.className = "mt-1.5 text-xs text-wine-700";
+      out.textContent = "⚠ الرقم غير مكتمل أو غير صالح — تأكّد منه.";
+    }
+  }
+  input.addEventListener("input", render);
+  render();
+})();
+</script>
 {% endblock %}
