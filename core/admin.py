@@ -64,15 +64,15 @@ def _email_subject_body(guest):
 # --------------------------------------------------------------------------- #
 @admin.register(WeddingConfig)
 class WeddingConfigAdmin(admin.ModelAdmin):
-    readonly_fields = ("logo_preview", "favicon_preview", "hero_preview")
+    readonly_fields = ("logo_preview", "favicon_preview", "hero_preview", "og_preview")
     fieldsets = (
         ("الأسماء", {"fields": ("groom_name", "bride_name", "groom_father", "bride_father",
                                 "groom_family_name_ar", "bride_family_name_ar")}),
         ("الصور والهوية", {
             "fields": ("logo", "logo_preview", "favicon", "favicon_preview",
-                       "hero_image", "hero_preview"),
-            "description": "ارفع شعار الموقع والأيقونة وصورة الخلفية — تُستخدَم فوراً في الموقع "
-                           "بلا إعادة نشر. اترك أي حقل فارغاً لاستخدام الافتراضي.",
+                       "hero_image", "hero_preview", "og_image", "og_preview"),
+            "description": "ارفع شعار الموقع والأيقونة وصورة الخلفية وصورة المشاركة — تُستخدَم "
+                           "فوراً في الموقع بلا إعادة نشر. اترك أي حقل فارغاً لاستخدام الافتراضي.",
         }),
         ("المناسبة", {"fields": ("wedding_datetime", "venue_name", "venue_address", "map_url", "hijri_text")}),
         ("النصوص", {"fields": ("invitation_intro_text", "privacy_notice_short")}),
@@ -104,6 +104,10 @@ class WeddingConfigAdmin(admin.ModelAdmin):
     @admin.display(description="معاينة الخلفية")
     def hero_preview(self, obj):
         return self._preview(obj.hero_image, "#fbf4e8")
+
+    @admin.display(description="معاينة صورة المشاركة")
+    def og_preview(self, obj):
+        return self._preview(obj.og_image, "#fbf4e8")
 
     def has_add_permission(self, request):
         return not WeddingConfig.objects.exists()

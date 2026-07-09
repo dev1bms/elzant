@@ -78,6 +78,11 @@ class WeddingConfig(models.Model):
         "صورة الخلفية الرئيسية", upload_to="site/", blank=True, null=True,
         help_text="خلفية الصفحة الرئيسية والظرف. إن تُركت فارغة تُستخدم الصورة الافتراضية.",
     )
+    og_image = models.ImageField(
+        "صورة المشاركة (OG)", upload_to="site/", blank=True, null=True,
+        help_text="الصورة التي تظهر عند مشاركة رابط الموقع على واتساب/فيسبوك. "
+                  "1200×630 بكسل يُفضّل. إن تُركت فارغة تُستخدم الصورة المولّدة تلقائياً.",
+    )
 
     # Event
     wedding_datetime = models.DateTimeField(
