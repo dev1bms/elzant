@@ -6,6 +6,10 @@
   <title>{% block title %}زفاف {{ config.groom_name }} و{{ config.bride_name }}{% endblock %}</title>
   <meta name="description" content="{% block meta_description %}اترك تهنئتك لـ {{ config.groom_name }} و{{ config.bride_name }} وشاركهما الفرحة{% endblock %}">
 
+  {# Favicon — admin-uploaded, falls back to the logo #}
+  {% if config.favicon %}<link rel="icon" href="{{ config.favicon.url }}"><link rel="apple-touch-icon" href="{{ config.favicon.url }}">
+  {% elif config.logo %}<link rel="icon" href="{{ config.logo.url }}"><link rel="apple-touch-icon" href="{{ config.logo.url }}">{% endif %}
+
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="elzant.com">
   <meta property="og:title" content="{% block og_title %}زفاف {{ config.groom_name }} و{{ config.bride_name }}{% endblock %}">

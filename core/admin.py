@@ -64,9 +64,16 @@ def _email_subject_body(guest):
 # --------------------------------------------------------------------------- #
 @admin.register(WeddingConfig)
 class WeddingConfigAdmin(admin.ModelAdmin):
+    readonly_fields = ("logo_preview", "favicon_preview", "hero_preview")
     fieldsets = (
         ("الأسماء", {"fields": ("groom_name", "bride_name", "groom_father", "bride_father",
                                 "groom_family_name_ar", "bride_family_name_ar")}),
+        ("الصور والهوية", {
+            "fields": ("logo", "logo_preview", "favicon", "favicon_preview",
+                       "hero_image", "hero_preview"),
+            "description": "ارفع شعار الموقع والأيقونة وصورة الخلفية — تُستخدَم فوراً في الموقع "
+                           "بلا إعادة نشر. اترك أي حقل فارغاً لاستخدام الافتراضي.",
+        }),
         ("المناسبة", {"fields": ("wedding_datetime", "venue_name", "venue_address", "map_url", "hijri_text")}),
         ("النصوص", {"fields": ("invitation_intro_text", "privacy_notice_short")}),
         ("قوالب الرسائل (placeholders: {{ guest_name }} {{ invitation_link }} {{ groom_name }} "
@@ -77,6 +84,26 @@ class WeddingConfigAdmin(admin.ModelAdmin):
                      "rsvp_thanks_attending", "rsvp_thanks_declined", "greeting_cta_label"),
           "description": "تظهر هذه الأزرار للمدعو في صفحة دعوته الخاصة. النصوص كلها قابلة للتحرير هنا."}),
     )
+
+    @staticmethod
+    def _preview(field, bg):
+        if not field:
+            return "— لم يُرفع بعد —"
+        return format_html(
+            '<img src="{}" style="max-height:80px;max-width:260px;border-radius:10px;'
+            'padding:8px;border:1px solid #e5ddce;background:{}">', field.url, bg)
+
+    @admin.display(description="معاينة الشعار (على خلفية داكنة)")
+    def logo_preview(self, obj):
+        return self._preview(obj.logo, "#241813")
+
+    @admin.display(description="معاينة الأيقونة")
+    def favicon_preview(self, obj):
+        return self._preview(obj.favicon or obj.logo, "#7c2b37")
+
+    @admin.display(description="معاينة الخلفية")
+    def hero_preview(self, obj):
+        return self._preview(obj.hero_image, "#fbf4e8")
 
     def has_add_permission(self, request):
         return not WeddingConfig.objects.exists()

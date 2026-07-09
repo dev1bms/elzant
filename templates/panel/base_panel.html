@@ -7,6 +7,8 @@
   <title>{% block title %}لوحة الدعوات · {{ config.groom_name }} و{{ config.bride_name }}{% endblock %}</title>
   <link rel="stylesheet" href="{% static 'css/fonts.css' %}">
   <link rel="stylesheet" href="{% static 'css/output.css' %}">
+  {% if config.favicon %}<link rel="icon" href="{{ config.favicon.url }}">
+  {% elif config.logo %}<link rel="icon" href="{{ config.logo.url }}">{% endif %}
   {% block extra_head %}{% endblock %}
 </head>
 <body class="min-h-screen bg-porcelain text-ink pb-24">
@@ -14,8 +16,12 @@
   {% if user.is_authenticated %}
   <header class="sticky top-0 z-30 border-b border-sand/70 bg-porcelain-50/85 backdrop-blur">
     <div class="mx-auto flex max-w-3xl items-center justify-between px-4 py-3">
-      <a href="{% url 'panel:dashboard' %}" class="names text-2xl text-wine-700">
-        {{ config.groom_name }} <span class="amp text-lg">&amp;</span> {{ config.bride_name }}
+      <a href="{% url 'panel:dashboard' %}" class="flex items-center">
+        {% if config.logo %}
+        <img src="{{ config.logo.url }}" alt="{{ config.groom_name }} و{{ config.bride_name }}" class="h-9 w-auto max-w-[160px]">
+        {% else %}
+        <span class="names text-2xl text-wine-700">{{ config.groom_name }} <span class="amp text-lg">&amp;</span> {{ config.bride_name }}</span>
+        {% endif %}
       </a>
       <form method="post" action="{% url 'panel:logout' %}" class="m-0">
         {% csrf_token %}

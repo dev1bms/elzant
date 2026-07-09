@@ -9,7 +9,7 @@
 
   {# The artwork — full-bleed on desktop, large top image on mobile #}
   <div class="hero-art hero-breathe art-fade art-veil-lg relative h-[54svh] min-h-[330px] w-full lg:absolute lg:inset-0 lg:h-auto">
-    <img src="{% static 'img/hero-bg.jpg' %}"
+    <img src="{% if config.hero_image %}{{ config.hero_image.url }}{% else %}{% static 'img/hero-bg.jpg' %}{% endif %}"
          alt="لوحة فنية للعروسين محمود ورينان على شرفة تطلّ على غروب البحر المتوسط"
          class="object-[58%_24%] lg:object-[72%_34%]">
   </div>

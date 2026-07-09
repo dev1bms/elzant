@@ -5,7 +5,7 @@
   envelope.js. IDs/classes kept for those scripts.
 {% endcomment %}
 <div class="envelope-overlay" id="envelope" role="dialog" aria-modal="true" aria-label="دعوة الزفاف">
-  <div class="envelope-art" style="background-image:url('{% static 'img/hero-bg.jpg' %}')" aria-hidden="true"></div>
+  <div class="envelope-art" style="background-image:url('{% if config.hero_image %}{{ config.hero_image.url }}{% else %}{% static 'img/hero-bg.jpg' %}{% endif %}')" aria-hidden="true"></div>
   <div class="intro-inner">
     <p class="eyebrow" style="color:var(--color-peach)">An Invitation</p>
     <p class="mt-7 text-sm tracking-wide text-porcelain-50/75">دعوة زفاف</p>

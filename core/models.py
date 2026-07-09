@@ -62,6 +62,23 @@ class WeddingConfig(models.Model):
     groom_family_name_ar = models.CharField("عائلة العريس", max_length=80, blank=True, default="الزنط")
     bride_family_name_ar = models.CharField("عائلة العروس", max_length=80, blank=True)
 
+    # Branding — admin-uploaded images. All optional: each falls back to a
+    # sensible default (text / bundled artwork) when empty, so the site never
+    # shows a broken image before the operator uploads anything.
+    logo = models.ImageField(
+        "شعار الموقع", upload_to="site/", blank=True, null=True,
+        help_text="يظهر أعلى الصفحة الرئيسية وفي ترويسة اللوحة بدل اسمَي العروسين. "
+                  "PNG بخلفية شفّافة يُفضّل.",
+    )
+    favicon = models.ImageField(
+        "أيقونة المتصفّح (Favicon)", upload_to="site/", blank=True, null=True,
+        help_text="أيقونة تبويب المتصفّح. إن تُركت فارغة يُستخدم الشعار. صورة مربّعة يُفضّل.",
+    )
+    hero_image = models.ImageField(
+        "صورة الخلفية الرئيسية", upload_to="site/", blank=True, null=True,
+        help_text="خلفية الصفحة الرئيسية والظرف. إن تُركت فارغة تُستخدم الصورة الافتراضية.",
+    )
+
     # Event
     wedding_datetime = models.DateTimeField(
         "موعد الزفاف (يُخزَّن بتوقيت القاهرة)", default=default_wedding_datetime

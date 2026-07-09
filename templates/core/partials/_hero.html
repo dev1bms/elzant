@@ -3,7 +3,7 @@
 
   {# The artwork — the visual soul. Full-bleed on desktop, large top image on mobile. #}
   <div class="hero-art hero-breathe art-fade art-veil-lg relative h-[58svh] min-h-[340px] w-full lg:absolute lg:inset-0 lg:h-auto">
-    <img src="{% static 'img/hero-bg.jpg' %}"
+    <img src="{% if config.hero_image %}{{ config.hero_image.url }}{% else %}{% static 'img/hero-bg.jpg' %}{% endif %}"
          alt="لوحة فنية للعروسين محمود ورينان على شرفة تطلّ على غروب البحر المتوسط"
          class="object-[58%_24%] lg:object-[72%_34%]">
   </div>
@@ -24,9 +24,14 @@
         <p class="mt-1.5 text-sm sm:text-base">بدعوتكم لحضور حفل زفاف أبنائهما</p>
       </div>
 
+      {% if config.logo %}
+      <img src="{{ config.logo.url }}" alt="{{ config.groom_name }} و{{ config.bride_name }}"
+           class="mx-auto mt-5 w-64 max-w-full sm:w-80 lg:mx-0">
+      {% else %}
       <h1 class="names mt-5 text-6xl leading-[1.1] sm:text-7xl">
         {{ config.groom_name }} <span class="amp text-4xl sm:text-5xl">&amp;</span> {{ config.bride_name }}
       </h1>
+      {% endif %}
 
       <div class="mt-5 flex items-center justify-center gap-4 lg:justify-end">
         <span class="h-px w-9 bg-champagne/70"></span>
