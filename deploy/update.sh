@@ -18,7 +18,8 @@ set -euo pipefail
 BRANCH="${ELZANT_BRANCH:-main}"
 SERVICE="${ELZANT_SERVICE:-elzant.service}"
 SITE_URL="${ELZANT_SITE_URL:-https://elzant.com}"
-HEALTH_URL="${ELZANT_HEALTH_URL:-http://127.0.0.1:8019/}"
+# Must match the Gunicorn bind in deploy/gunicorn.conf.py (127.0.0.1:8001).
+HEALTH_URL="${ELZANT_HEALTH_URL:-http://127.0.0.1:8001/}"
 KEEP_BACKUPS="${ELZANT_KEEP_BACKUPS:-10}"
 
 # --- تحديد مجلد المشروع + البيئة من موقع السكربت ---

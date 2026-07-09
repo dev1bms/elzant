@@ -67,7 +67,7 @@ class WeddingConfigAdmin(admin.ModelAdmin):
     readonly_fields = ("logo_preview", "favicon_preview", "hero_preview", "og_preview")
     fieldsets = (
         ("الأسماء", {"fields": ("groom_name", "bride_name", "groom_father", "bride_father",
-                                "groom_family_name_ar", "bride_family_name_ar")}),
+                                "masthead_text", "couple_names_latin")}),
         ("الصور والهوية", {
             "fields": ("logo", "logo_preview", "favicon", "favicon_preview",
                        "hero_image", "hero_preview", "og_image", "og_preview"),
@@ -75,7 +75,8 @@ class WeddingConfigAdmin(admin.ModelAdmin):
                            "فوراً في الموقع بلا إعادة نشر. اترك أي حقل فارغاً لاستخدام الافتراضي.",
         }),
         ("المناسبة", {"fields": ("wedding_datetime", "venue_name", "venue_address", "map_url", "hijri_text")}),
-        ("النصوص", {"fields": ("invitation_intro_text", "privacy_notice_short")}),
+        ("النصوص", {"fields": ("invitation_intro_text", "invitation_page_intro",
+                               "seo_description", "privacy_notice_short")}),
         ("قوالب الرسائل (placeholders: {{ guest_name }} {{ invitation_link }} {{ groom_name }} "
          "{{ bride_name }} {{ wedding_date }} {{ venue_name }})",
          {"fields": ("default_whatsapp_message_template", "default_email_subject", "default_email_body_template")}),
@@ -366,7 +367,7 @@ class GreetingAdmin(admin.ModelAdmin):
 # --------------------------------------------------------------------------- #
 @admin.register(InviterProfile)
 class InviterProfileAdmin(admin.ModelAdmin):
-    list_display = ("display_name", "user", "side", "can_view_all", "invited_total")
+    list_display = ("display_name", "user", "phone", "side", "can_view_all", "invited_total")
     list_filter = ("side", "can_view_all")
     search_fields = ("display_name", "user__username", "phone")
     autocomplete_fields = ("user",)

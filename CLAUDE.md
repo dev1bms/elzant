@@ -50,7 +50,7 @@ Two Django apps: **`core`** (the public site + all data models + admin) and **`p
 - `GreetingSuggestion` — ready-made greeting texts offered as one-tap chips.
 - `InviterProfile` — one-to-one with a Django user; its existence (or superuser) is what grants panel access. `can_view_all` unlocks the all-guests view.
 - `WhatsAppConfig` — Twilio credentials **and** the live `enabled` flag, all in the DB (no `.env`). The Auth Token lives here; the admin masks it and restricts the screen to superusers — protect the SQLite file and its backups.
-- `WhatsAppTemplate` — a Meta-approved template the sender can pick; `variables_map` orders the `{{1}},{{2}}…` slots to context keys. `MessageLog` — audit trail of every send attempt (never stores secrets).
+- `WhatsAppTemplate` — a registry/preview of Meta-approved templates (shown read-only in the panel); `variables_map` is documentation-only — the send path does NOT read it. The slot order is fixed in `build_invitation_variables`: `{{1}}`=guest name, `{{2}}`=venue/map, `{{3}}`=invitation link, `{{4}}`=token (RSVP URL buttons); any registered template must follow that order. `MessageLog` — audit trail of every send attempt (never stores secrets).
 
 **Moderation is post-publish, and banning must delete the photo file.** `/media/` is served by path with no auth, so `Greeting.hide()` deletes the photo + thumbnail from storage (not just flips status). The `post_delete` signal cleans up orphaned files and forces Django to not fast-delete on bulk admin delete. Don't "optimize" `hide()`/bulk actions into a single `.update()` — that would leave banned photos still served.
 

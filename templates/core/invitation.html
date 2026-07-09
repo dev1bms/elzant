@@ -10,7 +10,8 @@
   {# The artwork — full-bleed on desktop, large top image on mobile #}
   <div class="hero-art hero-breathe art-fade art-veil-lg relative h-[54svh] min-h-[330px] w-full lg:absolute lg:inset-0 lg:h-auto">
     <img src="{% if config.hero_image %}{{ config.hero_image.url }}{% else %}{% static 'img/hero-bg.jpg' %}{% endif %}"
-         alt="لوحة فنية للعروسين محمود ورينان على شرفة تطلّ على غروب البحر المتوسط"
+         alt="لوحة دعوة زفاف {{ config.groom_name }} و{{ config.bride_name }}"
+         fetchpriority="high"
          class="object-[58%_24%] lg:object-[72%_34%]">
   </div>
 
@@ -28,7 +29,7 @@
         <span class="h-px w-10 bg-champagne/70"></span>
       </div>
 
-      <p class="text-sm text-ink-soft">يتشرّف والداهما بدعوتكم لحضور حفل زفاف</p>
+      <p class="text-sm text-ink-soft">{{ config.invitation_page_intro|default:"يتشرّف والداهما بدعوتكم لحضور حفل زفاف" }}</p>
 
       <h2 class="names mt-3 text-5xl leading-[1.12] sm:text-6xl">
         {{ config.groom_name }} <span class="amp text-3xl sm:text-4xl">&amp;</span> {{ config.bride_name }}
@@ -41,14 +42,14 @@
       </div>
       {% if config.venue_name %}<p class="mt-2 text-sm text-ink-soft">{{ config.venue_name }}{% if config.venue_address %} · {{ config.venue_address }}{% endif %}</p>{% endif %}
 
-      {# countdown — flip boxes #}
+      {# countdown — flip boxes (server-rendered initial values; JS keeps ticking) #}
       <div id="countdown" data-target="{{ config.wedding_datetime|date:'c' }}" class="cd mt-7 justify-center lg:justify-end">
-        <div class="cd-box"><span data-unit="days" class="cd-num">0</span><span class="cd-label">يوم</span></div>
-        <div class="cd-box"><span data-unit="hours" class="cd-num">00</span><span class="cd-label">ساعة</span></div>
-        <div class="cd-box"><span data-unit="minutes" class="cd-num">00</span><span class="cd-label">دقيقة</span></div>
-        <div class="cd-box"><span data-unit="seconds" class="cd-num">00</span><span class="cd-label">ثانية</span></div>
+        <div class="cd-box"><span data-unit="days" class="cd-num">{{ cd.days }}</span><span class="cd-label">يوم</span></div>
+        <div class="cd-box"><span data-unit="hours" class="cd-num">{{ cd.hours }}</span><span class="cd-label">ساعة</span></div>
+        <div class="cd-box"><span data-unit="minutes" class="cd-num">{{ cd.minutes }}</span><span class="cd-label">دقيقة</span></div>
+        <div class="cd-box"><span data-unit="seconds" class="cd-num">{{ cd.seconds }}</span><span class="cd-label">ثانية</span></div>
       </div>
-      <p data-countdown-done class="mt-5 hidden text-base text-wine-600">تمّ الزفاف بحمد الله</p>
+      <p data-countdown-done class="mt-5 {% if not cd.done %}hidden {% endif %}text-base text-wine-600">تمّ الزفاف بحمد الله</p>
 
       {# RSVP — تأكيد الحضور / اعتذار (بصياغة يحرّرها الأدمن) #}
       {% if config.rsvp_enabled %}
@@ -81,7 +82,7 @@
             {% csrf_token %}
             <input type="hidden" name="choice" value="{% if guest.rsvp == 'attending' %}declined{% else %}attending{% endif %}">
             <button type="submit" class="text-xs text-ink-soft underline underline-offset-4 hover:text-wine-600">
-              {% if guest.rsvp == 'attending' %}تغيير إلى الاعتذار{% else %}بل سأحضر بإذن الله{% endif %}
+              {% if guest.rsvp == 'attending' %}تغيير إلى الاعتذار{% else %}بل {{ config.rsvp_attend_label|default:"سأحضر بإذن الله" }}{% endif %}
             </button>
           </form>
         {% endif %}

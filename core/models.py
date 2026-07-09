@@ -59,8 +59,14 @@ class WeddingConfig(models.Model):
     bride_father = models.CharField(
         "والد العروس", max_length=160, default="الشريف فلان الفولاني",
     )
-    groom_family_name_ar = models.CharField("عائلة العريس", max_length=80, blank=True, default="الزنط")
-    bride_family_name_ar = models.CharField("عائلة العروس", max_length=80, blank=True)
+    masthead_text = models.CharField(
+        "سطر العائلة (أعلى الدعوة)", max_length=120, default="أفراح آل الزنط",
+        help_text="يظهر أعلى الصفحة الرئيسية، مثل: أفراح آل الزنط.",
+    )
+    couple_names_latin = models.CharField(
+        "اسما العروسين باللاتينية", max_length=120, blank=True, default="Mahmoud & Rinan",
+        help_text="يظهر في تذييل الموقع. اتركه فارغاً لإخفائه.",
+    )
 
     # Branding — admin-uploaded images. All optional: each falls back to a
     # sensible default (text / bundled artwork) when empty, so the site never
@@ -95,8 +101,18 @@ class WeddingConfig(models.Model):
 
     # Texts
     invitation_intro_text = models.TextField(
-        "نص الدعوة (سطر تمهيدي)", blank=True,
-        default="يتشرّفان بدعوتكم لمشاركتهما فرحة العمر",
+        "نص الدعوة (بعد اسمَي الوالدين)", blank=True,
+        default="بدعوتكم لحضور حفل زفاف أبنائهما",
+        help_text="يظهر في الصفحة الرئيسية بعد «يتشرّف + اسمَي الوالدين».",
+    )
+    invitation_page_intro = models.CharField(
+        "تمهيد صفحة الدعوة الخاصة", max_length=200, blank=True,
+        default="يتشرّف والداهما بدعوتكم لحضور حفل زفاف",
+        help_text="السطر الذي يسبق اسمَي العروسين في صفحة الدعوة الخاصة /i/…",
+    )
+    seo_description = models.CharField(
+        "وصف الموقع (لمحرّكات البحث والمشاركة)", max_length=200, blank=True,
+        help_text="يظهر في نتائج البحث ومعاينات المشاركة. إن تُرك فارغاً يُستخدم نص تلقائي بأسماء العروسين.",
     )
     privacy_notice_short = models.TextField("إشعار الخصوصية المختصر", blank=True, default=DEFAULT_PRIVACY_NOTICE)
 
@@ -278,7 +294,10 @@ class GreetingSuggestion(models.Model):
         NICE = "nice", "جميل"
 
     text_ar = models.TextField("نص التهنئة", max_length=300)
-    category = models.CharField("الفئة", max_length=15, choices=Category.choices, blank=True)
+    category = models.CharField(
+        "الفئة", max_length=15, choices=Category.choices, blank=True,
+        help_text="للتنظيم داخل لوحة الإدارة فقط — الزوّار يرون أول ١٠ تهانٍ مفعّلة حسب الترتيب، بلا تصنيف.",
+    )
     active = models.BooleanField("مفعّل", default=True)
     sequence = models.PositiveSmallIntegerField("الترتيب", default=0)
 
@@ -508,9 +527,14 @@ class WhatsAppTemplate(models.Model):
     language = models.CharField("اللغة", max_length=10, default="ar")
     category = models.CharField("الفئة", max_length=12, choices=Category.choices, default=Category.UTILITY)
     body_preview_ar = models.TextField("نص المعاينة (عربي)", blank=True)
-    # Ordered names of the {{1}}, {{2}}… variables → context keys, e.g.
-    # ["guest_name"] means body {{1}} is the guest's name. Button URL var is the token.
-    variables_map = models.JSONField("خريطة المتغيّرات", default=list, blank=True)
+    # Display/documentation ONLY — the send path does NOT read this. The slot
+    # order is fixed in build_invitation_variables: {{1}}=اسم الضيف،
+    # {{2}}=الموقع/الخريطة، {{3}}=رابط الدعوة، {{4}}=رمز الدعوة (أزرار RSVP).
+    # Any registered template MUST follow that exact order.
+    variables_map = models.JSONField(
+        "خريطة المتغيّرات (للتوثيق فقط)", default=list, blank=True,
+        help_text="للعرض فقط — الترتيب الفعلي ثابت في الكود: 1=اسم الضيف، 2=الموقع، 3=رابط الدعوة، 4=رمز الدعوة.",
+    )
     content_sid = models.CharField("Content Template SID (Twilio)", max_length=64, blank=True)
     is_approved = models.BooleanField("معتمد", default=False)
     active = models.BooleanField("مفعّل", default=True)

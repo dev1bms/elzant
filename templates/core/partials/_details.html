@@ -12,7 +12,7 @@
       <p class="num text-4xl text-wine-700 sm:text-5xl">{% language 'ar' %}{{ config.wedding_datetime|date:'d . m . Y' }}{% endlanguage %}</p>
       <span class="hidden h-px w-16 bg-champagne/70 sm:block"></span>
     </div>
-    <p class="reveal mt-3 text-ink-soft">{% language 'ar' %}{{ config.wedding_datetime|date:'l' }}{% endlanguage %} · الساعة <span class="num text-ink">{{ config.wedding_datetime|time:'G:i' }}</span></p>
+    <p class="reveal mt-3 text-ink-soft">{% language 'ar' %}{{ config.wedding_datetime|date:'l' }}{% endlanguage %} · الساعة <span class="num text-ink">{% language 'ar' %}{{ config.wedding_datetime|time:'g:i A' }}{% endlanguage %}</span></p>
 
     {% if config.venue_name or config.venue_address %}
       <div class="reveal mt-12">

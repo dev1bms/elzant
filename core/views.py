@@ -7,6 +7,25 @@ from .models import Greeting, GreetingSuggestion, WeddingConfig, WeddingGuest
 from .utils import country_from_request, flag_from_code, get_client_ip, has_arabic
 
 
+# Newest greetings shown on the wall — keeps the homepage fast as submissions
+# grow (each renders a photo thumbnail); older ones remain in the DB/admin.
+WALL_LIMIT = 100
+
+
+def _countdown_initial():
+    """Server-side initial countdown values so the flip boxes show real numbers
+    immediately (and without JS) instead of zeros until countdown.js kicks in."""
+    remaining = WeddingConfig.get().wedding_datetime - timezone.now()
+    total = max(int(remaining.total_seconds()), 0)
+    return {
+        "days": total // 86400,
+        "hours": f"{(total % 86400) // 3600:02d}",
+        "minutes": f"{(total % 3600) // 60:02d}",
+        "seconds": f"{total % 60:02d}",
+        "done": total == 0,
+    }
+
+
 # Spam defenses are: CSRF, the hidden honeypot, model/form length limits, and
 # manual moderation (nothing reaches the wall unapproved). Request throttling is
 # intentionally NOT handled in-app — a per-process LocMem bucket is unreliable
@@ -69,11 +88,12 @@ def home(request):
         "core/home.html",
         {
             "form": form,
-            "greetings": Greeting.visible(),
+            "greetings": Greeting.visible()[:WALL_LIMIT],
             "suggestions": GreetingSuggestion.active_suggestions(),
             "guest": guest,
             "visitor_flag": flag_from_code(vcode),
             "visitor_country": vname,
+            "cd": _countdown_initial(),
         },
     )
 
@@ -100,7 +120,8 @@ def invitation(request, token):
     return render(
         request,
         "core/invitation.html",
-        {"guest": guest, "suggestions": GreetingSuggestion.active_suggestions()},
+        {"guest": guest, "suggestions": GreetingSuggestion.active_suggestions(),
+         "cd": _countdown_initial()},
     )
 
 

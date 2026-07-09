@@ -3,18 +3,19 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script>document.documentElement.classList.add("js")</script>
   <title>{% block title %}زفاف {{ config.groom_name }} و{{ config.bride_name }}{% endblock %}</title>
-  <meta name="description" content="{% block meta_description %}اترك تهنئتك لـ {{ config.groom_name }} و{{ config.bride_name }} وشاركهما الفرحة{% endblock %}">
+  <meta name="description" content="{% block meta_description %}{% if config.seo_description %}{{ config.seo_description }}{% else %}اترك تهنئتك لـ {{ config.groom_name }} و{{ config.bride_name }} وشاركهما الفرحة{% endif %}{% endblock %}">
 
   {# Favicon — admin-uploaded, falls back to the logo #}
   {% if config.favicon %}<link rel="icon" href="{{ config.favicon.url }}"><link rel="apple-touch-icon" href="{{ config.favicon.url }}">
   {% elif config.logo %}<link rel="icon" href="{{ config.logo.url }}"><link rel="apple-touch-icon" href="{{ config.logo.url }}">{% endif %}
 
   <meta property="og:type" content="website">
-  <meta property="og:site_name" content="elzant.com">
+  <meta property="og:site_name" content="{{ site_domain }}">
   <meta property="og:title" content="{% block og_title %}زفاف {{ config.groom_name }} و{{ config.bride_name }}{% endblock %}">
-  <meta property="og:description" content="{% block og_description %}اترك تهنئتك للعروسين قبل موعد الزفاف{% endblock %}">
-  <meta property="og:image" content="{{ og_image }}">
+  <meta property="og:description" content="{% block og_description %}{% if config.seo_description %}{{ config.seo_description }}{% else %}اترك تهنئتك للعروسين قبل موعد الزفاف{% endif %}{% endblock %}">
+  {% if og_image %}<meta property="og:image" content="{{ og_image }}">{% endif %}
   <meta property="og:url" content="{{ canonical_url }}">
   <meta name="twitter:card" content="summary_large_image">
 
@@ -36,11 +37,11 @@
   <footer class="relative overflow-hidden bg-espresso-900 px-6 py-20 text-center text-porcelain-50">
     <div class="pointer-events-none absolute inset-0" style="background:radial-gradient(60% 50% at 50% 0%, rgba(227,163,95,0.16), transparent 60%)"></div>
     <div class="relative">
-      <p class="label-lat text-rose-400">Mahmoud &amp; Rinan</p>
+      {% if config.couple_names_latin %}<p class="label-lat text-rose-400">{{ config.couple_names_latin }}</p>{% endif %}
       <p class="names mt-4 text-5xl" style="color:var(--color-porcelain-50)">{{ config.groom_name }} <span class="amp text-3xl" style="color:var(--color-peach)">&amp;</span> {{ config.bride_name }}</p>
       <div class="rule my-7"></div>
       <p class="num text-sm tracking-[0.3em] text-porcelain-50/70">{% language 'ar' %}{{ config.wedding_datetime|date:'d . m . Y' }}{% endlanguage %}</p>
-      <p class="mt-7"><a href="{{ site_url }}" class="label-lat text-rose-200 transition hover:text-peach">elzant.com</a></p>
+      <p class="mt-7"><a href="{{ site_url }}" class="label-lat text-rose-200 transition hover:text-peach">{{ site_domain }}</a></p>
       <p class="mt-3"><a href="{% url 'privacy' %}" class="text-xs tracking-wide text-porcelain-50/45 underline-offset-4 transition hover:text-porcelain-50/75 hover:underline">إشعار الخصوصية</a></p>
     </div>
   </footer>

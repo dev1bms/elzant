@@ -1,6 +1,12 @@
 {% extends "base.html" %}
 {% load static %}
 
+{% block extra_head %}
+  {# The artwork is the LCP on every device (envelope + hero) — fetch it first. #}
+  <link rel="preload" as="image" fetchpriority="high"
+        href="{% if config.hero_image %}{{ config.hero_image.url }}{% else %}{% static 'img/hero-bg.jpg' %}{% endif %}">
+{% endblock %}
+
 {% block envelope %}{% include "core/partials/_envelope.html" %}{% endblock %}
 
 {% block content %}
