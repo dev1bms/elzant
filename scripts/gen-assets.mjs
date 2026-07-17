@@ -1,8 +1,37 @@
 // Regenerate static image assets:
-//   - static/img/og-image.png  (1200×630) — the wedding artwork with the couple,
+//   - static/img/og-image.jpg  (1200×630) — the wedding artwork with the couple,
 //     a warm bottom scrim, and the names: premium when shared on WhatsApp.
+//   - static/img/hero-720.jpg / hero-1080.jpg — responsive variants of the hero
+//     artwork for the <img srcset>; phones fetch ~half the bytes (LCP).
 // Run with: npm run assets:build
 import sharp from "sharp";
+
+// Fallback favicon (used until the admin uploads one): a small sunset-palette
+// mark so the browser never 404s on /favicon.ico.
+const FAV = 64;
+await sharp(
+  Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="${FAV}" height="${FAV}" viewBox="0 0 64 64">
+    <defs>
+      <linearGradient id="s" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#f4c088"/><stop offset="55%" stop-color="#d9835f"/><stop offset="100%" stop-color="#7c2b37"/>
+      </linearGradient>
+    </defs>
+    <rect width="64" height="64" rx="14" fill="#fbf4e8"/>
+    <circle cx="32" cy="32" r="21" fill="url(#s)"/>
+    <circle cx="32" cy="32" r="21" fill="none" stroke="#c9a86a" stroke-width="3"/>
+  </svg>`)
+).png().toFile("static/img/favicon.png");
+console.log("✓ static/img/favicon.png (fallback icon)");
+
+// Responsive hero variants (the 1600px source stays the largest candidate).
+for (const w of [720, 1080]) {
+  const out = `static/img/hero-${w}.jpg`;
+  await sharp("static/img/hero-bg.jpg")
+    .resize({ width: w })
+    .jpeg({ quality: 78, mozjpeg: true })
+    .toFile(out);
+  console.log(`✓ ${out}`);
+}
 
 const W = 1200, H = 630;
 

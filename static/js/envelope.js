@@ -7,7 +7,9 @@
   var overlay = document.getElementById("envelope");
   if (!overlay) return;
 
-  var KEY = "elzant_envelope_opened";
+  // Per-page remember key (the private invitation page uses a per-guest key so
+  // its personalized intro shows even after the public page was visited).
+  var KEY = overlay.getAttribute("data-key") || "elzant_envelope_opened";
   var closed = false;
 
   function onKeydown(e) {

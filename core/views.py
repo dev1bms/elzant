@@ -1,3 +1,7 @@
+from datetime import timedelta, timezone as datetime_timezone
+
+from django.conf import settings
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
@@ -161,6 +165,92 @@ def rsvp_link(request, token, choice):
 
 def privacy(request):
     return render(request, "core/privacy.html")
+
+
+def favicon_ico(request):
+    """Some clients probe /favicon.ico directly even when a <link rel=icon> is
+    declared — answer with the resolved icon instead of a 404 on every visit."""
+    from .context_processors import _favicon
+
+    url = _favicon(WeddingConfig.get())
+    if url:
+        return redirect(url)
+    return HttpResponse(status=204)
+
+
+def _ics_escape(text):
+    """Escape TEXT values per RFC 5545 §3.3.11."""
+    return (
+        text.replace("\\", "\\\\").replace(";", "\\;").replace(",", "\\,").replace("\n", "\\n")
+    )
+
+
+def _ics_fold(line):
+    """Fold a content line to ≤75 octets (RFC 5545 §3.1) without splitting a
+    UTF-8 sequence — Arabic text triples in octets, so folding is required."""
+    out = []
+    raw = line.encode("utf-8")
+    while len(raw) > 74:
+        cut = 74
+        while cut > 0 and (raw[cut] & 0xC0) == 0x80:  # inside a UTF-8 char
+            cut -= 1
+        out.append(raw[:cut])
+        raw = b" " + raw[cut:]
+    out.append(raw)
+    return b"\r\n".join(out)
+
+
+def calendar_ics(request):
+    """«أضف إلى التقويم» — a downloadable calendar event built live from
+    WeddingConfig (no dependency, hand-rolled RFC 5545). Times are emitted in
+    UTC so every calendar app lands on the same Cairo instant; a display alarm
+    reminds the guest a day ahead. Served as an attachment so WhatsApp's
+    in-app browser hands it to the calendar app."""
+    config = WeddingConfig.get()
+    site_url = settings.SITE_URL.rstrip("/")
+    domain = site_url.split("//")[-1].split("/")[0] or "elzant.com"
+    fmt = "%Y%m%dT%H%M%SZ"
+    start = config.wedding_datetime.astimezone(datetime_timezone.utc)
+    end = start + timedelta(hours=4)  # typical celebration span; only a hint
+    summary = f"حفل زفاف {config.groom_name} و{config.bride_name}"
+    location = " — ".join(x for x in (config.venue_name, config.venue_address) if x)
+    desc_parts = [f"يسعدنا حضوركم حفل زفاف {config.groom_name} و{config.bride_name} 🤍"]
+    if config.map_url:
+        desc_parts.append(f"الموقع على الخريطة: {config.map_url}")
+    desc_parts.append(f"الدعوة: {site_url}")
+    description = _ics_escape("\n".join(desc_parts))
+
+    lines = [
+        "BEGIN:VCALENDAR",
+        "VERSION:2.0",
+        "PRODID:-//elzant//wedding//AR",
+        "CALSCALE:GREGORIAN",
+        "METHOD:PUBLISH",
+        "BEGIN:VEVENT",
+        f"UID:wedding-1@{domain}",
+        f"DTSTAMP:{timezone.now().astimezone(datetime_timezone.utc).strftime(fmt)}",
+        f"DTSTART:{start.strftime(fmt)}",
+        f"DTEND:{end.strftime(fmt)}",
+        f"SUMMARY:{_ics_escape(summary)}",
+        f"DESCRIPTION:{description}",
+    ]
+    if location:
+        lines.append(f"LOCATION:{_ics_escape(location)}")
+    if config.map_url:
+        lines.append(f"URL:{config.map_url}")
+    lines += [
+        "BEGIN:VALARM",
+        "ACTION:DISPLAY",
+        f"DESCRIPTION:{_ics_escape(summary)}",
+        "TRIGGER:-P1D",
+        "END:VALARM",
+        "END:VEVENT",
+        "END:VCALENDAR",
+    ]
+    body = b"\r\n".join(_ics_fold(line) for line in lines) + b"\r\n"
+    response = HttpResponse(body, content_type="text/calendar; charset=utf-8")
+    response["Content-Disposition"] = 'attachment; filename="elzant-wedding.ics"'
+    return response
 
 
 def _guest_from_session(request):

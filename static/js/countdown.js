@@ -45,10 +45,8 @@
   function tick() {
     var diff = target - Date.now();
     if (diff <= 0) {
-      set(units.days, 0);
-      set(units.hours, "00");
-      set(units.minutes, "00");
-      set(units.seconds, "00");
+      // The moment has passed: retire the boxes, show the thank-you line.
+      el.classList.add("hidden");
       if (doneEl) doneEl.classList.remove("hidden");
       if (timer) clearInterval(timer);
       return;

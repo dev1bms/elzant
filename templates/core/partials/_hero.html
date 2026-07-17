@@ -3,9 +3,9 @@
 
   {# The artwork — the visual soul. Full-bleed on desktop, large top image on mobile. #}
   <div class="hero-art hero-breathe art-fade art-veil-lg relative h-[58svh] min-h-[340px] w-full lg:absolute lg:inset-0 lg:h-auto">
-    <img src="{% if config.hero_image %}{{ config.hero_image.url }}{% else %}{% static 'img/hero-bg.jpg' %}{% endif %}"
+    <img src="{{ hero_src }}"{% if hero_srcset %} srcset="{{ hero_srcset }}" sizes="100vw"{% endif %}
          alt="لوحة دعوة زفاف {{ config.groom_name }} و{{ config.bride_name }}"
-         fetchpriority="high"
+         fetchpriority="high" width="1600" height="900"
          class="object-[58%_24%] lg:object-[72%_34%]">
   </div>
 
@@ -19,9 +19,9 @@
 
       <div class="mt-4 leading-relaxed text-ink-soft">
         <p class="text-sm sm:text-base">يتشرّف</p>
-        <p class="mt-1.5 font-head text-xl font-bold text-ink sm:text-2xl">{{ config.groom_father }}</p>
+        <p class="mt-1.5 font-head text-xl font-bold text-balance text-ink sm:text-2xl">{{ config.groom_father }}</p>
         <p class="label-lat my-0.5 text-lg">&amp;</p>
-        <p class="font-head text-xl font-bold text-ink sm:text-2xl">{{ config.bride_father }}</p>
+        <p class="font-head text-xl font-bold text-balance text-ink sm:text-2xl">{{ config.bride_father }}</p>
         <p class="mt-1.5 text-sm sm:text-base">{{ config.invitation_intro_text|default:"بدعوتكم لحضور حفل زفاف أبنائهما" }}</p>
       </div>
 
@@ -50,13 +50,17 @@
       </div>
 
       {# countdown — flip boxes (server-rendered initial values; JS keeps ticking) #}
-      <div id="countdown" data-target="{{ config.wedding_datetime|date:'c' }}" class="cd mt-7 justify-center lg:justify-end">
+      <div id="countdown" data-target="{{ config.wedding_datetime|date:'c' }}" role="timer"
+           class="cd mt-7 justify-center lg:justify-end{% if cd.done %} hidden{% endif %}">
         <div class="cd-box"><span data-unit="days" class="cd-num">{{ cd.days }}</span><span class="cd-label">يوم</span></div>
         <div class="cd-box"><span data-unit="hours" class="cd-num">{{ cd.hours }}</span><span class="cd-label">ساعة</span></div>
         <div class="cd-box"><span data-unit="minutes" class="cd-num">{{ cd.minutes }}</span><span class="cd-label">دقيقة</span></div>
         <div class="cd-box"><span data-unit="seconds" class="cd-num">{{ cd.seconds }}</span><span class="cd-label">ثانية</span></div>
       </div>
-      <p data-countdown-done class="mt-5 {% if not cd.done %}hidden {% endif %}text-base text-wine-600">تمّ الزفاف بحمد الله</p>
+      <div data-countdown-done class="mt-5 {% if not cd.done %}hidden {% endif %}text-wine-600" aria-live="polite">
+        <p class="text-base font-semibold">تمّ الزفاف بحمد الله</p>
+        <p class="mt-1 text-sm text-ink-soft">شكراً لكل من شاركنا فرحتنا 🤍</p>
+      </div>
     </div>
   </div>
 </section>

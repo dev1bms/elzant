@@ -77,6 +77,9 @@
   .font-display, .names { font-family: var(--font-display); font-weight: 700; line-height: 1.04; }
   ::selection { background: var(--color-wine-500); color: var(--color-porcelain-50); }
   :focus-visible { outline: 2px solid var(--color-wine-500); outline-offset: 3px; border-radius: 3px; }
+  /* Programmatic focus targets (the heading focused after the intro closes) —
+     a visible ring there reads as a glitch, and keyboard users never Tab to it. */
+  [tabindex="-1"]:focus, [tabindex="-1"]:focus-visible { outline: none; }
 }
 
 @layer components {
@@ -90,16 +93,23 @@
     font-size: 1.05rem; letter-spacing: 0.1em; color: var(--color-rose-500);
   }
   .num { font-family: var(--font-num); direction: ltr; unicode-bidi: isolate; font-weight: 600; letter-spacing: 0.04em; }
+  /* A clock time with an Arabic ص/م marker reads RTL: «8:00 م», not «م 8:00». */
+  .num-time { direction: rtl; }
 
-  /* ---- Countdown: flip boxes (each cell flips when its value changes) ---- */
-  .cd { display: flex; align-items: stretch; justify-content: center; gap: 0.55rem; }
+  /* ---- Countdown: flip boxes (each cell flips when its value changes).
+     Compact on phones, a touch larger from sm up — quiet, not four billboards. ---- */
+  .cd { display: flex; align-items: stretch; justify-content: center; gap: 0.5rem; }
   .cd-box {
-    display: flex; flex-direction: column; align-items: center; gap: 0.3rem;
-    min-width: 4.1rem; padding: 0.7rem 0.5rem 0.6rem; perspective: 360px;
-    border-radius: 0.95rem;
+    display: flex; flex-direction: column; align-items: center; gap: 0.25rem;
+    min-width: 3.5rem; padding: 0.55rem 0.4rem 0.5rem; perspective: 360px;
+    border-radius: 0.85rem;
     background: linear-gradient(180deg, #fffaf1, var(--color-cream));
     border: 1px solid color-mix(in srgb, var(--color-champagne) 38%, var(--color-sand));
     box-shadow: 0 16px 32px -22px rgba(58,42,34,0.55), inset 0 1px 0 rgba(255,255,255,0.7);
+  }
+  @media (min-width: 640px) {
+    .cd { gap: 0.55rem; }
+    .cd-box { min-width: 4.1rem; padding: 0.7rem 0.5rem 0.6rem; border-radius: 0.95rem; }
   }
   .cd-box::before {  /* the flip-clock seam across the middle */
     content: ""; position: absolute; left: 0.5rem; right: 0.5rem; top: 50%; height: 1px;
@@ -107,10 +117,12 @@
   }
   .cd-box { position: relative; }
   .cd-num {
-    font-family: var(--font-num); direction: ltr; font-weight: 700; font-size: 2.05rem; line-height: 1;
+    font-family: var(--font-num); direction: ltr; font-weight: 700; font-size: 1.65rem; line-height: 1;
+    font-variant-numeric: tabular-nums;
     color: var(--color-wine-600); display: inline-block; transform-origin: center;
     backface-visibility: hidden;
   }
+  @media (min-width: 640px) { .cd-num { font-size: 2.05rem; } }
   .cd-num.is-flip { animation: cdflip .5s cubic-bezier(.4,0,.2,1); }
   @keyframes cdflip {
     0%   { transform: rotateX(0deg); }
@@ -138,6 +150,27 @@
   .btn-on-art:hover { background: var(--color-porcelain-50); color: var(--color-espresso-900); transform: translateY(-1px); }
   .btn-on-dark { border: 1px solid rgba(251,244,232,0.5); color: var(--color-porcelain-50); }
   .btn-on-dark:hover { background: var(--color-porcelain-50); color: var(--color-espresso-900); }
+  /* The golden seal — the intro's one indulgence: brushed champagne with a slow shine. */
+  .btn-seal {
+    position: relative; overflow: hidden;
+    background: linear-gradient(160deg, #e2c288, var(--color-champagne) 48%, #ad8b50);
+    color: var(--color-espresso-900); font-weight: 700;
+    border: 1px solid rgba(255,251,241,0.55);
+    box-shadow: 0 18px 44px -16px rgba(201,168,106,0.8), inset 0 1px 0 rgba(255,255,255,0.55);
+  }
+  .btn-seal:hover { transform: translateY(-1px); box-shadow: 0 24px 52px -16px rgba(201,168,106,0.9), inset 0 1px 0 rgba(255,255,255,0.55); }
+  .btn-seal::after {
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background: linear-gradient(115deg, transparent 32%, rgba(255,255,255,0.38) 50%, transparent 68%);
+    transform: translateX(-160%);
+    animation: seal-shine 3.6s ease-in-out infinite;
+  }
+  @keyframes seal-shine {
+    0%, 55% { transform: translateX(-160%); }
+    85%, 100% { transform: translateX(160%); }
+  }
+  /* Compact button (inline actions next to text, e.g. map/calendar on /i/). */
+  .btn-sm { padding: 0.62rem 1.35rem; font-size: 0.9rem; gap: 0.45rem; }
 
   /* ---- Surfaces ---- */
   .panel {
@@ -155,11 +188,11 @@
   }
   .sec-head { display: flex; flex-direction: column; align-items: center; gap: 0.7rem; }
 
-  /* ---- Suggestion chips ---- */
+  /* ---- Suggestion chips (comfortable touch targets) ---- */
   .chip {
     border-radius: 9999px; border: 1px solid var(--color-sand);
     background: var(--color-porcelain-50); color: var(--color-ink-soft);
-    padding: 0.45rem 0.95rem; font-size: 0.875rem;
+    padding: 0.6rem 1.05rem; font-size: 0.875rem;
     transition: border-color .2s ease, color .2s ease, background-color .2s ease, transform .2s ease;
   }
   .chip:hover { border-color: var(--color-wine-500); color: var(--color-wine-600); transform: translateY(-1px); }
@@ -302,6 +335,94 @@
     }
   }
 
+  /* ---- Short blessing (دعاء) — a quiet Markazi line bridging details → wishes ---- */
+  .dua {
+    font-family: "Markazi Text", serif; font-size: 1.55rem; line-height: 1.9;
+    color: var(--color-wine-600);
+  }
+
+  /* ---- Sticky mobile action bar (appears after the hero; hides at the footer) ----
+     Porcelain glass + champagne hairline; respects the iPhone home indicator. */
+  .actionbar {
+    position: fixed; inset-inline: 0; bottom: 0; z-index: 40;
+    display: flex; gap: 0.5rem; align-items: stretch;
+    padding: 0.55rem 0.8rem calc(0.55rem + env(safe-area-inset-bottom, 0px));
+    background: color-mix(in srgb, var(--color-porcelain-50) 88%, transparent);
+    -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+    border-top: 1px solid color-mix(in srgb, var(--color-champagne) 45%, var(--color-sand));
+    box-shadow: 0 -18px 40px -30px rgba(58,42,34,0.5);
+    transform: translateY(110%);
+    transition: transform .45s cubic-bezier(.2,.8,.2,1), visibility .45s;
+    visibility: hidden;
+  }
+  .actionbar.is-on { transform: none; visibility: visible; }
+  @media (min-width: 1024px) { .actionbar { display: none; } }
+  .actionbar a {
+    flex: 1 1 0; min-height: 47px; min-width: 0;
+    display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem;
+    border-radius: 9999px; font-size: 0.85rem; font-weight: 600; white-space: nowrap;
+    border: 1px solid color-mix(in srgb, var(--color-wine-500) 40%, transparent);
+    color: var(--color-wine-600);
+  }
+  .actionbar a svg { flex: none; }
+  .actionbar a.is-primary {
+    background: var(--color-wine-500); border-color: var(--color-wine-500);
+    color: var(--color-porcelain-50);
+    box-shadow: 0 12px 26px -14px var(--color-wine-500);
+  }
+
+  /* ---- Wall photos: warm shimmer while the lazy image streams in ---- */
+  .msg-frame img {
+    background: linear-gradient(100deg, var(--color-porcelain-200) 40%, #fdf8f0 50%, var(--color-porcelain-200) 60%) 0 0 / 200% 100%;
+    animation: skeleton 1.3s linear 8;  /* stops on its own; invisible once loaded */
+  }
+  @keyframes skeleton { to { background-position: -200% 0; } }
+  /* photo greetings open in the lightbox — the frame is a real button */
+  button.msg-frame { display: block; width: 100%; cursor: zoom-in; text-align: inherit; }
+
+  /* ---- Lightbox: an espresso room for one photograph ---- */
+  .lightbox {
+    position: fixed; inset: 0; z-index: 95;
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px; background: rgba(24,15,11,0.9);
+    -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px);
+  }
+  .lightbox[hidden] { display: none; }
+  .lightbox figure {
+    position: relative; z-index: 1; max-width: min(94vw, 900px); max-height: 88svh;
+    display: flex; flex-direction: column; gap: 12px; align-items: center;
+    animation: up .45s cubic-bezier(.2,.8,.2,1) both;
+  }
+  .lightbox img {
+    max-width: 100%; max-height: calc(88svh - 56px); object-fit: contain;
+    border-radius: 6px; border: 6px solid #fff;
+    box-shadow: 0 40px 90px -30px rgba(0,0,0,0.7);
+  }
+  .lightbox figcaption { color: var(--color-porcelain-50); font-size: 0.95rem; }
+  .lightbox__close {
+    position: absolute; top: max(14px, env(safe-area-inset-top, 0px)); inset-inline-start: 14px; z-index: 2;
+    width: 46px; height: 46px; border-radius: 9999px;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: rgba(251,244,232,0.14); color: var(--color-porcelain-50);
+    font-size: 26px; line-height: 1; border: 1px solid rgba(251,244,232,0.35); cursor: pointer;
+  }
+  .lightbox__close:hover { background: rgba(251,244,232,0.26); }
+  .lightbox__nav {
+    position: absolute; top: 50%; transform: translateY(-50%); z-index: 2;
+    width: 46px; height: 46px; border-radius: 9999px;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: rgba(251,244,232,0.12); color: var(--color-porcelain-50);
+    border: 1px solid rgba(251,244,232,0.3); cursor: pointer; font-size: 22px;
+  }
+  .lightbox__nav:hover { background: rgba(251,244,232,0.24); }
+  /* RTL: previous sits on the reading-start (right) edge, next on the left. */
+  .lightbox__nav--prev { inset-inline-start: 10px; }
+  .lightbox__nav--next { inset-inline-end: 10px; }
+  .lightbox__nav[disabled] { opacity: 0.35; cursor: default; }
+
+  /* ---- Wall "show more": extras are hidden only when JS will reveal them ---- */
+  html.js .wall-extra.wall-hidden { display: none; }
+
   /* ---- Motion ---- */
   /* The hidden pre-reveal state applies ONLY when JS is running (base.html adds
      html.js in <head>) — with JS off/blocked, content stays fully visible. */
@@ -319,8 +440,16 @@
     padding: 28px; color: var(--color-porcelain-50); overflow: hidden;
   }
   .envelope-art {
-    position: absolute; inset: 0; background-size: cover; background-position: 60% 38%;
+    position: absolute; inset: 0; overflow: hidden;
     transform: scale(1.12); filter: blur(9px) saturate(1.06) brightness(0.96);
+  }
+  .envelope-art img { width: 100%; height: 100%; object-fit: cover; object-position: 60% 38%; }
+  /* Admin-uploaded logo shown inside the intro (falls back to the eyebrow). */
+  .intro-logo { width: clamp(120px, 38vw, 190px); height: auto; filter: drop-shadow(0 6px 24px rgba(36,24,19,0.5)); }
+  /* The invited guest's name on the intro — clear UI face, luminous on the art. */
+  .intro-guest {
+    font-family: var(--font-head); font-weight: 700; font-size: 1.6rem; line-height: 1.35;
+    color: var(--color-porcelain-50); text-shadow: 0 2px 26px rgba(36,24,19,0.6);
   }
   .envelope-overlay::after {
     content: ""; position: absolute; inset: 0;
@@ -471,6 +600,26 @@
     border-radius: 22px; padding: 18px 18px 20px;
     box-shadow: 0 40px 90px -40px rgba(44,33,27,0.6);
   }
+  /* Phones: the picker becomes a bottom sheet (thumb reach, native feel). */
+  @media (max-width: 639px) {
+    .card-modal { padding: 0; align-items: flex-end; }
+    .card-modal__panel {
+      max-width: none; max-height: 92dvh;
+      border-radius: 22px 22px 0 0; border-bottom: 0;
+      padding-bottom: calc(18px + env(safe-area-inset-bottom, 0px));
+      animation: sheet-up .4s cubic-bezier(.2,.8,.2,1) both;
+    }
+    .card-modal__panel::before {  /* drag-handle affordance */
+      content: ""; flex: none; width: 44px; height: 4px; border-radius: 2px;
+      margin: -6px auto 0; background: var(--color-sand);
+    }
+    .card-modal__foot {
+      bottom: calc(-18px - env(safe-area-inset-bottom, 0px));
+      margin-bottom: calc(-18px - env(safe-area-inset-bottom, 0px));
+      padding-bottom: calc(18px + env(safe-area-inset-bottom, 0px));
+    }
+  }
+  @keyframes sheet-up { from { transform: translateY(28px); opacity: 0.5; } to { transform: none; opacity: 1; } }
   .card-modal__head { display: flex; align-items: center; justify-content: space-between; }
   .card-modal__x {
     font-size: 26px; line-height: 1; color: var(--color-cloud);
@@ -483,7 +632,11 @@
     display: flex; gap: 12px; overflow-x: auto; padding-bottom: 6px;
     scrollbar-width: thin; -webkit-overflow-scrolling: touch;
   }
-  .card-modal__foot { display: flex; gap: 10px; }
+  .card-modal__foot {  /* stays visible while the frame strip scrolls */
+    display: flex; gap: 10px;
+    position: sticky; bottom: -20px; margin: 0 -18px -20px; padding: 12px 18px 20px;
+    background: linear-gradient(180deg, transparent, var(--color-porcelain-50) 32%);
+  }
 
   .frame-opt {
     flex: 0 0 auto; background: none; border: 0; padding: 0;
@@ -521,8 +674,12 @@
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  .reveal, .up, .intro-inner, .hero-art, .hero-breathe img, .art-fade::after, .cd-num.is-flip {
+  .reveal, .up, .intro-inner, .hero-art, .hero-breathe img, .art-fade::after, .cd-num.is-flip,
+  .card-modal__panel, .lightbox figure {
     opacity: 1 !important; transform: none !important; animation: none !important; transition: none !important;
   }
   .btn-spinner, .wa-spin { animation: none !important; }
+  .btn-seal::after, .msg-frame img { animation: none !important; }
+  .envelope-overlay.is-closing { transition: none !important; }
+  .actionbar { transition: none !important; }
 }

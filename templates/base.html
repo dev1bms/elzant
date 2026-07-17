@@ -2,20 +2,26 @@
 <html dir="rtl" lang="ar">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#fbf4e8">
   <script>document.documentElement.classList.add("js")</script>
   <title>{% block title %}زفاف {{ config.groom_name }} و{{ config.bride_name }}{% endblock %}</title>
   <meta name="description" content="{% block meta_description %}{% if config.seo_description %}{{ config.seo_description }}{% else %}اترك تهنئتك لـ {{ config.groom_name }} و{{ config.bride_name }} وشاركهما الفرحة{% endif %}{% endblock %}">
+  <link rel="canonical" href="{{ canonical_url }}">
 
-  {# Favicon — admin-uploaded, falls back to the logo #}
-  {% if config.favicon %}<link rel="icon" href="{{ config.favicon.url }}"><link rel="apple-touch-icon" href="{{ config.favicon.url }}">
-  {% elif config.logo %}<link rel="icon" href="{{ config.logo.url }}"><link rel="apple-touch-icon" href="{{ config.logo.url }}">{% endif %}
+  {# Favicon — admin upload → logo → generated fallback (context processor),
+     so the browser never 404s on an automatic /favicon.ico request. #}
+  {% if favicon_url %}<link rel="icon" href="{{ favicon_url }}"><link rel="apple-touch-icon" href="{{ favicon_url }}">{% endif %}
 
   <meta property="og:type" content="website">
+  <meta property="og:locale" content="ar_AR">
   <meta property="og:site_name" content="{{ site_domain }}">
   <meta property="og:title" content="{% block og_title %}زفاف {{ config.groom_name }} و{{ config.bride_name }}{% endblock %}">
   <meta property="og:description" content="{% block og_description %}{% if config.seo_description %}{{ config.seo_description }}{% else %}اترك تهنئتك للعروسين قبل موعد الزفاف{% endif %}{% endblock %}">
-  {% if og_image %}<meta property="og:image" content="{{ og_image }}">{% endif %}
+  {% if og_image %}<meta property="og:image" content="{{ og_image }}">
+  {% if og_image_width %}<meta property="og:image:width" content="{{ og_image_width }}">
+  <meta property="og:image:height" content="{{ og_image_height }}">{% endif %}
+  <meta property="og:image:alt" content="دعوة زفاف {{ config.groom_name }} و{{ config.bride_name }}">{% endif %}
   <meta property="og:url" content="{{ canonical_url }}">
   <meta name="twitter:card" content="summary_large_image">
 

@@ -3,17 +3,19 @@
 
 {% block extra_head %}
   {# The artwork is the LCP on every device (envelope + hero) — fetch it first. #}
-  <link rel="preload" as="image" fetchpriority="high"
-        href="{% if config.hero_image %}{{ config.hero_image.url }}{% else %}{% static 'img/hero-bg.jpg' %}{% endif %}">
+  <link rel="preload" as="image" fetchpriority="high" href="{{ hero_src }}"
+        {% if hero_srcset %}imagesrcset="{{ hero_srcset }}" imagesizes="100vw"{% endif %}>
 {% endblock %}
 
 {% block envelope %}{% include "core/partials/_envelope.html" %}{% endblock %}
 
 {% block content %}
   {% include "core/partials/_hero.html" %}
+  <div id="actionbar-sentinel" aria-hidden="true"></div>
   {% include "core/partials/_details.html" %}
   {% include "core/partials/_greeting_form.html" %}
   {% include "core/partials/_wall.html" %}
+  {% include "core/partials/_actionbar.html" %}
 {% endblock %}
 
 {% block extra_js %}
@@ -22,4 +24,5 @@
   <script src="{% static 'js/envelope.js' %}" defer></script>
   <script src="{% static 'js/suggestions.js' %}" defer></script>
   <script src="{% static 'js/cards.js' %}" defer></script>
+  <script src="{% static 'js/wall.js' %}" defer></script>
 {% endblock %}

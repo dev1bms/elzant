@@ -12,7 +12,7 @@
       <p class="num text-4xl text-wine-700 sm:text-5xl">{% language 'ar' %}{{ config.wedding_datetime|date:'d . m . Y' }}{% endlanguage %}</p>
       <span class="hidden h-px w-16 bg-champagne/70 sm:block"></span>
     </div>
-    <p class="reveal mt-3 text-ink-soft">{% language 'ar' %}{{ config.wedding_datetime|date:'l' }}{% endlanguage %} · الساعة <span class="num text-ink">{% language 'ar' %}{{ config.wedding_datetime|time:'g:i A' }}{% endlanguage %}</span></p>
+    <p class="reveal mt-3 text-ink-soft">{% language 'ar' %}{{ config.wedding_datetime|date:'l' }}{% endlanguage %} · الساعة <span class="num num-time text-ink">{% language 'ar' %}{{ config.wedding_datetime|time:'g:i A' }}{% endlanguage %}</span></p>
 
     {% if config.venue_name or config.venue_address %}
       <div class="reveal mt-12">
@@ -22,14 +22,26 @@
       </div>
     {% endif %}
 
-    {% if config.map_url %}
-      <a href="{{ config.map_url }}" target="_blank" rel="noopener" class="btn btn-ghost reveal mt-10">
-        <svg viewBox="0 0 24 24" class="h-4 w-4"><path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z" fill="#7d7a4d"/></svg>
-        {% trans "الموقع على الخريطة" %}
+    <div class="reveal mt-10 flex flex-wrap items-center justify-center gap-3">
+      {% if config.map_url %}
+        <a href="{{ config.map_url }}" target="_blank" rel="noopener" class="btn btn-ghost">
+          <svg viewBox="0 0 24 24" class="h-4 w-4 fill-current" aria-hidden="true"><path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg>
+          {% trans "الموقع على الخريطة" %}
+        </a>
+      {% endif %}
+      <a href="{% url 'calendar_ics' %}" class="btn btn-ghost">
+        <svg viewBox="0 0 24 24" class="h-4 w-4 fill-current" aria-hidden="true"><path d="M17 3h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h2V1h2v2h6V1h2v2zm2 8H5v8h14v-8zm0-4H5v2h14V7zm-8 6h2v2h-2v-2z"/></svg>
+        أضف إلى التقويم
       </a>
-    {% endif %}
+    </div>
     {% if not config.venue_name and not config.venue_address and not config.map_url %}
       <p class="reveal mt-6 text-sm text-cloud">تفاصيل القاعة تُضاف قريباً</p>
     {% endif %}
+
+    {# دعاء قصير — جسر هادئ بين التفاصيل ونموذج التهنئة #}
+    <div class="reveal mt-16">
+      <div class="rule"></div>
+      <p class="dua mt-6">«اللهمّ بارك لهما وبارك عليهما، واجمع بينهما في خير»</p>
+    </div>
   </div>
 </section>

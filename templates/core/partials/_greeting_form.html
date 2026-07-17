@@ -19,15 +19,16 @@
       <div>
         <label for="{{ form.name.id_for_label }}" class="mb-2 block text-sm text-ink-soft">الاسم</label>
         {{ form.name }}
-        {% if form.name.errors %}<p class="mt-2 text-sm text-wine-500">{{ form.name.errors.0 }}</p>{% endif %}
+        {% if form.name.errors %}<p class="mt-2 text-sm text-wine-500" role="alert">{{ form.name.errors.0 }}</p>{% endif %}
       </div>
 
       {% if suggestions %}
         <div>
           <p class="mb-2.5 text-sm text-ink-soft">لا تعرف ماذا تكتب؟ اختر تهنئة ثم عدّلها:</p>
-          <div class="flex flex-wrap gap-2" id="suggestion-chips">
+          {# شريط أفقي قابل للتمرير بدل رصّ الاقتراحات عمودياً #}
+          <div class="scroll-x -mx-6 flex gap-2 px-6 pb-1 sm:-mx-8 sm:px-8" id="suggestion-chips">
             {% for s in suggestions %}
-              <button type="button" class="chip suggestion-chip" data-text="{{ s.text_ar }}">{{ s.text_ar|truncatechars:34 }}</button>
+              <button type="button" class="chip suggestion-chip flex-none whitespace-nowrap" data-text="{{ s.text_ar }}">{{ s.text_ar|truncatechars:34 }}</button>
             {% endfor %}
           </div>
         </div>
@@ -36,7 +37,7 @@
       <div>
         <label for="{{ form.message.id_for_label }}" class="mb-2 block text-sm text-ink-soft">رسالتك للعروسين</label>
         {{ form.message }}
-        {% if form.message.errors %}<p class="mt-2 text-sm text-wine-500">{{ form.message.errors.0 }}</p>{% endif %}
+        {% if form.message.errors %}<p class="mt-2 text-sm text-wine-500" role="alert">{{ form.message.errors.0 }}</p>{% endif %}
       </div>
 
       {# Optional photo + template — chosen together in a live-preview modal #}
@@ -65,7 +66,7 @@
           </div>
         </div>
 
-        {% if form.photo.errors %}<p class="mt-2 text-sm text-wine-500">{{ form.photo.errors.0 }}</p>{% endif %}
+        {% if form.photo.errors %}<p class="mt-2 text-sm text-wine-500" role="alert">{{ form.photo.errors.0 }}</p>{% endif %}
         <p class="mt-2 text-xs text-cloud">JPG / PNG / WEBP · حتى ١٠ ميجابايت · تظهر فور الإرسال.</p>
       </div>
 

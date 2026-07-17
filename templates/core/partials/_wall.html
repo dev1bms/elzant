@@ -8,13 +8,14 @@
     </div>
 
     {% if greetings %}
-      <div class="mt-14 columns-1 gap-6 sm:columns-2 [&>*]:mb-6">
+      <div class="mt-14 columns-1 gap-6 sm:columns-2 [&>*]:mb-6" id="wall-items">
         {% for g in greetings %}
-          <figure class="msg-card reveal break-inside-avoid{% if g.photo_thumbnail %} msg-card--photo{% endif %}">
+          {# Beyond the first dozen: hidden only when JS is there to reveal them #}
+          <figure class="msg-card reveal break-inside-avoid{% if g.photo_thumbnail %} msg-card--photo{% endif %}{% if forloop.counter > 12 %} wall-extra wall-hidden{% endif %}">
             {% if g.photo_thumbnail %}
-              <div class="msg-frame mb-5">
-                <img src="{{ g.photo_thumbnail.url }}" alt="صورة مرفقة بالتهنئة" loading="lazy" class="h-48 w-full object-cover" width="480" height="360">
-              </div>
+              <button type="button" class="msg-frame mb-5" data-full="{{ g.uploaded_photo.url }}" data-name="{{ g.name }}">
+                <img src="{{ g.photo_thumbnail.url }}" alt="صورة تهنئة من {{ g.name }} — اضغط للتكبير" loading="lazy" decoding="async" class="h-48 w-full object-cover" width="480" height="360">
+              </button>
             {% endif %}
             <span class="msg-quote" aria-hidden="true">&ldquo;</span>
             <blockquote class="msg-text mt-1">{{ g.message|linebreaksbr }}</blockquote>
@@ -26,8 +27,25 @@
           </figure>
         {% endfor %}
       </div>
+
+      {% if greetings|length > 12 %}
+        <div class="mt-10 text-center" id="wall-more-wrap" hidden>
+          <button type="button" id="wall-more" class="btn btn-ghost">عرض المزيد من التهاني</button>
+        </div>
+      {% endif %}
     {% else %}
       <p class="reveal mt-14 text-center text-cloud">كن أوّل من يهنّئ العروسين</p>
     {% endif %}
+  </div>
+
+  {# ---- Lightbox: tap a wall photo to view it large (wall.js) ---- #}
+  <div id="lightbox" class="lightbox" role="dialog" aria-modal="true" aria-label="معاينة صورة التهنئة" hidden>
+    <button type="button" class="lightbox__close" data-lb-close aria-label="إغلاق">&times;</button>
+    <button type="button" class="lightbox__nav lightbox__nav--prev" data-lb-prev aria-label="الصورة السابقة">&rsaquo;</button>
+    <button type="button" class="lightbox__nav lightbox__nav--next" data-lb-next aria-label="الصورة التالية">&lsaquo;</button>
+    <figure>
+      <img id="lightbox-img" src="" alt="صورة التهنئة بالحجم الكامل">
+      <figcaption id="lightbox-cap"></figcaption>
+    </figure>
   </div>
 </section>

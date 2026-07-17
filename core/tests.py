@@ -364,3 +364,173 @@ class PurgeSpamCommandTests(TestCase):
         remaining = list(Greeting.objects.all())
         self.assertEqual(len(remaining), 1)
         self.assertEqual(remaining[0].name, "سالم")
+
+
+@override_settings(**WA_SETTINGS)
+class CalendarIcsTests(TestCase):
+    """«أضف إلى التقويم» — /wedding.ics builds a valid RFC 5545 event from
+    WeddingConfig (nothing hardcoded), in UTC, with folded UTF-8 lines."""
+
+    def setUp(self):
+        from datetime import datetime
+        from zoneinfo import ZoneInfo
+
+        self.config = WeddingConfig.get()
+        self.config.venue_name = "قاعة الاختبار"
+        self.config.venue_address = "شارع التجربة ١"
+        self.config.map_url = "https://maps.example.com/x"
+        self.config.wedding_datetime = datetime(2026, 7, 22, 20, 0, tzinfo=ZoneInfo("Africa/Cairo"))
+        self.config.save()
+
+    def _unfolded(self):
+        resp = Client().get(reverse("calendar_ics"))
+        self.assertEqual(resp.status_code, 200)
+        return resp, resp.content.replace(b"\r\n ", b"").decode("utf-8")
+
+    def test_headers_type_and_attachment_filename(self):
+        resp, _ = self._unfolded()
+        self.assertEqual(resp["Content-Type"], "text/calendar; charset=utf-8")
+        self.assertIn('attachment; filename="elzant-wedding.ics"', resp["Content-Disposition"])
+
+    def test_event_fields_come_from_config_in_utc(self):
+        _, text = self._unfolded()
+        # 20:00 Cairo (صيفاً UTC+3) == 17:00Z
+        self.assertIn("DTSTART:20260722T170000Z", text)
+        self.assertIn("DTEND:20260722T210000Z", text)
+        self.assertIn("SUMMARY:حفل زفاف محمود ورينان", text)
+        self.assertIn("قاعة الاختبار", text)
+        self.assertIn("https://maps.example.com/x", text)
+        self.assertIn("BEGIN:VALARM", text)
+        self.assertIn("TRIGGER:-P1D", text)
+
+    def test_datetime_not_hardcoded_and_winter_offset_correct(self):
+        from datetime import datetime
+        from zoneinfo import ZoneInfo
+
+        # شتاءً القاهرة UTC+2 → 19:30 == 17:30Z (يثبت أن التحويل يُحسب لا يُثبَّت)
+        self.config.wedding_datetime = datetime(2027, 1, 5, 19, 30, tzinfo=ZoneInfo("Africa/Cairo"))
+        self.config.save()
+        _, text = self._unfolded()
+        self.assertIn("DTSTART:20270105T173000Z", text)
+
+    def test_lines_folded_within_75_octets_and_utf8_survives(self):
+        resp = Client().get(reverse("calendar_ics"))
+        raw = resp.content
+        self.assertIn(b"\r\n", raw)
+        for line in raw.split(b"\r\n"):
+            self.assertLessEqual(len(line), 75, line[:80])
+        raw.replace(b"\r\n ", b"").decode("utf-8")  # must not raise mid-character
+
+
+@override_settings(**WA_SETTINGS)
+class InvitationPrivacyTests(TestCase):
+    """The private page greets the guest — but the name must never leak into
+    link-preview surfaces (OG meta) or client storage keys."""
+
+    def setUp(self):
+        self.guest = WeddingGuest.objects.create(full_name="ضيف الاختبار الكريم")
+
+    def test_private_page_renders_and_greets_guest(self):
+        resp = Client().get(reverse("invitation", args=[self.guest.invitation_token]))
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, "ضيف الاختبار الكريم")
+
+    def test_bad_token_is_404(self):
+        self.assertEqual(Client().get("/i/not-a-real-token/").status_code, 404)
+
+    def test_guest_name_never_inside_meta_tags(self):
+        import re
+
+        html = Client().get(
+            reverse("invitation", args=[self.guest.invitation_token])
+        ).content.decode()
+        for tag in re.findall(r"<meta[^>]+>", html):
+            self.assertNotIn("ضيف الاختبار", tag, tag)
+
+    def test_intro_storage_key_uses_pk_not_token(self):
+        resp = Client().get(reverse("invitation", args=[self.guest.invitation_token]))
+        self.assertContains(resp, f'data-key="elzant_envelope_opened-g{self.guest.pk}"')
+        self.assertNotContains(resp, f"elzant_envelope_opened-{self.guest.invitation_token}")
+
+
+@override_settings(**WA_SETTINGS)
+class CountdownStateTests(TestCase):
+    """Server-rendered countdown: real numbers without JS, and a post-wedding
+    thank-you state instead of negative digits."""
+
+    def test_past_wedding_hides_boxes_and_shows_thanks(self):
+        import re
+        from datetime import datetime, timezone as datetime_timezone
+
+        config = WeddingConfig.get()
+        config.wedding_datetime = datetime(2020, 1, 1, 18, 0, tzinfo=datetime_timezone.utc)
+        config.save()
+        resp = Client().get(reverse("home"))
+        self.assertContains(resp, "تمّ الزفاف بحمد الله")
+        html = resp.content.decode()
+        box = re.search(r'id="countdown"[^>]*class="([^"]*)"', html)
+        self.assertIn("hidden", box.group(1))
+        self.assertNotIn("-", re.search(r'data-unit="days"[^>]*>([^<]*)<', html).group(1))
+
+    def test_future_wedding_renders_positive_initials(self):
+        import re
+        from datetime import datetime
+        from zoneinfo import ZoneInfo
+
+        config = WeddingConfig.get()
+        config.wedding_datetime = datetime(2030, 1, 1, 20, 0, tzinfo=ZoneInfo("Africa/Cairo"))
+        config.save()
+        html = Client().get(reverse("home")).content.decode()
+        box = re.search(r'id="countdown"[^>]*class="([^"]*)"', html)
+        self.assertNotIn("hidden", box.group(1))
+        days = int(re.search(r'data-unit="days"[^>]*>(\d+)<', html).group(1))
+        self.assertGreater(days, 0)
+
+
+@override_settings(**WA_SETTINGS)
+class BrandingFallbackTests(TestCase):
+    """Branding resolution: admin uploads win; missing generated assets degrade
+    gracefully instead of 500ing the whole site (manifest storage)."""
+
+    def test_home_renders_with_no_admin_uploads(self):
+        resp = Client().get(reverse("home"))
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, "<img")
+
+    def test_context_processor_never_500s_when_static_raises(self):
+        with patch("core.context_processors.static", side_effect=ValueError("no manifest entry")):
+            resp = Client().get(reverse("home"))
+        self.assertEqual(resp.status_code, 200)
+
+    def test_admin_uploaded_hero_and_og_take_precedence(self):
+        import tempfile
+
+        from django.core.files.base import ContentFile
+        from django.test import override_settings as _override
+
+        from core.context_processors import _hero, _og
+
+        gif = (
+            b"GIF87a\x01\x00\x01\x00\x80\x01\x00\x00\x00\x00ccc,\x00\x00\x00\x00"
+            b"\x01\x00\x01\x00\x00\x02\x02D\x01\x00;"
+        )
+        with tempfile.TemporaryDirectory() as media:
+            with _override(MEDIA_ROOT=media):
+                config = WeddingConfig.get()
+                config.hero_image.save("hero-admin.gif", ContentFile(gif), save=False)
+                config.og_image.save("og-admin.gif", ContentFile(gif), save=True)
+
+                hero_src, hero_srcset = _hero(config)
+                self.assertIn("hero-admin", hero_src)
+                self.assertEqual(hero_srcset, "")  # لا srcset لصورة الأدمن
+
+                og_path, og_w, og_h = _og(config)
+                self.assertIn("og-admin", og_path)
+                self.assertIsNone(og_w)  # لا أبعاد مفترضة لصورة مجهولة الأبعاد
+
+    def test_favicon_ico_probe_never_404s(self):
+        resp = Client().get("/favicon.ico")
+        self.assertIn(resp.status_code, (204, 302))
+
+    def test_head_declares_a_favicon_link(self):
+        self.assertContains(Client().get(reverse("home")), 'rel="icon"')

@@ -1,30 +1,50 @@
 {% load static i18n %}
 {% comment %}
-  Minimal opening screen (replaces a classic envelope). Hidden by default (works
-  without JS); the inline script reveals it on first visit. Close handled by
-  envelope.js. IDs/classes kept for those scripts.
+  Full-screen opening scene (the "envelope"). Hidden by default (works without
+  JS); the inline script reveals it on first visit. Close handled by envelope.js.
+  IDs/classes kept for those scripts.
+  Accepts an optional `guest` (private /i/<token>/ links) — the intro then
+  addresses the guest by name. The remember-key is per-guest so a personalized
+  intro is never swallowed by an earlier visit to the public page. The key uses
+  the numeric pk, NOT the invitation token — nothing sensitive in localStorage.
 {% endcomment %}
-<div class="envelope-overlay" id="envelope" role="dialog" aria-modal="true" aria-label="دعوة الزفاف">
-  <div class="envelope-art" style="background-image:url('{% if config.hero_image %}{{ config.hero_image.url }}{% else %}{% static 'img/hero-bg.jpg' %}{% endif %}')" aria-hidden="true"></div>
+<div class="envelope-overlay" id="envelope" role="dialog" aria-modal="true" aria-label="دعوة الزفاف"
+     data-key="elzant_envelope_opened{% if guest %}-g{{ guest.pk }}{% endif %}">
+  <div class="envelope-art" aria-hidden="true">
+    <img src="{{ hero_src }}"{% if hero_srcset %} srcset="{{ hero_srcset }}" sizes="100vw"{% endif %} alt="" width="1600" height="900">
+  </div>
   <div class="intro-inner">
-    <p class="eyebrow" style="color:var(--color-peach)">An Invitation</p>
-    <p class="mt-7 text-sm tracking-wide text-porcelain-50/75">دعوة زفاف</p>
-    <h1 class="names names-on-art mt-3 text-6xl leading-tight sm:text-7xl">
+    {% if config.logo %}
+      <img src="{{ config.logo.url }}" alt="" class="intro-logo mx-auto" aria-hidden="true">
+    {% else %}
+      <p class="eyebrow" style="color:var(--color-peach)">An Invitation</p>
+    {% endif %}
+
+    {% if guest %}
+      <p class="mt-7 text-sm tracking-wide text-porcelain-50/75">دعوة خاصة إلى</p>
+      <p class="intro-guest mt-2 text-balance">{{ guest.full_name }}</p>
+      <p class="mt-5 text-sm tracking-wide text-porcelain-50/75">يسعدنا أن تشاركونا فرحتنا بحفل زفاف</p>
+    {% else %}
+      <p class="mt-7 text-sm tracking-wide text-porcelain-50/75">دعوة خاصة لحضور حفل زفاف</p>
+    {% endif %}
+
+    <p class="names names-on-art mt-3 text-6xl leading-tight sm:text-7xl">
       {{ config.groom_name }} <span class="amp text-3xl sm:text-4xl">&amp;</span> {{ config.bride_name }}
-    </h1>
+    </p>
     <div class="mx-auto my-8 h-px w-16 bg-champagne/70"></div>
     <p class="num text-sm tracking-[0.25em] text-porcelain-50/80">{% language 'ar' %}{{ config.wedding_datetime|date:'d . m . Y' }}{% endlanguage %}</p>
 
     <div class="mt-10">
-      <button type="button" id="envelope-open" class="btn btn-on-art">افتح الدعوة</button>
+      <button type="button" id="envelope-open" class="btn btn-seal">افتح الدعوة</button>
     </div>
-    <button type="button" id="envelope-skip" class="mt-5 px-6 py-3 text-sm tracking-wide text-porcelain-50/80 underline-offset-4 transition hover:text-porcelain-50 hover:underline">تخطّي</button>
+    <button type="button" id="envelope-skip" class="mt-5 px-6 py-3 text-sm tracking-wide text-porcelain-50/80 underline-offset-4 transition hover:text-porcelain-50 hover:underline">تخطّي المقدمة</button>
   </div>
 </div>
 <script>
   (function () {
     try {
-      if (!localStorage.getItem("elzant_envelope_opened")) {
+      var el = document.getElementById("envelope");
+      if (!localStorage.getItem(el.getAttribute("data-key"))) {
         document.documentElement.classList.add("show-envelope");
       }
     } catch (e) {}
