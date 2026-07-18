@@ -61,6 +61,12 @@
       </div>
       {% if config.venue_name %}<p class="mt-2 text-sm text-ink-soft">{{ config.venue_name }}{% if config.venue_address %} · {{ config.venue_address }}{% endif %}</p>{% endif %}
 
+      {% if show_youth %}
+      <p class="mx-auto mt-3 max-w-xs rounded-full border border-champagne/60 bg-porcelain-50/80 px-4 py-2 text-sm text-wine-600 lg:mx-0">
+        ✦ سهرة الشباب: الثلاثاء <span class="num">21 . 07</span> · <span class="num num-time">8:30 م</span> — قاعة «فيلا روز»
+      </p>
+      {% endif %}
+
       {# quick actions — open the map / save the date, straight from WhatsApp #}
       <div class="mt-5 flex flex-wrap items-center justify-center gap-2.5 lg:justify-end">
         {% if config.map_url %}

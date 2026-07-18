@@ -16,10 +16,15 @@ from .utils import country_from_request, flag_from_code, get_client_ip, has_arab
 WALL_LIMIT = 100
 
 
-def _countdown_initial():
+# سهرة الشباب — الثلاثاء 21/07/2026 الساعة 8:30 مساءً بتوقيت القاهرة (17:30Z).
+# حدث لمرة واحدة قبل الزفاف بيوم؛ مثبَّت هنا عمداً (لا حقل إعدادات له).
+YOUTH_EVENING_DT = timezone.datetime(2026, 7, 21, 17, 30, tzinfo=datetime_timezone.utc)
+
+
+def _countdown_initial(target=None):
     """Server-side initial countdown values so the flip boxes show real numbers
     immediately (and without JS) instead of zeros until countdown.js kicks in."""
-    remaining = WeddingConfig.get().wedding_datetime - timezone.now()
+    remaining = (target or WeddingConfig.get().wedding_datetime) - timezone.now()
     total = max(int(remaining.total_seconds()), 0)
     return {
         "days": total // 86400,
@@ -27,6 +32,7 @@ def _countdown_initial():
         "minutes": f"{(total % 3600) // 60:02d}",
         "seconds": f"{total % 60:02d}",
         "done": total == 0,
+        "target": target,
     }
 
 
@@ -98,6 +104,9 @@ def home(request):
             "visitor_flag": flag_from_code(vcode),
             "visitor_country": vname,
             "cd": _countdown_initial(),
+            "cd_youth": _countdown_initial(YOUTH_EVENING_DT),
+            # يختفي القسم كله بعد انتهاء السهرة بست ساعات
+            "show_youth": timezone.now() < YOUTH_EVENING_DT + timedelta(hours=6),
         },
     )
 
@@ -125,7 +134,8 @@ def invitation(request, token):
         request,
         "core/invitation.html",
         {"guest": guest, "suggestions": GreetingSuggestion.active_suggestions(),
-         "cd": _countdown_initial()},
+         "cd": _countdown_initial(),
+         "show_youth": timezone.now() < YOUTH_EVENING_DT + timedelta(hours=6)},
     )
 
 
