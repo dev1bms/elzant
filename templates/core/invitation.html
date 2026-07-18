@@ -9,8 +9,7 @@
         {% if hero_srcset %}imagesrcset="{{ hero_srcset }}" imagesizes="100vw"{% endif %}>
 {% endblock %}
 
-{# Personalized opening scene — the WhatsApp link lands here, so the intro
-   greets the guest by name (per-guest remember key inside the partial). #}
+{# Personalized opening scene — WhatsApp links land here; greets the guest by name #}
 {% block envelope %}{% include "core/partials/_envelope.html" %}{% endblock %}
 
 {% block content %}

@@ -9,8 +9,7 @@
   <meta name="description" content="{% block meta_description %}{% if config.seo_description %}{{ config.seo_description }}{% else %}اترك تهنئتك لـ {{ config.groom_name }} و{{ config.bride_name }} وشاركهما الفرحة{% endif %}{% endblock %}">
   <link rel="canonical" href="{{ canonical_url }}">
 
-  {# Favicon — admin upload → logo → generated fallback (context processor),
-     so the browser never 404s on an automatic /favicon.ico request. #}
+  {# Favicon — admin upload → logo → generated fallback; never 404s on /favicon.ico #}
   {% if favicon_url %}<link rel="icon" href="{{ favicon_url }}"><link rel="apple-touch-icon" href="{{ favicon_url }}">{% endif %}
 
   <meta property="og:type" content="website">
