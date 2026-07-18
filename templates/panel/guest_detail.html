@@ -65,6 +65,26 @@
     </ol>
   </div>
 
+  {# ---- inbound WhatsApp replies (free text — not the RSVP buttons) ---- #}
+  {% if inbound_msgs %}
+  <div class="panel mt-4 p-5">
+    <h2 class="mb-3 flex items-center gap-2 text-sm font-bold text-ink">
+      <svg viewBox="0 0 24 24" class="h-4 w-4 fill-wine-500" aria-hidden="true"><path d="M4 3h16a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H9l-5 4V5a2 2 0 0 1 2-2z"/></svg>
+      ردود واردة من الضيف
+      <span class="rounded-full bg-wine-500 px-2 py-0.5 text-[0.7rem] font-bold text-porcelain-50">{{ inbound_msgs|length }}</span>
+    </h2>
+    <ul class="space-y-2">
+      {% for m in inbound_msgs %}
+      <li class="rounded-xl border border-sand/70 bg-porcelain-50 px-3 py-2">
+        <p class="text-sm leading-relaxed text-ink">{{ m.payload.body|default:"(وسائط بدون نص)" }}</p>
+        <p class="num mt-1 text-[0.68rem] text-cloud" dir="ltr">{{ m.created_at|date:"Y/m/d H:i" }}</p>
+        {% if m.payload.media %}<p class="mt-0.5 text-[0.68rem] text-cloud">مرفقات: {{ m.payload.media }} — تُعرض من سجل Twilio</p>{% endif %}
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+
   {# ---- invitation link ---- #}
   <div class="panel mt-4 p-5">
     <h2 class="mb-2 text-sm font-bold text-ink">رابط الدعوة الخاص</h2>

@@ -141,3 +141,47 @@ class AddAndDedupeTests(TestCase):
         self.assertEqual(WeddingGuest.objects.filter(phone_e164="201001234567").count(), 2)
         dup = WeddingGuest.objects.get(full_name="خالد مكرّر")
         self.assertEqual(dup.invited_by, self.bride)
+
+
+@override_settings(**PANEL_SETTINGS)
+class InboundBadgeTests(TestCase):
+    """عدّاد الردود الواردة: شارة بجانب اسم الضيف + قسم الردود في صفحته."""
+
+    def setUp(self):
+        from core.models import MessageLog
+
+        self.inviter = _make_inviter("badge_user", "أبو الشباب")
+        self.guest = WeddingGuest.objects.create(
+            full_name="سالم", phone_number="01001112222", phone_e164="201001112222",
+            invited_by=self.inviter,
+        )
+        for text in ("مبارك مقدماً!", "وين القاعة؟"):
+            MessageLog.objects.create(
+                guest=self.guest, template_name="inbound_text",
+                status=WhatsAppStatus.READ, payload={"body": text, "media": 0},
+            )
+        self.client.login(username="badge_user", password="pw")
+
+    def test_guests_list_shows_reply_count(self):
+        resp = self.client.get(reverse("panel:guests"))
+        self.assertContains(resp, "data-inbound-badge")
+        self.assertContains(resp, ">سالم<", html=False)
+        self.assertContains(resp, "2")
+
+    def test_guest_detail_lists_replies(self):
+        resp = self.client.get(reverse("panel:guest_detail", args=[self.guest.id]))
+        self.assertContains(resp, "ردود واردة من الضيف")
+        self.assertContains(resp, "وين القاعة؟")
+        self.assertContains(resp, "مبارك مقدماً!")
+
+    def test_activity_feed_excludes_inbound_rows(self):
+        resp = self.client.get(reverse("panel:activity"))
+        self.assertNotContains(resp, "وين القاعة؟")
+
+    def test_no_badge_for_guest_without_replies(self):
+        quiet = WeddingGuest.objects.create(
+            full_name="هادئ", phone_number="01003334444", phone_e164="201003334444",
+            invited_by=self.inviter,
+        )
+        resp = self.client.get(reverse("panel:guest_detail", args=[quiet.id]))
+        self.assertNotContains(resp, "ردود واردة من الضيف")

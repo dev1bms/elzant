@@ -123,12 +123,18 @@ def _notify_result(request, guest, result):
         messages.error(request, f"تعذّر الإرسال إلى «{guest.full_name}»: {result.error}")
 
 
+# عدد الردود الواردة (غير أزرار RSVP) لكل ضيف — يظهر شارةً بجانب الاسم.
+_INBOUND_COUNT = Count(
+    "message_logs", filter=Q(message_logs__template_name="inbound_text")
+)
+
+
 @inviter_required
 def dashboard(request):
     mine = visible_guests(request.user, "mine")
     ctx = {
         "mine": _counters(mine),
-        "recent": mine.order_by("-created_at")[:8],
+        "recent": mine.annotate(inbound_count=_INBOUND_COUNT).order_by("-created_at")[:8],
         "view_all": can_view_all(request.user),
     }
     if ctx["view_all"]:
@@ -167,7 +173,10 @@ def guests_list(request):
     base = visible_guests(request.user, scope)
     # Newest activity first (recently-sent, then recently-added). Search / status
     # filter / re-sort all happen client-side for an instant, reload-free feel.
-    guests = list(base.order_by("-last_sent_at", "-created_at", "full_name"))
+    guests = list(
+        base.annotate(inbound_count=_INBOUND_COUNT)
+        .order_by("-last_sent_at", "-created_at", "full_name")
+    )
     for g in guests:
         g.tokens = _guest_tokens(g)
         g.digits = re.sub(r"\D", "", (g.phone_number or "") + (g.phone_e164 or ""))
@@ -225,6 +234,10 @@ def guest_detail(request, guest_id):
     return render(request, "panel/guest_detail.html", {
         "guest": guest,
         "timeline": timeline,
+        # الردود الواردة من هذا الضيف (نص حر — غير أزرار تأكيد الحضور)
+        "inbound_msgs": guest.message_logs.filter(
+            template_name="inbound_text"
+        ).order_by("-created_at")[:50],
         # Any step still "active" (awaiting a Twilio callback) → let the page
         # auto-refresh so the status advances without a manual reload.
         "has_pending": any(s["state"] == "active" for s in timeline),
@@ -268,8 +281,9 @@ def activity(request):
     # that _apply_status writes for every Twilio delivery/read callback
     # (sender=None, no template) and the inbound-RSVP rows — otherwise the feed
     # shows ~5 rows per message and mislabels delivered/read as "بالانتظار".
-    logs = logs.exclude(template_name="rsvp_inbound").exclude(
-        Q(sender__isnull=True) & Q(template_name=""))
+    logs = logs.exclude(
+        template_name__in=("rsvp_inbound", "inbound_text")
+    ).exclude(Q(sender__isnull=True) & Q(template_name=""))
     if not can_view_all(request.user):
         logs = logs.filter(Q(sender=request.user) | Q(guest__invited_by=request.user))
     logs = list(logs.order_by("-created_at")[:200])

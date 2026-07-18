@@ -58,7 +58,16 @@
         <div class="mt-0.5 text-[0.65rem] text-cloud">أضافه: {% if g.invited_by.inviter_profile %}{{ g.invited_by.inviter_profile.display_name }}{% else %}{{ g.invited_by.username }}{% endif %}</div>
         {% endif %}
       </div>
-      {% include "panel/partials/_wa_badge.html" with g=g %}
+      <div class="flex flex-none items-center gap-2">
+        {% if g.inbound_count %}
+        <span class="inline-flex items-center gap-1 rounded-full bg-wine-500 px-2 py-1 text-[0.7rem] font-bold text-porcelain-50"
+              title="ردود واتساب واردة" data-inbound-badge>
+          <svg viewBox="0 0 24 24" class="h-3 w-3 fill-current" aria-hidden="true"><path d="M4 3h16a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H9l-5 4V5a2 2 0 0 1 2-2z"/></svg>
+          {{ g.inbound_count }}
+        </span>
+        {% endif %}
+        {% include "panel/partials/_wa_badge.html" with g=g %}
+      </div>
     </a>
     {% endfor %}
   </div>
