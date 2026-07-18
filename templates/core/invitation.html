@@ -37,7 +37,18 @@
         <span class="h-px w-10 bg-champagne/70"></span>
       </div>
 
+      {# الوالدان — كما في بطاقة الدعوة المطبوعة #}
+      {% if config.groom_father or config.bride_father %}
+      <div class="leading-relaxed text-ink-soft">
+        <p class="text-sm">يتشرّف</p>
+        {% if config.groom_father %}<p class="mt-1.5 font-head text-lg font-bold text-balance text-ink sm:text-xl">{{ config.groom_father }}</p>{% endif %}
+        {% if config.groom_father and config.bride_father %}<p class="label-lat my-0.5 text-base">&amp;</p>{% endif %}
+        {% if config.bride_father %}<p class="font-head text-lg font-bold text-balance text-ink sm:text-xl">{{ config.bride_father }}</p>{% endif %}
+      </div>
+      <p class="mt-1.5 text-sm text-ink-soft">{{ config.invitation_page_intro|default:"بدعوتكم لحضور حفل زفاف نجليهما" }}</p>
+      {% else %}
       <p class="text-sm text-ink-soft">{{ config.invitation_page_intro|default:"يتشرّف والداهما بدعوتكم لحضور حفل زفاف" }}</p>
+      {% endif %}
 
       <h2 class="names mt-3 text-5xl leading-[1.12] sm:text-6xl">
         {{ config.groom_name }} <span class="amp text-3xl sm:text-4xl">&amp;</span> {{ config.bride_name }}
