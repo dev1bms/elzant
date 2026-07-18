@@ -534,3 +534,63 @@ class BrandingFallbackTests(TestCase):
 
     def test_head_declares_a_favicon_link(self):
         self.assertContains(Client().get(reverse("home")), 'rel="icon"')
+
+
+@override_settings(**WA_SETTINGS)
+class InboundFreeTextTests(TestCase):
+    """Non-RSVP WhatsApp replies are kept visible: stored in MessageLog and
+    (optionally) emailed to the family — never lost in the API void."""
+
+    def setUp(self):
+        self.url = reverse("twilio_inbound")
+        self.guest = WeddingGuest.objects.create(
+            full_name="ماجد", phone_number="01005554444", phone_e164="201005554444",
+        )
+
+    @patch("core.webhooks.validate_twilio_request", return_value=True)
+    def test_free_text_from_guest_is_logged(self, _v):
+        resp = self.client.post(self.url, {
+            "From": "whatsapp:+201005554444", "Body": "وين القاعة بالضبط؟",
+            "ProfileName": "Majed", "MessageSid": "SM123",
+        })
+        self.assertEqual(resp.status_code, 200)
+        entry = MessageLog.objects.filter(template_name="inbound_text").get()
+        self.assertEqual(entry.guest, self.guest)
+        self.assertEqual(entry.payload["body"], "وين القاعة بالضبط؟")
+        # لم يتغيّر ردّ الحضور
+        self.guest.refresh_from_db()
+        self.assertEqual(self.guest.rsvp, WeddingGuest.Rsvp.NONE)
+
+    @patch("core.webhooks.validate_twilio_request", return_value=True)
+    def test_unknown_sender_text_logged_without_guest(self, _v):
+        self.client.post(self.url, {"From": "whatsapp:+201000000000", "Body": "مبروووك"})
+        entry = MessageLog.objects.filter(template_name="inbound_text").get()
+        self.assertIsNone(entry.guest)
+        self.assertEqual(entry.payload["body"], "مبروووك")
+
+    @patch("core.webhooks.validate_twilio_request", return_value=True)
+    def test_rsvp_button_does_not_double_log(self, _v):
+        self.client.post(self.url, {
+            "From": "whatsapp:+201005554444", "ButtonPayload": "rsvp_yes",
+            "ButtonText": "سأحضر بإذن الله",
+        })
+        self.assertFalse(MessageLog.objects.filter(template_name="inbound_text").exists())
+        self.assertTrue(MessageLog.objects.filter(template_name="rsvp_inbound").exists())
+
+    @patch("core.webhooks.validate_twilio_request", return_value=True)
+    def test_empty_body_no_media_not_logged(self, _v):
+        self.client.post(self.url, {"From": "whatsapp:+201005554444", "Body": "  "})
+        self.assertFalse(MessageLog.objects.filter(template_name="inbound_text").exists())
+
+    @override_settings(
+        INBOUND_NOTIFY_EMAIL="family@example.com",
+        EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
+    )
+    @patch("core.webhooks.validate_twilio_request", return_value=True)
+    def test_notify_email_sent_when_configured(self, _v):
+        from django.core import mail
+
+        self.client.post(self.url, {"From": "whatsapp:+201005554444", "Body": "ألف مبروك!"})
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertIn("ماجد", mail.outbox[0].subject)
+        self.assertIn("ألف مبروك!", mail.outbox[0].body)

@@ -484,12 +484,19 @@ class WhatsAppTemplateAdmin(admin.ModelAdmin):
 
 @admin.register(MessageLog)
 class MessageLogAdmin(admin.ModelAdmin):
-    list_display = ("created_at", "guest", "sender", "template_name", "status", "short_error")
+    list_display = ("created_at", "guest", "sender", "template_name", "status", "inbound_preview", "short_error")
     list_filter = ("status", "template_name", "created_at")
-    search_fields = ("guest__full_name", "wa_message_id", "error")
+    search_fields = ("guest__full_name", "wa_message_id", "error", "payload__body")
     readonly_fields = ("guest", "sender", "template_name", "wa_message_id", "status",
                        "error", "payload", "created_at")
     list_per_page = 100
+
+    @admin.display(description="الرد الوارد")
+    def inbound_preview(self, obj):
+        body = (obj.payload or {}).get("body", "") if isinstance(obj.payload, dict) else ""
+        if not body:
+            return "—"
+        return (body[:60] + "…") if len(body) > 60 else body
 
     @admin.display(description="الخطأ")
     def short_error(self, obj):

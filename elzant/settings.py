@@ -225,6 +225,9 @@ EMAIL_HOST_USER = env("EMAIL_HOST_USER", default="")
 EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", default="")
 EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS", default=True)
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="elzant <no-reply@elzant.com>")
+# Optional: email the family when a WhatsApp reply arrives that isn't an RSVP
+# (the number lives on the API — nobody has a WhatsApp app open to read it).
+INBOUND_NOTIFY_EMAIL = env("INBOUND_NOTIFY_EMAIL", default="")
 
 
 def email_is_configured():

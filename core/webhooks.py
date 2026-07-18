@@ -9,6 +9,7 @@ Twilio does not retry. An unsigned/forged request is rejected with 403.
 import logging
 import re
 
+from django.conf import settings
 from django.http import HttpResponse, HttpResponseForbidden
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
@@ -131,7 +132,13 @@ def twilio_inbound_webhook(request):
 
     reply_text = ""
     try:
-        reply_text = _handle_inbound_rsvp(request)
+        recorded = _handle_inbound_rsvp(request)
+        if recorded is None:
+            # Not an RSVP — keep the reply visible to the operator (the number
+            # lives on the API; nobody has a WhatsApp app open to read it).
+            _log_inbound_message(request)
+        else:
+            reply_text = recorded
     except Exception:  # noqa: BLE001 — never 500 on Twilio; that triggers retries
         log.exception("twilio inbound webhook processing error")
 
@@ -140,27 +147,27 @@ def twilio_inbound_webhook(request):
 
 def _handle_inbound_rsvp(request):
     """Apply the inbound reply to the matching guest; return a thank-you string
-    (or "" when nothing was recorded)."""
+    when an RSVP was recorded, or ``None`` when this wasn't an RSVP."""
     from .models import WeddingConfig, WhatsAppConfig
     from .whatsapp import normalize_phone
 
     config = WeddingConfig.get()
     if not config.rsvp_enabled:
-        return ""
+        return None
 
     sender = request.POST.get("From", "") or request.POST.get("WaId", "")
     digits = re.sub(r"\D", "", sender)
     e164 = normalize_phone(digits, WhatsAppConfig.get().default_country_code)
     guest = WeddingGuest.objects.filter(phone_e164=e164).first() if e164 else None
     if not guest:
-        return ""
+        return None
 
     payload = (request.POST.get("ButtonPayload", "") or "").strip().lower()
     choice = _RSVP_PAYLOADS.get(payload) or _rsvp_choice_from_text(
         request.POST.get("ButtonText") or request.POST.get("Body"), config
     )
     if not guest.set_rsvp(choice):
-        return ""
+        return None
 
     MessageLog.objects.create(
         guest=guest, template_name="rsvp_inbound",
@@ -169,6 +176,65 @@ def _handle_inbound_rsvp(request):
     )
     return (config.rsvp_thanks_attending if choice == WeddingGuest.Rsvp.ATTENDING
             else config.rsvp_thanks_declined)
+
+
+def _log_inbound_message(request):
+    """Store a non-RSVP inbound reply (text/media) in MessageLog so the family
+    sees it in the admin, and optionally email them (INBOUND_NOTIFY_EMAIL)."""
+    from .models import WhatsAppConfig
+    from .whatsapp import normalize_phone
+
+    body = (request.POST.get("Body") or "").strip()
+    try:
+        num_media = int(request.POST.get("NumMedia") or 0)
+    except ValueError:
+        num_media = 0
+    if not body and not num_media:
+        return
+
+    sender = request.POST.get("From", "") or request.POST.get("WaId", "")
+    digits = re.sub(r"\D", "", sender)
+    e164 = normalize_phone(digits, WhatsAppConfig.get().default_country_code)
+    guest = WeddingGuest.objects.filter(phone_e164=e164).first() if e164 else None
+    profile = (request.POST.get("ProfileName") or "").strip()
+
+    MessageLog.objects.create(
+        guest=guest,
+        template_name="inbound_text",
+        status=WhatsAppStatus.READ,
+        wa_message_id=request.POST.get("MessageSid", ""),
+        payload={
+            "body": body[:2000],
+            "from": e164 or digits,
+            "profile": profile[:80],
+            "media": num_media,
+        },
+    )
+    _notify_inbound(guest, profile, e164 or digits, body, num_media)
+
+
+def _notify_inbound(guest, profile, phone, body, num_media):
+    """Best-effort email to the family about a new WhatsApp reply. Active only
+    when INBOUND_NOTIFY_EMAIL is set; never raises (fail_silently)."""
+    to = getattr(settings, "INBOUND_NOTIFY_EMAIL", "")
+    if not to:
+        return
+    from django.core.mail import send_mail
+
+    who = guest.full_name if guest else (profile or phone)
+    lines = [f"من: {who} ({phone})"]
+    if body:
+        lines.append(f"النص: {body}")
+    if num_media:
+        lines.append(f"مرفقات: {num_media}")
+    lines.append("التفاصيل الكاملة في «سجل الرسائل» بلوحة الأدمن.")
+    send_mail(
+        f"رد واتساب جديد من {who}",
+        "\n".join(lines),
+        settings.DEFAULT_FROM_EMAIL,
+        [to],
+        fail_silently=True,
+    )
 
 
 def _twiml_reply(text):
