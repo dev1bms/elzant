@@ -185,3 +185,38 @@ class InboundBadgeTests(TestCase):
         )
         resp = self.client.get(reverse("panel:guest_detail", args=[quiet.id]))
         self.assertNotContains(resp, "ردود واردة من الضيف")
+
+
+@override_settings(**PANEL_SETTINGS)
+class JourneyStripTests(TestCase):
+    """شريط رحلة الضيف: أيقونات المراحل + مدة التصفح تظهر في القوائم."""
+
+    def setUp(self):
+        from django.utils import timezone as tz
+
+        self.inviter = _make_inviter("journey_user", "أم العريس")
+        self.guest = WeddingGuest.objects.create(
+            full_name="نبيل", phone_number="01007776655", phone_e164="201007776655",
+            invited_by=self.inviter, wa_status=WhatsAppStatus.READ,
+            invitation_status=WeddingGuest.Status.GREETED,
+            last_opened_at=tz.now(), time_on_site_seconds=195,
+        )
+        self.client.login(username="journey_user", password="pw")
+
+    def test_list_shows_journey_and_time(self):
+        resp = self.client.get(reverse("panel:guests"))
+        self.assertContains(resp, 'title="كتب تهنئة"')       # مرحلة مضيئة
+        self.assertContains(resp, "3د 15ث")                   # 195 ثانية
+        self.assertContains(resp, 'title="أُرسلت"')
+
+    def test_dashboard_recent_shows_journey(self):
+        resp = self.client.get(reverse("panel:dashboard"))
+        self.assertContains(resp, 'title="فتح الدعوة"')
+
+    def test_activity_rows_carry_journey(self):
+        from core.models import MessageLog
+
+        MessageLog.objects.create(guest=self.guest, sender=self.inviter,
+                                  template_name="HXtest", status=WhatsAppStatus.SENT)
+        resp = self.client.get(reverse("panel:activity"))
+        self.assertContains(resp, 'title="قُرئت"')

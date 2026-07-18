@@ -28,6 +28,7 @@
           {% if log.guest %}
             {% if view_all or log.guest.invited_by_id == request.user.id %}
             <a href="{% url 'panel:guest_detail' log.guest.id %}" class="block truncate font-semibold text-ink hover:text-wine-600">{{ log.guest.full_name }}</a>
+            {% include "panel/partials/_journey.html" with g=log.guest %}
             {% else %}
             <div class="truncate font-semibold text-ink">{{ log.guest.full_name }}</div>
             {% endif %}

@@ -13,6 +13,7 @@
 {% block envelope %}{% include "core/partials/_envelope.html" %}{% endblock %}
 
 {% block content %}
+<span data-ping-url="{% url 'presence_ping' guest.invitation_token %}" hidden></span>
 <section class="relative overflow-hidden bg-porcelain lg:min-h-[100svh]">
 
   {# The artwork — full-bleed on desktop, large top image on mobile #}
@@ -144,4 +145,5 @@
 {% block extra_js %}
   <script src="{% static 'js/countdown.js' %}" defer></script>
   <script src="{% static 'js/envelope.js' %}" defer></script>
+  <script src="{% static 'js/presence.js' %}" defer></script>
 {% endblock %}

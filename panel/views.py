@@ -129,12 +129,48 @@ _INBOUND_COUNT = Count(
 )
 
 
+def _journey(g):
+    """مراحل رحلة الضيف كأيقونات مضيئة: أُرسلت ← سُلّمت ← قُرئت ← فتح الدعوة
+    ← كتب تهنئة. تُعرض تحت اسمه في القوائم دون فتح صفحته."""
+    opened = g.invitation_status in (
+        WeddingGuest.Status.OPENED, WeddingGuest.Status.GREETED
+    ) or bool(g.last_opened_at)
+    return [
+        {"key": "sent", "label": "أُرسلت", "on": g.wa_status in _SENT_PLUS},
+        {"key": "delivered", "label": "سُلّمت", "on": g.wa_status in _DELIVERED_PLUS},
+        {"key": "read", "label": "قُرئت", "on": g.wa_status == WhatsAppStatus.READ},
+        {"key": "opened", "label": "فتح الدعوة", "on": opened},
+        {"key": "greeted", "label": "كتب تهنئة",
+         "on": g.invitation_status == WeddingGuest.Status.GREETED},
+    ]
+
+
+def _time_label(seconds):
+    """«كم جلس بالموقع» بصيغة مقروءة: ٤٥ث / ٣د ١٢ث / ١س ٥د."""
+    if not seconds:
+        return ""
+    if seconds < 60:
+        return f"{seconds}ث"
+    if seconds < 3600:
+        return f"{seconds // 60}د {seconds % 60}ث"
+    return f"{seconds // 3600}س {(seconds % 3600) // 60}د"
+
+
+def _attach_journey(guests):
+    for g in guests:
+        g.journey = _journey(g)
+        g.time_label = _time_label(g.time_on_site_seconds)
+    return guests
+
+
 @inviter_required
 def dashboard(request):
     mine = visible_guests(request.user, "mine")
     ctx = {
         "mine": _counters(mine),
-        "recent": mine.annotate(inbound_count=_INBOUND_COUNT).order_by("-created_at")[:8],
+        "recent": _attach_journey(list(
+            mine.annotate(inbound_count=_INBOUND_COUNT).order_by("-created_at")[:8]
+        )),
         "view_all": can_view_all(request.user),
     }
     if ctx["view_all"]:
@@ -177,6 +213,7 @@ def guests_list(request):
         base.annotate(inbound_count=_INBOUND_COUNT)
         .order_by("-last_sent_at", "-created_at", "full_name")
     )
+    _attach_journey(guests)
     for g in guests:
         g.tokens = _guest_tokens(g)
         g.digits = re.sub(r"\D", "", (g.phone_number or "") + (g.phone_e164 or ""))
@@ -288,6 +325,9 @@ def activity(request):
         logs = logs.filter(Q(sender=request.user) | Q(guest__invited_by=request.user))
     logs = list(logs.order_by("-created_at")[:200])
     for lg in logs:
+        if lg.guest:
+            lg.guest.journey = _journey(lg.guest)
+            lg.guest.time_label = _time_label(lg.guest.time_on_site_seconds)
         if lg.status == WhatsAppStatus.FAILED:
             lg.kind = "failed"
         elif lg.payload and lg.payload.get("simulated"):

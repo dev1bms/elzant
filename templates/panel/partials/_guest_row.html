@@ -9,6 +9,7 @@
       دعاه: {% if g.invited_by.inviter_profile %}{{ g.invited_by.inviter_profile.display_name }} · {{ g.invited_by.inviter_profile.get_side_display }}{% else %}{{ g.invited_by.username }}{% endif %}
     </div>
     {% endif %}
+    {% include "panel/partials/_journey.html" %}
   </div>
   <div class="flex flex-none items-center gap-2">
     {% if g.inbound_count %}

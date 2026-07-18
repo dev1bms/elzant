@@ -10,6 +10,7 @@
 {% block envelope %}{% include "core/partials/_envelope.html" %}{% endblock %}
 
 {% block content %}
+  {% if guest %}<span data-ping-url="{% url 'presence_ping' guest.invitation_token %}" hidden></span>{% endif %}
   {% include "core/partials/_hero.html" %}
   <div id="actionbar-sentinel" aria-hidden="true"></div>
   {% include "core/partials/_details.html" %}
@@ -25,4 +26,5 @@
   <script src="{% static 'js/suggestions.js' %}" defer></script>
   <script src="{% static 'js/cards.js' %}" defer></script>
   <script src="{% static 'js/wall.js' %}" defer></script>
+  <script src="{% static 'js/presence.js' %}" defer></script>
 {% endblock %}

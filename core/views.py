@@ -3,6 +3,7 @@ from datetime import timedelta, timezone as datetime_timezone
 from django.conf import settings
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
 
 from .forms import GreetingForm
@@ -175,6 +176,32 @@ def rsvp_link(request, token, choice):
 
 def privacy(request):
     return render(request, "core/privacy.html")
+
+
+@csrf_exempt
+def presence_ping(request, token):
+    """Heartbeat from presence.js on the guest's invitation pages — accumulates
+    an approximate «time on site». POST-only, no CSRF (sendBeacon can't send
+    headers; the unguessable token is the auth). Each ping adds ≤60s and the
+    total is capped, so the number can't be inflated meaningfully. Always 204."""
+    if request.method != "POST":
+        return HttpResponse(status=204)
+    guest = WeddingGuest.objects.filter(invitation_token=token).first()
+    if guest and guest.time_on_site_seconds < 7200:  # ساعتان سقفاً
+        import json
+
+        from django.db.models import F
+
+        try:
+            seconds = int(json.loads(request.body or b"{}").get("seconds", 0))
+        except (ValueError, TypeError, json.JSONDecodeError):
+            seconds = 0
+        seconds = max(0, min(seconds, 60))
+        if seconds:
+            WeddingGuest.objects.filter(pk=guest.pk).update(
+                time_on_site_seconds=F("time_on_site_seconds") + seconds
+            )
+    return HttpResponse(status=204)
 
 
 def favicon_ico(request):

@@ -234,6 +234,9 @@ class WeddingGuest(models.Model):
     send_count = models.PositiveSmallIntegerField("عدد مرات الإرسال", default=0)
     last_sent_at = models.DateTimeField("آخر إرسال", null=True, blank=True)
     last_opened_at = models.DateTimeField("آخر فتح", null=True, blank=True)
+    # مجموع الثواني التي قضاها الضيف على صفحات الدعوة (نبضات presence.js —
+    # تُجمَع بمقدار ≤60ث لكل نبضة وبسقف كلي؛ تقديرية وليست تتبّعاً دقيقاً).
+    time_on_site_seconds = models.PositiveIntegerField("مدة التصفح (ثوانٍ)", default=0)
     invited_at = models.DateTimeField("تاريخ الإرسال", null=True, blank=True)
     # RSVP — ردّ الحضور من صفحة الدعوة (أو من زرّ واتساب عبر webhook الوارد).
     rsvp = models.CharField(

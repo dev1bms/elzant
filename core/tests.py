@@ -594,3 +594,39 @@ class InboundFreeTextTests(TestCase):
         self.assertEqual(len(mail.outbox), 1)
         self.assertIn("ماجد", mail.outbox[0].subject)
         self.assertIn("ألف مبروك!", mail.outbox[0].body)
+
+
+@override_settings(**WA_SETTINGS)
+class PresencePingTests(TestCase):
+    """نبضات مدة التصفح: تجميع مقنَّن، سقف لكل نبضة، ولا تسريب عبر token خاطئ."""
+
+    def setUp(self):
+        self.guest = WeddingGuest.objects.create(full_name="زائر", phone_e164="201009998877")
+        self.url = f"/i/{self.guest.invitation_token}/ping/"
+
+    def _ping(self, url, seconds):
+        return Client().post(url, data=f'{{"seconds": {seconds}}}',
+                             content_type="application/json")
+
+    def test_accumulates_seconds(self):
+        self.assertEqual(self._ping(self.url, 15).status_code, 204)
+        self._ping(self.url, 15)
+        self.guest.refresh_from_db()
+        self.assertEqual(self.guest.time_on_site_seconds, 30)
+
+    def test_per_ping_cap_60(self):
+        self._ping(self.url, 9999)
+        self.guest.refresh_from_db()
+        self.assertEqual(self.guest.time_on_site_seconds, 60)
+
+    def test_bad_token_is_silent_204(self):
+        resp = self._ping("/i/wrong-token/ping/", 15)
+        self.assertEqual(resp.status_code, 204)
+        self.guest.refresh_from_db()
+        self.assertEqual(self.guest.time_on_site_seconds, 0)
+
+    def test_garbage_body_ignored(self):
+        resp = Client().post(self.url, data="not-json", content_type="application/json")
+        self.assertEqual(resp.status_code, 204)
+        self.guest.refresh_from_db()
+        self.assertEqual(self.guest.time_on_site_seconds, 0)

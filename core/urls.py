@@ -15,6 +15,8 @@ urlpatterns = [
     path("privacy/", views.privacy, name="privacy"),
     # «أضف إلى التقويم» — downloadable calendar event built from WeddingConfig.
     path("wedding.ics", views.calendar_ics, name="calendar_ics"),
+    # نبضات حساب مدة التصفح من صفحات الدعوة (sendBeacon)
+    path("i/<str:token>/ping/", views.presence_ping, name="presence_ping"),
     # Direct /favicon.ico probes (old in-app browsers) → the resolved icon.
     path("favicon.ico", views.favicon_ico, name="favicon_ico"),
     # Twilio WhatsApp status callback (signature-verified).
