@@ -90,8 +90,13 @@ def invitation_url(guest):
 
 def build_invitation_variables(guest):
     """Content variables for the invitation template:
-    ``{{1}}`` = guest name, ``{{2}}`` = venue/map link, ``{{3}}`` = the guest's
-    personal invitation link.
+    ``{{1}}`` = guest name, ``{{2}}`` = the guest's personal invitation link.
+
+    The live approved template (mhmoud_alzant_wedding) hardcodes the venue and
+    map in its body and uses only {{1}}+{{2}}, so the personal link sits at
+    {{2}}. Extra keys are harmless (Twilio substitutes only what the template
+    references): {{3}} still carries the venue/map link and {{4}} the token for
+    any template with RSVP URL buttons (i/confirm/{{4}}, i/decline/{{4}}).
 
     WhatsApp/Twilio REJECT an approved Content Template when any variable
     resolves to an empty string (errors 21656 / 92007 / 63013), which would fail
@@ -106,9 +111,9 @@ def build_invitation_variables(guest):
     location = config.map_url or config.venue_address or config.venue_name or link
     return {
         "1": guest.full_name or "ضيفنا الكريم",
-        "2": location,
-        "3": link,
-        "4": guest.invitation_token,  # RSVP button URLs: i/confirm/{{4}}, i/decline/{{4}}
+        "2": link,
+        "3": location,
+        "4": guest.invitation_token,
     }
 
 

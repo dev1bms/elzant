@@ -23,6 +23,8 @@ python manage.py migrate
 python manage.py createsuperuser
 python manage.py runserver          # http://127.0.0.1:8000  (admin at /admin/)
 python manage.py makemigrations core
+python manage.py purge_spam_greetings           # custom cmd: preview spam greetings (dry-run)
+python manage.py purge_spam_greetings --apply   # actually delete them (+ their photo files, via post_delete)
 
 # Tests (real suite in core/tests.py + panel/tests.py — WhatsApp/Twilio, RSVP, moderation)
 python manage.py test
@@ -41,16 +43,16 @@ Security auto-hardens when `DEBUG=False` (SSL redirect, secure cookies, proxy SS
 
 ## Architecture
 
-Two Django apps: **`core`** (the public site + all data models + admin) and **`panel`** (a self-service dashboard for family members who send invitations — `/panel/`, its own auth, templates, and access control; it owns no models, only views over `core`'s). Public URLs (`core/urls.py`): `home` (`/`), `thank_you` (`/tahnia/shukran/`), `invitation` (`/i/<token>/`), `rsvp` (`/i/<token>/rsvp/`, POST), `privacy`, plus two signature-verified Twilio webhooks (`/webhooks/twilio/`, `/webhooks/twilio/inbound/`). Everything else is the Django admin, which is the operator's full content-management surface.
+Two Django apps: **`core`** (the public site + all data models + admin) and **`panel`** (a self-service dashboard for family members who send invitations — `/panel/`, its own auth, templates, and access control; it owns no models, only views over `core`'s). Public URLs (`core/urls.py`): `home` (`/`), `thank_you` (`/tahnia/shukran/`), `invitation` (`/i/<token>/`), `rsvp` (`/i/<token>/rsvp/`, POST), one-tap GET RSVP links `rsvp_attend`/`rsvp_decline` (`/i/confirm/<token>/`, `/i/decline/<token>/` — used in email/WhatsApp bodies), `privacy`, plus two signature-verified Twilio webhooks (`/webhooks/twilio/`, `/webhooks/twilio/inbound/`). Everything else is the Django admin, which is the operator's full content-management surface.
 
 **Data model (`core/models.py`):** every "config" model is a `pk=1` singleton with a `.get()` classmethod and admin-only editing (no redeploy to change content/secrets).
-- `WeddingConfig` — event details, message templates, and RSVP button copy. Exposed to every template via the `core.context_processors.wedding` context processor as `config`.
+- `WeddingConfig` — event details, message templates, RSVP button copy, **and admin-uploaded branding** (`logo`, `favicon`, `hero_image`, `og_image` ImageFields, all optional). Each branding field falls back to bundled artwork/generated assets when empty, so the site never shows a broken image before the operator uploads anything. Exposed to every template via the `core.context_processors.wedding` context processor as `config`. That processor also computes `og_image` — resolution order is admin upload → generated `img/og-image.jpg` → tracked `img/hero-bg.jpg` → `""`, wrapped in try/except because it runs on every request and manifest storage would 500 the whole site if `assets:build` hadn't been run.
 - `WeddingGuest` — an invited guest with an unguessable `invitation_token`. `invitation_status` tracks the funnel (draft → ready → sent → opened → greeted); `wa_status` mirrors Twilio delivery; `rsvp`/`rsvp_at` hold the attendance reply. `invited_by` (a Django user) is who sent the invite — the basis for panel data isolation. `set_rsvp()` is the shared write path for both the web page and the inbound-WhatsApp webhook.
 - `Greeting` — a visitor's message + optional processed photo + chosen `card_template`. **Post-moderation model:** greetings publish immediately (`status=APPROVED` on save); the admin *hides/bans* bad ones afterward. `Greeting.visible()` = everything except `REJECTED`.
 - `GreetingSuggestion` — ready-made greeting texts offered as one-tap chips.
 - `InviterProfile` — one-to-one with a Django user; its existence (or superuser) is what grants panel access. `can_view_all` unlocks the all-guests view.
 - `WhatsAppConfig` — Twilio credentials **and** the live `enabled` flag, all in the DB (no `.env`). The Auth Token lives here; the admin masks it and restricts the screen to superusers — protect the SQLite file and its backups.
-- `WhatsAppTemplate` — a registry/preview of Meta-approved templates (shown read-only in the panel); `variables_map` is documentation-only — the send path does NOT read it. The slot order is fixed in `build_invitation_variables`: `{{1}}`=guest name, `{{2}}`=venue/map, `{{3}}`=invitation link, `{{4}}`=token (RSVP URL buttons); any registered template must follow that order. `MessageLog` — audit trail of every send attempt (never stores secrets).
+- `WhatsAppTemplate` — a registry/preview of Meta-approved templates (shown read-only in the panel); `variables_map` is documentation-only — the send path does NOT read it. The slot order is fixed in `build_invitation_variables`: `{{1}}`=guest name, `{{2}}`=the guest's personal invitation link, `{{3}}`=venue/map, `{{4}}`=token (RSVP URL buttons); any registered template must follow that order (the live template uses only `{{1}}`+`{{2}}` — extra keys are ignored by Twilio). `MessageLog` — audit trail of every send attempt (never stores secrets).
 
 **Moderation is post-publish, and banning must delete the photo file.** `/media/` is served by path with no auth, so `Greeting.hide()` deletes the photo + thumbnail from storage (not just flips status). The `post_delete` signal cleans up orphaned files and forces Django to not fast-delete on bulk admin delete. Don't "optimize" `hide()`/bulk actions into a single `.update()` — that would leave banned photos still served.
 
@@ -72,7 +74,7 @@ Two Django apps: **`core`** (the public site + all data models + admin) and **`p
 
 Templates in `templates/` (`base.html` + `core/` pages and `core/partials/`). Styling is Tailwind CSS v4 configured entirely in `tailwind/input.css` via `@theme` (no `tailwind.config.js`) — that file holds the design tokens (the "Sunset on the Mediterranean" palette, self-hosted font stacks). `@source` directives there tell Tailwind to scan templates and `static/js/**`, so class names used only from JS must stay discoverable. Vanilla JS per-feature in `static/js/` (`cards.js`, `envelope.js`, `countdown.js`, `suggestions.js`, etc.) — no framework, no bundler.
 
-`static/img/hero-bg.jpg` is the tracked source artwork; `og-image.jpg` is generated by `npm run assets:build` and gitignored — regenerate it rather than editing it, and rebuild before wide sharing (WhatsApp caches OG images hard).
+`static/img/hero-bg.jpg` is the tracked source artwork; `og-image.jpg` is generated by `npm run assets:build` and gitignored — regenerate it rather than editing it, and rebuild before wide sharing (WhatsApp caches OG images hard). This generated file is only the *fallback*: an admin-uploaded `WeddingConfig.og_image`/`hero_image`/`logo`/`favicon` overrides the static asset at runtime (see the context processor above). The family panel renders inline SVG QR codes for invitation links via `core/qr.py` (`qr_svg`), which degrades gracefully if the pure-Python `qrcode` dep is missing.
 
 **Build order before serving in production:** `npm run assets:build` → `npm run css:build` → `collectstatic`. WhiteNoise serves static files (compressed+hashed manifest storage when `DEBUG=False`); it never serves `/media/`, which has its own route in `elzant/urls.py`.
 
